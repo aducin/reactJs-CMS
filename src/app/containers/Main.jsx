@@ -15,7 +15,6 @@ import 'rxjs/add/observable/interval';
 
 import store from '../store.jsx';
 import * as product from '../actions/productActions.jsx';
-//import * as user from '../actions/userActions.jsx';
 import './main.css';
 
 import Config from '../Config.jsx';
@@ -248,7 +247,7 @@ export default class App extends React.Component {
 	}
 
 	unsubscribe() {
-		if (subscription) {
+		if (this.subscription) {
 			this.subscription.unsubscribe();
 			//observable = null;
 			//clearInterval(subscription);

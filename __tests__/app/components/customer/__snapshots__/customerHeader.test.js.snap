@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Customer snapshot CustomerHeader renders correctly 1`] = `
+<div
+  className="container bgrContent borderRadius10 marginTop40px paddingBottom40px"
+>
+  <div
+    className="col-xs-12"
+  >
+    <div
+      className="container"
+    >
+      <div
+        className="col-xs-12"
+        style={null}
+      >
+        <h3>
+          Manager klientów Ad9BIS
+        </h3>
+      </div>
+    </div>
+    <div
+      className="col-xs-12 marginTop10px"
+    >
+      <div
+        className="col-xs-12 col-md-3"
+      >
+        <label
+          className="col-xs-12"
+          style={null}
+        >
+          Adres e-mail
+        </label>
+      </div>
+      <div
+        className="col-xs-12 col-md-3"
+      >
+        <input
+          className="form-control textAlignCenter"
+          disabled={false}
+          name="address"
+          onChange={[Function]}
+          placeholder="Podaj adres email"
+          type="text"
+        />
+      </div>
+      <div
+        className="col-xs-12 col-md-3"
+      >
+        <input
+          className="form-control btn btn-primary cursorPointer"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+          value="Wyszukaj"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;

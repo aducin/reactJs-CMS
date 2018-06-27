@@ -1,10 +1,7 @@
 import React from 'react';
 import TestRenderer from 'react-test-renderer';
-
 import Config from '../../../../src/app/Config.jsx';
 import PostalHeader from '../../../../src/app/components/postal/PostalHeader.jsx';
-
-//import { getPostal } from '../testing';
 
 let curAmount;
 //let data;

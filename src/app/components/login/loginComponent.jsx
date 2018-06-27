@@ -5,7 +5,6 @@ import Footer from '../dumb/Footer.jsx';
 import './login.css';
 
 import Config from '../../Config.jsx';
-import InputComponent from '../dumb/inputComponent.jsx';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import Cookies from 'universal-cookie';
 import axios from 'axios';
@@ -22,7 +21,7 @@ export default class LoginComponent extends React.Component {
 			message: null,
 			password: '',
 			remember: false,
-			success: false,
+
 		}
 	}
 

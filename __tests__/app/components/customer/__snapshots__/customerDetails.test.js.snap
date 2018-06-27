@@ -1,0 +1,220 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Customer details\` snapshot CustomerDetails renders correctly 1`] = `
+<div
+  className="container bgrContent borderRadius10 marginTop40px paddingBottom40px"
+>
+  <div
+    className="col-xs-12"
+  >
+    <div
+      className="col-xs-12"
+    >
+      <div
+        className="container"
+      >
+        <div
+          className="col-xs-12"
+          style={null}
+        >
+          <h3>
+            Dane dotyczące klienta o adresie: test@test.com - Pan Albert Ducin
+          </h3>
+        </div>
+      </div>
+      <div
+        className="col-xs-12 marginTop10px"
+      >
+        <div
+          className="col-xs-12 col-md-6"
+        >
+          <label
+            className="col-xs-12"
+            style={null}
+          >
+            Stary Panel - ID: 4
+          </label>
+        </div>
+      </div>
+      <div
+        className="col-xs-12 pull-left marginTop20px"
+      >
+        <div
+          className="col-xs-12"
+        >
+          <h3>
+            Szczegóły
+             - 
+            Stary Panel
+            : 
+          </h3>
+          <div
+            className="col-xs-12"
+          >
+            <div
+              className="col-xs-12"
+            >
+              <h4>
+                Klient nie podał jeszcze żadnego adresu.
+              </h4>
+            </div>
+            <div
+              className="col-xs-12"
+            >
+              <div
+                className="paddingBottom1"
+              >
+                <h3>
+                  Złożone zamówienia: 
+                </h3>
+              </div>
+              <table
+                className="table table-striped table-bordered"
+              >
+                <thead>
+                  <tr>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      ID
+                    </th>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Referencja
+                    </th>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Data
+                    </th>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Kwota (produkty)
+                    </th>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Kwota (porto)
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    className="textAlignCenter"
+                  >
+                    <td>
+                      5
+                    </td>
+                    <td>
+                      000000005
+                    </td>
+                    <td>
+                      2010-05-15 21:46:56
+                    </td>
+                    <td>
+                      50.00
+                      zł
+                    </td>
+                    <td>
+                      9.50
+                      zł
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="col-xs-12"
+      >
+        <h3>
+          Brak konta w nowym sklepie.
+        </h3>
+      </div>
+      <div
+        className="marginTop10px"
+      >
+        <div
+          className="col-xs-12 col-md-2 pull-left"
+        >
+          <a
+            className="form-control btn btn-warning"
+            disabled={false}
+            href="http://modele-ad9bis.pl/reactjs-training/dist/#/customers"
+          >
+            Powrót
+          </a>
+        </div>
+        <div
+          className="col-xs-12 col-md-3 col-lg-2 pull-left"
+        >
+          <a
+            className="form-control btn btn-primary"
+            href="http://modele-ad9bis.pl/cms_spa/web/customer/mail/?email=test@test.com&result=display"
+            target="blank"
+          >
+            Zobacz treść maila
+          </a>
+        </div>
+        <div
+          className="col-xs-12 col-md-2"
+        >
+          <input
+            className="form-control btn btn-primary cursorPointer"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+            value="Mail (szczegóły)"
+          />
+        </div>
+        <div
+          className="col-xs-12 col-md-2"
+        >
+          <input
+            className="form-control btn btn-primary cursorPointer"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+            value="Mail (transfer)"
+          />
+        </div>
+        <div
+          className="col-xs-12 col-md-2"
+        >
+          <input
+            className="form-control btn btn-danger cursorPointer"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+            value="Usuń konto"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

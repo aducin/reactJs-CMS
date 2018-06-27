@@ -51,8 +51,8 @@ const customerDetails = ( props ) => {
   const setDisplay = (notEmpty, address, order, panel) => {
     let curAddress, curOrder;
     if (notEmpty[panel]) {
-      curAddress = setAddress(address.old);
-      curOrder = setOrder(order.old);
+      curAddress = setAddress(address[panel]);
+      curOrder = setOrder(order[panel]);
       return setContent(curAddress, curOrder, panel);
     } else {
       return setEmpty(panel);
