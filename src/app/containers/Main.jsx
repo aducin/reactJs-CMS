@@ -22,8 +22,8 @@ import Config from '../Config.jsx';
 import Footer from '../components/dumb/Footer.jsx';
 import Helper from '../components/Helper.jsx';
 
-let observable;
-let subscription;
+//let observable;
+//let subscription;
 
 @connect((store) => {
     return {
@@ -34,7 +34,7 @@ let subscription;
 
 export default class App extends React.Component {
 	constructor(props) {
-		super(props);	    
+		super(props);
 		this.state = {
 			approvalInProgress: false,
 			approved: false,
@@ -45,7 +45,8 @@ export default class App extends React.Component {
 			success: false,
 			toDisplay: undefined,
 			token: null
-		}
+		};
+		this.subscription = null;
 	}
 
 	componentDidMount() {
@@ -224,10 +225,10 @@ export default class App extends React.Component {
 
 	setOrdersSearch = () => {
 		this.checkOrders();
-		subscription = Observable.interval(300000)
+		this.subscription = Observable.interval(300000)
 		.subscribe(int => this.checkOrders());
 	}
-/*checkOrders
+/*
 	setOrdersSearch = () => {
 		observable = Observable.create((observer) => {
 			observer.next(this.checkOrders());
@@ -248,7 +249,7 @@ export default class App extends React.Component {
 
 	unsubscribe() {
 		if (subscription) {
-			subscription.unsubscribe();
+			this.subscription.unsubscribe();
 			//observable = null;
 			//clearInterval(subscription);
 		}
