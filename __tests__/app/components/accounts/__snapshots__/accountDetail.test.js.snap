@@ -1,0 +1,292 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccountDetails renders correctly 1`] = `
+<div
+  className="col-xs-12 pull-left bgrContent borderRadius10 marginTop40px paddingBottom40px"
+>
+  <div
+    className="col-xs-12"
+  >
+    <div
+      className="container"
+    >
+      <div
+        className="col-xs-12"
+        style={null}
+      >
+        <h3>
+          Lista rachunków - ostatnie 10 wyników
+        </h3>
+      </div>
+    </div>
+  </div>
+  <div
+    className="marginTop20px"
+  >
+    <table
+      className="table table-striped table-bordered"
+    >
+      <thead>
+        <tr>
+          <th
+            className="textAlignCenter"
+          >
+            Lp.
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Klient
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Numer nadania
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Kwota
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Rodzaj
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Nr paragonu
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Data paragonu
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Data wpłaty
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Lok.
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Wagony
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Element
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Części
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Książki
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Auta
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+          <th
+            className="textAlignCenter cursorPointer"
+            onClick={[Function]}
+          >
+            Uwagi
+            <i
+              aria-hidden="true"
+              className="fa fa-sort"
+              style={
+                Object {
+                  "marginLeft": "20px",
+                }
+              }
+            />
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          className="cursorPointer textAlignCenter"
+          onClick={[Function]}
+        >
+          <td
+            className="colorWarning"
+          >
+            1
+            .
+          </td>
+          <td>
+            PayU
+          </td>
+          <td />
+          <td>
+            10.99
+            zł
+          </td>
+          <td />
+          <td>
+            9834
+          </td>
+          <td>
+            2018-06-22
+          </td>
+          <td>
+            2018-06-21
+          </td>
+          <td />
+          <td />
+          <td>
+            10
+          </td>
+          <td>
+            5
+          </td>
+          <td />
+          <td />
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+`;

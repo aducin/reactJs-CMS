@@ -1,0 +1,143 @@
+@mixin bgr {
+  background-color: #f3f3fb;
+  width:$percent100;
+  min-height:$percent100;
+  overflow: $overflow-hidden;
+}
+
+@mixin darken($color) {
+  color: $color;
+  &:hover {
+    color: darken($color, 20%);
+  }
+}
+
+@mixin display($value: none) {
+  display: $value;
+}
+
+@mixin drop-box {
+  background: #F8F8F8;
+  border: 5px ridge #DDD;
+  text-align: $text-align-center;
+}
+
+@mixin fixed {
+  position: fixed;
+}
+
+@mixin font-google($font) {
+  $font: unquote($font);
+  @import url(https://fonts.googleapis.com/css?family=#{$font});
+}
+
+@mixin font-weight ($value) {
+  font-weight: $value;
+}
+
+@mixin fonts($family, $size, $weight) {
+  font: {
+    family: $family;
+    size: $size;
+    weight: $weight;
+  }
+}
+
+@mixin lighten($color) {
+  color: $color;
+  &:hover {
+    color: lighten($color, 10%);
+  }
+}
+
+@mixin margin-both($left: auto, $right: auto) {
+  margin-left: $left;
+  margin-right: $right;
+}
+
+@mixin margin-down-up($down, $up) {
+  margin-bottom: $down;
+  margin-top: $up;
+}
+
+@mixin position-fixed {
+  @include fixed;
+  height: $percent100;
+  overflow: auto;
+}
+
+@mixin rounded {
+  border-radius: $pixels10;
+}
+
+@mixin screen-medium {
+  @media only screen and (max-width: 680px) {
+    @content;
+  }
+}
+
+@mixin screen-min-medium {
+  @media only screen and (min-width: 680px) {
+    @content;
+  }
+}
+
+@mixin screen-large {
+  @media only screen and (max-width: 960px) {
+    @content;
+  }
+}
+
+@mixin screen-only-large {
+  @media only screen and (min-width: 960px) and (max-width: 1200px) {
+    @content;
+  }
+}
+
+@mixin screen-not-xlarge {
+  @media only screen and (max-width: 1200px) {
+    @content;
+  }
+}
+
+@mixin screen-xlarge {
+  @media only screen and (min-width: 1200px) {
+    @content;
+  }
+}
+
+@mixin text-position($position: $text-align-center) {
+  text-align: $position;
+}
+
+@mixin title-font {
+  font: {
+    family: "Arial";
+    weight: 800;
+    size: 30px;
+  }
+}
+
+@mixin value-bottom($value) {
+  bottom: $value;
+}
+
+@mixin value-height($value: auto) {
+  height: $value;
+}
+
+@mixin value-left($value) {
+  left: $value;
+}
+
+@mixin value-right($value) {
+  right: $value;
+}
+
+@mixin value-top($value) {
+  top: $value;
+}
+
+@mixin value-width($value) {
+  width: $value;
+}

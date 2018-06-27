@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Postal snapshot Header renders correctly 1`] = `
+<div>
+  <div
+    className="headerList"
+  >
+    <div
+      className="col-xs-11 pull-left"
+    >
+      <a
+        className="btn btn-info rightMargin"
+        disabled={false}
+        onClick={[Function]}
+        style={Object {}}
+      >
+        Produkty
+      </a>
+      <a
+        className="btn btn-info rightMargin"
+        disabled={false}
+        onClick={[Function]}
+        style={Object {}}
+      >
+        Zamówienia
+      </a>
+      <a
+        className="btn btn-info rightMargin"
+        disabled={false}
+        onClick={[Function]}
+        style={Object {}}
+      >
+        Wysyłki
+      </a>
+      <a
+        className="btn btn-info rightMargin"
+        disabled={false}
+        onClick={[Function]}
+        style={Object {}}
+      >
+        Rachunki
+      </a>
+      <a
+        className="btn btn-info rightMargin"
+        disabled={false}
+        onClick={[Function]}
+        style={Object {}}
+      >
+        Klienci
+      </a>
+    </div>
+    <div
+      className="col-xs-1 pull-right"
+    >
+      <button
+        className="btn btn-danger btn-block logoutButton"
+        onClick={[Function]}
+        type="button"
+      >
+        Wyloguj
+      </button>
+    </div>
+  </div>
+</div>
+`;
