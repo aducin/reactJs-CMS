@@ -140,6 +140,9 @@ const Config = {
 			receiptDate: 'Data paragonu',
 			remarks: 'Uwagi',
 			shipment: 'Numer przesyłki',
+			summary: 'Podsumowanie - stawka',
+			summaryAmount: 'Kwota - ogółem',
+			summaryTax: 'Należny podate',
 			state: 'Stan rachunku',
 			type: 'Typ rachunku'
 		},

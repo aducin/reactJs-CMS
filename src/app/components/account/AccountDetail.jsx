@@ -25,7 +25,9 @@ const accountDetail = ( props ) => {
       }
     }
   };
-  let content, head;
+  let content, head, summary, row3, row17, tax3, tax17;
+  let amount3 = 0;
+  let amount17 = 0;
   let contentArray = [];
   let list = props.data.list.map((el) => {
     let curType = props.types.filter((secondEl) => { return parseInt(secondEl.id) === parseInt(el.type); });
@@ -63,6 +65,15 @@ const accountDetail = ( props ) => {
     }
   });
   list.forEach((el, index) => {
+    if (el.closed) {
+      if (el.type === 3) {
+        amount17 += el.floatAmount;
+      } else if (el.type !== 4) {
+        amount3 += el.floatAmount;
+      } else {
+        amount3 = amount3 - el.floatAmount;
+      }
+    }
     let active = el.id === props.selectedRow;
     let activeClass = active ? 'selected cursorPointer textAlignCenter' : 'cursorPointer textAlignCenter';
     let closedClass = el.closed ? 'colorWarning' : 'colorSuccess';
@@ -71,7 +82,7 @@ const accountDetail = ( props ) => {
         <td class={closedClass}>{index + 1}.</td>
         <td>{el.recipient}</td>
         <td>{el.address}</td>
-        <td>{el.amount}zł</td>
+        <td>{el.amount}{message.currency}</td>
         <td>{el.typeName}</td>
         <td>{el.receipt}</td>
         <td>{el.receiptTime}</td>
@@ -85,6 +96,45 @@ const accountDetail = ( props ) => {
       </tr>
     );
   });
+  if (amount3 > 0) {
+    tax3 = amount3 * 0.03;
+    row3 = (
+      <tr>
+        <td key="1" class="textAlignCenter">3%</td>
+        <td key="2" class="textAlignCenter">{ amount3.toFixed(2) }{ message.currency }</td>
+        <td key="3" class="textAlignCenter">{ tax3.toFixed(2) }{ message.currency }</td>
+      </tr>
+    );
+  }
+  if (amount17 > 0) {
+    tax17 = amount17 * 0.17;
+    row17 = (
+      <tr>
+        <td key="1" class="textAlignCenter">17%</td>
+        <td key="2" class="textAlignCenter">{ amount17.toFixed(2) }{ message.currency }</td>
+        <td key="3" class="textAlignCenter">{ tax17.toFixed(2) }{ message.currency }</td>
+      </tr>
+    );
+  }
+  if (amount3 > 0 || amount17 > 0) {
+    summary = (
+      <div class="col-xs-12 col-md-4 pull-left">
+        <table class="table table-striped table-bordered">
+          <thead>
+          <tr>
+            <th key="1" class="textAlignCenter">{ message.account.summary }</th>
+            <th key="2" class="textAlignCenter">{ message.account.summaryAmount }</th>
+            <th key="3" class="textAlignCenter">{ message.account.summaryTax }</th>
+          </tr>
+          </thead>
+          <tbody>
+          { row3 }
+          { row17 }
+          </tbody>
+        </table>
+      </div>
+    );
+  }
   head = (
     <thead>
       <tr>
@@ -94,7 +144,7 @@ const accountDetail = ( props ) => {
   );
   content = (
     <tbody>
-      {contentArray}
+      { contentArray }
     </tbody>
   );
   return(
@@ -107,6 +157,9 @@ const accountDetail = ( props ) => {
           {head}
           {content}
         </table>
+        <div class="col-xs-12 col-md-4 pull-left"></div>
+        {summary}
+        <div class="col-xs-12 col-md-4 pull-left"></div>
       </div>
     </div>
   );

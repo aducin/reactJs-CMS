@@ -81,6 +81,10 @@ export default class ProductContainer extends React.Component {
 		}
 	}
 
+	componentWillUnmount() {
+		this.props.unsubscribe();
+	}
+
 	checkComponent(props, state) {
 		this.setState({
 			askForData: true,

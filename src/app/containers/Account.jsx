@@ -31,10 +31,6 @@ export default class AccountContainer extends React.Component {
 		this.state = State;
 	}
 
-	componentDidMount() {
-		this.props.unsubscribe();
-	}
-
 	componentWillUpdate(nextProps, nextState) {
 		if (nextProps.approved && nextProps.token) {
 			if (!nextState.ajaxSent) {

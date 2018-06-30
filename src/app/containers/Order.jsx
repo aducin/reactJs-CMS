@@ -39,39 +39,35 @@ export default class OrderContainer extends React.Component {
 		}
 	}
 
-	componentDidMount() {
-		this.props.unsubscribe();
-	}
-
-    componentWillUpdate(nextProps, nextState) {
-    	if (nextProps.approved && nextProps.token) {
-				if (nextProps.params.db === undefined && nextProps.params.id === undefined) {
-					if (nextState.disable && !nextState.clear) {
+	componentWillUpdate(nextProps, nextState) {
+		if (nextProps.approved && nextProps.token) {
+			if (nextProps.params.db === undefined && nextProps.params.id === undefined) {
+				if (nextState.disable && !nextState.clear) {
+					this.setState({
+						clear: true,
+						curShipment: Config.message.orders.defaultShipmentNumber,
+						db: undefined,
+						disable: false,
+						id: undefined,
+						shipmentNumber: false
+					}, () => {
+						store.dispatch(order.clearData());
 						this.setState({
-							clear: true,
-							curShipment: Config.message.orders.defaultShipmentNumber,
-							db: undefined,
-							disable: false,
-							id: undefined,
-							shipmentNumber: false
-						}, () => {
-							store.dispatch(order.clearData());
-							this.setState({
-								clear: false
-							});
+							clear: false
 						});
-					}
-				}
-	    }
-    }
-
-		componentDidUpdate() {
-			if (this.props.approved && this.props.token) {
-				if (this.props.params.db !== undefined && this.props.params.id !== undefined) {
-					this.checkUrl(this.props, this.state);
+					});
 				}
 			}
 		}
+	}
+
+	componentDidUpdate() {
+		if (this.props.approved && this.props.token) {
+			if (this.props.params.db !== undefined && this.props.params.id !== undefined) {
+				this.checkUrl(this.props, this.state);
+			}
+		}
+	}
 
     checkUrl(nextProps, nextState) {
     	let params = {};
