@@ -94,7 +94,7 @@ export default class ProductContainer extends React.Component {
 			this.checkUrl(props, state);
 		});
 	}
-	
+
 	checkUrl(nextProps, nextState) {
 		if (nextProps.params.action !== undefined && nextProps.params.id !== undefined) {
 			let action = nextProps.params.action;
@@ -487,13 +487,15 @@ export default class ProductContainer extends React.Component {
 	  		messageStyle = "alert alert-danger alertHeight textAlignCenter";
 	  	}
     	if (this.props.approved) {
+				let linkDisable = this.state.modifiedSearch || this.state.printingSearch;
     		header = (
     			<div class="height12">
 	    			<Header 
 	    				active="products" 
 	    				buttonHandler={this.props.logoutHandler.bind(this)}
-	      				disable={this.state.disable}
-	      				fields={Config.fields}
+							disable={this.state.disable}
+							fields={Config.fields}
+							linkDisable={linkDisable}
 	      			/>
       			</div>
       		);

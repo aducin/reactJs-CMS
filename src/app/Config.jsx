@@ -134,6 +134,7 @@ const Config = {
 			modify: 'Edytuj rachunek',
 			modifyTitle: 'Zmodyfikuj istniejący rachunek',
 			maxAmount: ' (maksymalna jednorazowa ilość - uściślij kryteria)',
+			noData: 'Nie znaleziono wyników spełniających podane kryteria.',
 			notAutomatic: ['Lista rachunków z podanego zakresu: ', 'wyników'],
 			order: 'Zamówienie',
 			receipt: 'Numer dokumentu',

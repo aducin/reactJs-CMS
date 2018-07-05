@@ -6,7 +6,12 @@ const header = ( props ) => {
 	let fieldArray = props.fields.map((el, index) => {
 		let curClass = props.active === el.link ? "btn btn-primary rightMargin" : "btn btn-info rightMargin";
 		let curDisabled = props.active === el.link;
-		return <Link key={ index } to={ el.link } disabled={curDisabled} class={ curClass }>{ el.name }</Link>
+		return <Link
+			key={ index }
+			to={ el.link }
+			disabled={ curDisabled || props.linkDisable }
+			class={ curClass }
+		>{ el.name }</Link>
 	});
 	return(
 		<div>

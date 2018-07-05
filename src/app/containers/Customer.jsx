@@ -38,6 +38,10 @@ export default class CustomerContainer extends React.Component {
     }
   }
 
+  componentDidMount() {
+    this.props.unsubscribe();
+  }
+
   componentWillUpdate(nextProps, nextState) {
     if (nextProps.approved && nextProps.token) {
       if (nextProps.params.email !== undefined && nextProps.params.email !== nextState.curAddress) {

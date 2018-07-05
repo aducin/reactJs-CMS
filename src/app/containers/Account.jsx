@@ -420,21 +420,26 @@ export default class AccountContainer extends React.Component {
 					<Busy title={Config.message.loading} />
 				);
 			}
+			let empty;
 			if (data.list) {
-				accountsDetails = (
-					<AccountDetail
-						ascending={this.state.ascending}
-						columns={Config.accountColumns}
-						data={data}
-						message={Config.message}
-						selectedRow={this.state.selectedRow}
-						selectRow={this.selectRow.bind(this)}
-						sortTable={this.sortTable.bind(this)}
-						sortBy={this.state.sortBy}
-						types={Config.accountTypes}
-					/>
-				);
+				empty = false;
+			} else {
+				empty = true;
 			}
+			accountsDetails = (
+				<AccountDetail
+					ascending={this.state.ascending}
+					columns={Config.accountColumns}
+					data={data}
+					empty={empty}
+					message={Config.message}
+					selectedRow={this.state.selectedRow}
+					selectRow={this.selectRow.bind(this)}
+					sortTable={this.sortTable.bind(this)}
+					sortBy={this.state.sortBy}
+					types={Config.accountTypes}
+				/>
+			);
 			if (this.state.modal) {
 				let title = this.state.modal === 'add' ? Config.message.account.addTitle : Config.message.account.modifyTitle;
 				let modalObj = this.state.modalObj;
