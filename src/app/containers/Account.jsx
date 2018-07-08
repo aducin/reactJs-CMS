@@ -2,7 +2,6 @@ import React from 'react';
 import { Router, Route, IndexRoute, browserHistory, hashHistory } from 'react-router';
 import { connect } from 'react-redux';
 import { Modal } from 'react-bootstrap';
-import axios from 'axios';
 import moment from 'moment';
 
 import store from '../store.jsx';
@@ -16,6 +15,7 @@ import Message from '../components/dumb/Message.jsx';
 import AccountDetail from '../components/account/AccountDetail.jsx';
 import AccountModal from '../components/modal/AccountModal.jsx';
 import AccountHeader from '../components/account/AccountHeader.jsx';
+import AccountModel from '../model/accountModel.jsx';
 import State from '../components/account/state.jsx';
 
 
@@ -58,8 +58,7 @@ export default class AccountContainer extends React.Component {
 		if (this.state.selected.dateFrom !== null && this.state.selected.dateTo !== null) {
 			let from = this.state.selected.dateFrom.format('YYYY-MM-DD');
 			let to = this.state.selected.dateTo.format('YYYY-MM-DD');
-			let url = Config.url.serverPath + 'jpk/' + this.props.token + '?dateFrom=' + from + '&dateTo=' + to;
-			axios.get(url)
+			AccountModel.createXml(from, to , this.props.token)
 				.then((response) => {
 					if (response.data.success) {
 						this.props.setSuccess(response.data.reason);
@@ -74,7 +73,6 @@ export default class AccountContainer extends React.Component {
 					let message = err.message || Config.message.error;
 					this.props.setWarning(message);
 				});
-			console.log(url);
 		}
 	}
 
@@ -138,11 +136,10 @@ export default class AccountContainer extends React.Component {
 		this.setState({
 			inProgress: true
 		}, () => {
-			url = Config.url.serverPath + 'accounts/' + this.props.token;
 			if (custom) {
 				params = this.setParams();
 			}
-			axios.get(url, { params })
+			AccountModel.getData(params, this.props.token)
 				.then((response) => {
 					this.setState({
 						inProgress: false
@@ -250,11 +247,10 @@ export default class AccountContainer extends React.Component {
 		this.setState({
 			modalDisable: true
 		}, () => {
-			var url = Config.url.serverPath + 'accounts';
 			if (this.state.modal === 'add') {
-				ajax = axios.post(url, {data}, Config.ajaxConfig);
+				ajax = AccountModel.rowSave(data);
 			} else {
-				ajax = axios.put(url, {data}, Config.ajaxConfig);
+				ajax = AccountModel.rowUpdate(data);
 			}
 			ajax.then((response) => {
 				let type = response.data.success ? 'success' : 'error';

@@ -2,7 +2,7 @@ import React from 'react';
 import { Router, Route, IndexRoute, browserHistory, hashHistory } from 'react-router';
 import { connect } from 'react-redux';
 import { reactLocalStorage } from 'reactjs-localstorage';
-import axios from 'axios';
+//import axios from 'axios';
 
 import store from '../store.jsx';
 import * as postal from '../actions/postalActions.jsx';
@@ -10,12 +10,13 @@ import * as postal from '../actions/postalActions.jsx';
 import Busy from '../components/dumb/Busy.jsx';
 import Config from '../Config.jsx';
 import Header from '../components/dumb/Header.jsx';
-import Helper from '../components/Helper.jsx';
+//import Helper from '../components/Helper.jsx';
 import Message from '../components/dumb/Message.jsx';
 
 import PostalChange from '../components/modal/PostalChange.jsx';
 import PostalDetail from '../components/postal/PostalDetail.jsx';
 import PostalHeader from '../components/postal/PostalHeader.jsx';
+import PostalModel from '../model/postalModel.jsx';
 
 @connect((store) => {
 	return {
@@ -61,23 +62,25 @@ export default class PostalContainer extends React.Component {
 	}
 
 	getPostal() {
+		let data = PostalModel.getData(this.props.token);
+		/*
 		let url = Helper.setUrl('pathPostal', this.props.token);
 		axios.get(url)
-			.then((response) => {
-				this.setState({
-					inProgress: false
-				}, () => {
-					if (response.data.success) {
-						store.dispatch(postal.getAmount(response.data.list));
-					} else {
-						throw new Error(response.data.reason);
-					}
-				});
-			})
-			.catch((err) =>{
-				let message = err.message || Config.message.error;
-				this.props.setWarning(message);
+		*/
+		data.then((response) => {
+			this.setState({
+				inProgress: false
+			}, () => {
+				if (response.data.success) {
+					store.dispatch(postal.getAmount(response.data.list));
+				} else {
+					throw new Error(response.data.reason);
+				}
 			});
+		}).catch((err) =>{
+			let message = err.message || Config.message.error;
+			this.props.setWarning(message);
+		});
 	}
 
 	handleAmountToChange(e) {
@@ -105,7 +108,8 @@ export default class PostalContainer extends React.Component {
 		this.setState({
 			modalInProgress: true
 		}, () => {
-			axios.put(url, {data}, this.state.config)
+			//axios.put(url, {data}, this.state.config)
+			PostalModel.setData(this.state.amountToChange, this.state.modal, this.state.config)
 				.then((response) => {
 					if (response.data.success) {
 						this.setState({

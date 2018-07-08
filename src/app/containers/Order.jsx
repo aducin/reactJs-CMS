@@ -2,7 +2,6 @@ import React from 'react';
 import { Router, Route, IndexRoute, browserHistory, hashHistory } from 'react-router';
 import { connect } from 'react-redux';
 import { reactLocalStorage } from 'reactjs-localstorage';
-import axios from 'axios';
 
 import store from '../store.jsx';
 import * as order from '../actions/orderActions.jsx';
@@ -14,6 +13,8 @@ import Message from '../components/dumb/Message.jsx';
 
 import OrderDetail from '../components/order/OrderDetail.jsx';
 import OrderHeader from '../components/order/OrderHeader.jsx';
+import OrderModel from '../model/orderModel.jsx';
+import CustomerModel from '../model/customerModel.jsx';
 
 @connect((store) => {
     return {
@@ -32,6 +33,7 @@ export default class OrderContainer extends React.Component {
 			db: undefined,
 			disable: false,
 			display: false,
+			empty: true,
 			id: undefined,
 			inProgress: false,
 			panel: null,
@@ -41,8 +43,11 @@ export default class OrderContainer extends React.Component {
 
 	componentWillUpdate(nextProps, nextState) {
 		if (nextProps.approved && nextProps.token) {
-			if (nextProps.params.db === undefined && nextProps.params.id === undefined) {
-				if (nextState.disable && !nextState.clear) {
+			if (
+				(nextProps.params.db === undefined && this.props.params.db !== undefined) &&
+				(nextProps.params.id === undefined && this.props.params.id !== undefined)
+			) {
+				if (this.state.disable) {
 					this.setState({
 						clear: true,
 						curShipment: Config.message.orders.defaultShipmentNumber,
@@ -64,12 +69,12 @@ export default class OrderContainer extends React.Component {
 	componentDidUpdate() {
 		if (this.props.approved && this.props.token) {
 			if (this.props.params.db !== undefined && this.props.params.id !== undefined) {
-				this.checkUrl(this.props, this.state);
+				this.checkUrl(this.props);
 			}
 		}
 	}
 
-    checkUrl(nextProps, nextState) {
+    checkUrl(nextProps) {
     	let params = {};
 			let curPromise;
     	let url;
@@ -86,37 +91,27 @@ export default class OrderContainer extends React.Component {
     			id: id,
     			inProgress: true
     		}, () => {
-    			if (!action) {
-    				url = urlData.serverPath + 'orders/' + db + '/' + id + '/' + token;
-						curPromise = axios.get(url, { params });
+    			if (!action || action !== 'voucher') {
+						if (action === 'even') {
+							curPromise = OrderModel.evenData(db, id);
+						} else if (action === 'discount' || action === 'mail') {
+							curPromise = OrderModel.getDiscountOrMail(action, db, id, token);
+						} else {
+							curPromise = OrderModel.getData(db, id, token);
+						}
 						this.handlePromise(curPromise, action, db, id);
     			} else {
-    				if (action === 'even') {
-							url = urlData.serverPath + urlData.pathOrder + '/' + db + '/' + id + '/even';
-							curPromise = axios.put(url, {}, Config.ajaxConfig);
-							this.handlePromise(curPromise, action, db, id);
-						} else if (action === 'discount' || action === 'mail') {
-							url = urlData.serverPath + urlData.pathOrder + '/' + db + '/' + id + '/' + token + '?action=' + action;
-							curPromise = axios.get(url, { params });
-							this.handlePromise(curPromise, action, db, id);
-						} else if (action === 'voucher') {
-							url = urlData.serverPath + urlData.pathOrder + '/' + db + '/' + id;
-							let params = { basic: true };
-							axios.get(url, { params })
-								.then((response) => {
-									if (!response.data.customer) {
-										throw new Error(response.data.reason);
-									} else {
-										let customerUrl = urlData.serverPath + 'customer/' + db + '/' + response.data.customer.id + '/vouchers/' + this.props.token;
-										curPromise = axios.get( customerUrl, {} )
-										this.handlePromise(curPromise, action, db, id);
-									}
-								})
-								.catch((err) =>{
-									let message = err.message || Config.message.error;
-									this.props.setWarning(message);
-								});
-						}
+						OrderModel.getVoucher(db, id).then((response) => {
+							if (!response.data.customer) {
+								throw new Error(response.data.reason);
+							} else {
+								curPromise = CustomerModel.getCustomerById(db, response.data.customer.id, this.props.token);
+								this.handlePromise(curPromise, action, db, id);
+							}
+						}).catch((err) =>{
+							let message = err.message || Config.message.error;
+							this.props.setWarning(message);
+						});
     			}
     		});
     	}
@@ -177,6 +172,7 @@ export default class OrderContainer extends React.Component {
 		let action = this.props.params.action ? this.props.params.action : 'deliveryNumber';
 		let db = this.props.params.db;
 		let id = this.props.params.id;
+		/*
 		let urlData = Config.url;
 		let url = urlData.serverPath + urlData.pathOrder + '/' + db + '/' + id + '/mail/' + this.props.token;
 		let params = {
@@ -192,6 +188,8 @@ export default class OrderContainer extends React.Component {
 			params.action = 'undelivered';
 		}
 		axios.get(url, { params })
+		*/
+		OrderModel.sendEmail(action, db, id, this.props.token)
 			.then((response) => {
 				if (response.data.success) {
 					this.props.setSuccess(response.data.reason);
@@ -240,6 +238,7 @@ export default class OrderContainer extends React.Component {
 
 	render() {
 		let busy, details, header, message, messageStyle, orderHeader;
+		let empty = this.props.params.db === undefined && this.props.params.id === undefined;
 		if (this.props.success) {
 		  	messageStyle = "alert alert-success alertHeight textAlignCenter";
 	  	} else if (this.props.error) {
@@ -272,10 +271,9 @@ export default class OrderContainer extends React.Component {
       				search={this.searchOrder.bind(this)}
       			/>
       		);
-      		if (this.state.inProgress) {
+				if (this.state.inProgress) {
     			busy = <Busy title={Config.message.loading} />;
     		}
-				let curOrder = this.props.order;
     		if (!this.state.inProgress) {
     			details = (
     				<OrderDetail
@@ -283,7 +281,8 @@ export default class OrderContainer extends React.Component {
 							curShipment={this.state.curShipment}
     					details={this.props.order}
     					display={this.state.display}
-    					images={Config.images} 
+    					empty={empty}
+							images={Config.images}
     					message={Config.message}
 							send={this.sendEmail.bind(this)}
     					setDisplay={this.setDisplay.bind(this)}

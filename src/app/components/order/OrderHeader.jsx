@@ -27,7 +27,8 @@ export default class OrderHeader extends React.Component {
 	}
 
 	componentWillUpdate(nextProps, nextState) {
-		if (nextProps.clear) {
+		let empty = this.state.actionId === '' && this.state.panelId === '' && this.state.currentSelect === null;
+		if (nextProps.clear && !empty) {
 			this.setState({
 				actionId: '',
 				currentSelect: null,

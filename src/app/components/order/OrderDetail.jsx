@@ -20,7 +20,7 @@ const voucherFields = ['Numer ID', 'Referencja', 'Koszt produktów', 'Koszt tran
 const OrderDetail = ( props ) => {
 	let empty = (props.details.additionalData === false && props.details.orderData === null);
 	let message = props.message.orders;
-	if (empty) {
+	if (empty || props.empty) {
 		return (
 			<div class="container bgrContent borderRadius10 marginTop40px paddingBottom40px">
 				<div class="col-xs-12">

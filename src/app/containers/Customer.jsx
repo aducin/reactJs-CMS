@@ -2,8 +2,6 @@ import React from 'react';
 import { Router, Route, IndexRoute, browserHistory, hashHistory } from 'react-router';
 import { connect } from 'react-redux';
 
-import axios from 'axios';
-
 import store from '../store.jsx';
 import * as customer from '../actions/customerActions.jsx';
 
@@ -16,6 +14,7 @@ import Validator from '../components/Validator.jsx';
 import CustomerDetails from '../components/customer/CustomerDetails.jsx';
 import CustomerHeader from '../components/customer/CustomerHeader.jsx';
 import CustomerDelete from '../components/modal/CustomerDelete.jsx';
+import CustomerModel from '../model/customerModel.jsx';
 
 @connect((store) => {
   return {
@@ -62,9 +61,7 @@ export default class CustomerContainer extends React.Component {
     this.setState({
       inProgress: true
     }, () => {
-      let email = this.state.curAddress;
-      let url = Config.url.serverPath + 'customer/' + email + '/' + this.props.token;
-      axios.get(url)
+      CustomerModel.getCustomerByEmail(this.state.curAddress, this.props.token)
         .then((response) => {
           if (response.data.success) {
             store.dispatch(customer.setData(response.data));
@@ -83,15 +80,10 @@ export default class CustomerContainer extends React.Component {
   }
 
   sendEmail(action) {
-    let url = Config.url.serverPath + 'customer/mail/' + this.props.token;
-    let params = {
-      email: this.state.curAddress,
-      result: action
-    };
     this.setState({
       inProgress: true
     }, () => {
-      axios.get(url, { params })
+      CustomerModel.sendCustomerEmail(action, this.state.curAddress, this.props.token)
         .then((response) => {
           if (response.data.success) {
             this.props.setSuccess(response.data.reason);
