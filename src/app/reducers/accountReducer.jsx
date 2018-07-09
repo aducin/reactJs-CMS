@@ -1,5 +1,6 @@
 export function accountReducer (state={
 	amount: null,
+	amounts: {},
 	automatic: false,
 	empty: undefined,
 	list: null,
@@ -13,6 +14,7 @@ export function accountReducer (state={
 		case "clear_data": {
 			state = {...state, 
 				amount: null,
+				amounts: {},
 				automatic: false,
 				empty: undefined,
 				error: false,
@@ -27,6 +29,7 @@ export function accountReducer (state={
 		case "set_error": {
 			state = {...state, 
 				amount: null,
+				amounts: {},
 				automatic: false,
 				empty: undefined,
 				error: action.payload,
@@ -41,6 +44,7 @@ export function accountReducer (state={
 		case "set_list": {
 			state = {...state, 
 				amount: action.payload.amount,
+				amounts: action.payload.amounts,
 				automatic: action.payload.automatic,
 				empty: action.payload.empty,
 				error: false,

@@ -2,7 +2,7 @@ const state = {
   ajaxSent: false,
   ascending: false,
   createXml: false,
-  innerFields: ['amount', 'automatic', 'list', 'maxAmount', 'message'],
+  innerFields: ['amount', 'amounts', 'automatic', 'list', 'maxAmount', 'message'],
   inProgress: false,
   link: undefined,
   modal: false,

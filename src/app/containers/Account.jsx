@@ -139,30 +139,19 @@ export default class AccountContainer extends React.Component {
 			if (custom) {
 				params = this.setParams();
 			}
-			AccountModel.getData(params, this.props.token)
-				.then((response) => {
-					this.setState({
-						inProgress: false
-					}, () => {
+			let observable = AccountModel.getData(params, this.props.token);
+			this.setState({
+				inProgress: false
+			}, () => {
+				observable.subscribe((response) => {
+					try {
 						if (response.data.success) {
 							let data = {};
 							this.state.innerFields.forEach((el) => {
-								if (el === 'list' && response.data[el] !== undefined && response.data[el][0]) {
-									response.data[el].map(function (secondEl) {
-										secondEl.floatAmount = parseFloat(secondEl.amount);
-										secondEl.cashTimestamp = (new Date(secondEl.cashTime)).getTime() / 1000;
-										secondEl.createTimestamp = (new Date(secondEl.createTime)).getTime() / 1000;
-										secondEl.receiptTimestamp = (new Date(secondEl.receiptTime)).getTime() / 1000;
-										return secondEl;
-									});
-								}
 								data[el] = response.data[el];
 							});
-							data.dateFrom = data.dateFrom !== undefined ? data.dateFrom : null;
-							data.dateTo = data.dateTo !== undefined ? data.dateTo : null;
-							data.empty = Boolean(response.data.empty);
 							let accountData = {...this.state.accountData};
-							accountData.list = data.list;
+							accountData.list = response.data.list;
 							this.setState({
 								accountData: accountData,
 							}, () => {
@@ -171,12 +160,19 @@ export default class AccountContainer extends React.Component {
 						} else {
 							throw new Error(response.data.reason);
 						}
-					});
-				})
-				.catch((err) =>{
+					} catch(err) {
+						let message = err.message || Config.message.error;
+						this.props.setWarning(message);
+					}
+				}, (err) => {
+					console.log('inside observable error');
+					console.log(err);
 					let message = err.message || Config.message.error;
 					this.props.setWarning(message);
+				}, () => {
+					console.log('finally!');
 				});
+			});
 		});
 	}
 
