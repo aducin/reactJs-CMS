@@ -55,7 +55,7 @@ const AccountModel = {
         finalObj.data.dateTo = response.data.dateTo !== undefined ? response.data.dateTo : null;
         finalObj.data.empty = Boolean(response.data.empty);
       } else {
-        t shrow new Error(response.data.reason);
+        throw new Error(response.data.reason);
       }
       return finalObj;
     });
