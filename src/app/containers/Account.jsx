@@ -165,8 +165,6 @@ export default class AccountContainer extends React.Component {
 						this.props.setWarning(message);
 					}
 				}, (err) => {
-					console.log('inside observable error');
-					console.log(err);
 					let message = err.message || Config.message.error;
 					this.props.setWarning(message);
 				}, () => {
