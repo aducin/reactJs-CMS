@@ -90,6 +90,39 @@ label {
   }
 }
 
+@media screen and (max-width: 790px) {
+  .headerButton {
+    width: 100%;
+    margin-bottom: $pixels10;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  .logoutButton {
+    max-width: 740px;
+  }
+}
+
+@media screen and (min-width: 790px) {
+  .maxWidth160{
+    max-width: 160px;
+  }
+  .headerButton {
+    min-width: 130px;
+  }
+  .minWidth160{
+    min-width: 160px;
+  }
+}
+
+@media screen and (max-width: 992px) and (min-width: 790px) {
+  .logoutButton {
+    max-width: 673px;
+  }
+  .logoutMargin {
+    margin-top: 15px;
+  }
+}
+
 @media screen and (min-width: 1400px) {
   .respWidth33{
     @include value-width(33%);
@@ -558,7 +591,9 @@ label {
   @include value-bottom(0);
   @include value-right(1%);
   color: $color-navy-blue;
+  z-index: -1;
 }
+
 .form-signin {
   max-width: 380px;
   padding: 15px 35px 45px;
@@ -679,6 +714,9 @@ label {
 }
 .marginBottom20 {
   margin-bottom: $pixels20;
+}
+.marginBottom40 {
+  margin-bottom: 40px;
 }
 .margin16left {
   margin-left: 16px;
@@ -818,6 +856,9 @@ label {
 .minheight465 {
   min-height: 410px;
 }
+.minWidth180 {
+  min-width: 180px;
+}
 .noEvents {
   pointer-events: $none;
 }
@@ -886,6 +927,11 @@ label {
   @include font-weight(bold);
   background-color: #7D6464 !important;
   color: #EFE8E8;
+}
+.table-horizontal {
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 .textAlignCenter {
   @include text-position();

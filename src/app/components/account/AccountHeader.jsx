@@ -12,14 +12,14 @@ const accountHeader = ( props ) => {
   let xml;
   if (props.link) {
     xml = (
-      <div class="col-xs-12 col-md-6 marginTop10px">
+      <div class="col-xs-12 col-sm-4 col-md-12 marginTop10px">
         <a href={props.link} download>{message.account.downloadXml}</a>
       </div>
     );
   } else {
     xml = (
-      <div class="col-xs-12 col-md-6 marginTop10px">
-        <input class="form-control btn btn-primary" disabled={!props.xml} onClick={ () => props.createXml() } type="button" value={ message.account.createXml } />
+      <div class="col-xs-12 col-sm-4 col-md-12 marginTop10px">
+        <input class="form-control btn btn-primary maxWidth160" disabled={!props.xml} onClick={ () => props.createXml() } type="button" value={ message.account.createXml } />
       </div>
     );
   }
@@ -77,14 +77,12 @@ const accountHeader = ( props ) => {
           </div>
           <div class="col-xs-12 col-md-4 pull-left">
             <h4>{message.account.managing}</h4>
-            <div class="col-xs-12 col-md-6 marginTop10px">
-              <input class="form-control btn btn-primary" disabled={props.disable} onClick={ () => props.accountModal('add') } type="button" value={ message.account.add } />
+            <div class="col-xs-12 col-sm-4 col-md-12 marginTop10px">
+              <input class="form-control btn btn-primary maxWidth160" disabled={props.disable} onClick={ () => props.accountModal('add') } type="button" value={ message.account.add } />
             </div>
-            <div class="col-xs-12"></div>
-            <div class="col-xs-12 col-md-6 marginTop10px">
-              <input class="form-control btn btn-primary" disabled={props.disable || !props.selectedRow} onClick={ () => props.accountModal('modify') } type="button" value={ message.account.modify } />
+            <div class="col-xs-12 col-sm-4 col-md-12 marginTop10px">
+              <input class="form-control btn btn-primary maxWidth160" disabled={props.disable || !props.selectedRow} onClick={ () => props.accountModal('modify') } type="button" value={ message.account.modify } />
             </div>
-            <div class="col-xs-12"></div>
             {xml}
           </div>
         </div>

@@ -71,6 +71,7 @@ const accountDetail = ( props ) => {
       let active = el.id === props.selectedRow;
       let activeClass = active ? 'selected cursorPointer textAlignCenter' : 'cursorPointer textAlignCenter';
       let closedClass = el.closed ? 'colorWarning' : 'colorSuccess';
+      let remarks = el.remarks ? el.remarks : '---';
       contentArray.push(
         <tr key={ index } onClick={ () => props.selectRow(el.id)} class={activeClass}>
           <td class={closedClass}>{index + 1}.</td>
@@ -87,6 +88,7 @@ const accountDetail = ( props ) => {
           <td>{el.accessories}</td>
           <td>{el.book}</td>
           <td>{el.car}</td>
+          <td>{remarks}</td>
         </tr>
       );
     });
@@ -141,12 +143,12 @@ const accountDetail = ( props ) => {
       </tbody>
     );
     return(
-      <div class="col-xs-12 pull-left bgrContent borderRadius10 marginTop40px paddingBottom40px">
+      <div class="col-xs-12 pull-left bgrContent borderRadius10 marginTop40px">
         <div class="col-xs-12">
           <Title title={title} />
         </div>
         <div class="marginTop20px">
-          <table class="table table-striped table-bordered">
+          <table class="table table-striped table-bordered table-horizontal">
             {head}
             {content}
           </table>

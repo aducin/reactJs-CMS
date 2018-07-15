@@ -256,9 +256,9 @@ export default class App extends React.Component {
 
     render () {
 			let footer, margin, padding;
-				if (this.state.curPage !== 'login') {
-					footer = <Footer curClass="footerMain" />
-					margin = 'marginTop1';
+			if (this.state.curPage !== 'login') {
+				footer = <Footer />
+				margin = 'marginTop1';
 				padding = 'paddingBottom2';
 			}
 			return (
