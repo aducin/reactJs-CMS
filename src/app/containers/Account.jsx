@@ -144,31 +144,20 @@ export default class AccountContainer extends React.Component {
 				inProgress: false
 			}, () => {
 				observable.subscribe((response) => {
-					try {
-						if (response.data.success) {
-							let data = {};
-							this.state.innerFields.forEach((el) => {
-								data[el] = response.data[el];
-							});
-							let accountData = {...this.state.accountData};
-							accountData.list = response.data.list;
-							this.setState({
-								accountData: accountData,
-							}, () => {
-								store.dispatch(account.setList(data));
-							});
-						} else {
-							throw new Error(response.data.reason);
-						}
-					} catch(err) {
-						let message = err.message || Config.message.error;
-						this.props.setWarning(message);
-					}
+					let data = {};
+					this.state.innerFields.forEach((el) => {
+						data[el] = response.data[el];
+					});
+					let accountData = {...this.state.accountData};
+					accountData.list = response.data.list;
+					this.setState({
+						accountData: accountData,
+					}, () => {
+						store.dispatch(account.setList(data));
+					});
 				}, (err) => {
 					let message = err.message || Config.message.error;
 					this.props.setWarning(message);
-				}, () => {
-					console.log('finally!');
 				});
 			});
 		});
