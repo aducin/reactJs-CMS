@@ -13,11 +13,11 @@ import 'rxjs/add/operator/filter';
 import 'rxjs/add/observable/dom/ajax';
 import 'rxjs/add/observable/interval';
 
-import store from '../store.jsx';
+import store from '../store';
 import * as product from '../actions/productActions.jsx';
 import './main.css';
 
-import Config from '../Config.jsx';
+import Config from '../Config';
 import Footer from '../components/dumb/Footer.jsx';
 import Helper from '../components/Helper.jsx';
 

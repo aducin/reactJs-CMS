@@ -2,7 +2,7 @@ import React from 'react';
 
 import axios from 'axios';
 
-import Config from '../Config.jsx';
+import Config from '../Config';
 import Helper from '../components/Helper.jsx';
 
 let path;

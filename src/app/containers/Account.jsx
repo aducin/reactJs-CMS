@@ -4,11 +4,11 @@ import { connect } from 'react-redux';
 import { Modal } from 'react-bootstrap';
 import moment from 'moment';
 
-import store from '../store.jsx';
+import store from '../store';
 import * as account from '../actions/accountActions.jsx';
 
 import Busy from '../components/dumb/Busy.jsx';
-import Config from '../Config.jsx';
+import Config from '../Config';
 import Header from '../components/dumb/Header.jsx';
 import Message from '../components/dumb/Message.jsx';
 
@@ -16,7 +16,8 @@ import AccountDetail from '../components/account/AccountDetail.jsx';
 import AccountModal from '../components/modal/AccountModal.jsx';
 import AccountHeader from '../components/account/AccountHeader.jsx';
 import AccountModel from '../model/accountModel.jsx';
-import State from '../components/account/state.jsx';
+import State from '../components/account/state';
+import { createReducedObj } from '../components/Helper.jsx';
 
 
 @connect((store) => {
@@ -128,24 +129,20 @@ export default class AccountContainer extends React.Component {
 				params = this.setParams();
 			}
 			let observable = AccountModel.getData(params, this.props.token);
-			this.setState({
-				inProgress: false
+			observable.subscribe((response) => {
+				let data = createReducedObj(response.data, this.state.innerFields);
+				let accountData = {...this.state.accountData, list: response.data.list};
+				this.setState({
+					accountData: accountData
+				}, () => {
+					store.dispatch(account.setList(data));
+				});
+			}, (err) => {
+				let message = err.message || Config.message.error;
+				this.props.setWarning(message);
 			}, () => {
-				observable.subscribe((response) => {
-					let data = {};
-					this.state.innerFields.map((el) => {
-						data[el] = response.data[el];
-						return false;
-					});
-					let accountData = {...this.state.accountData, list: response.data.list};
-					this.setState({
-						accountData: accountData
-					}, () => {
-						store.dispatch(account.setList(data));
-					});
-				}, (err) => {
-					let message = err.message || Config.message.error;
-					this.props.setWarning(message);
+				this.setState({
+					inProgress: false
 				});
 			});
 		});

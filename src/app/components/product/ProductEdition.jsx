@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactTooltip from 'react-tooltip';
 
-import Config from '../../Config.jsx';
+import Config from '../../Config';
 import Helper from '../Helper.jsx';
 
 import Busy from '../dumb/Busy.jsx';

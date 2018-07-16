@@ -4,10 +4,10 @@ import { connect } from 'react-redux';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import axios from 'axios';
 
-import store from '../store.jsx';
+import store from '../store';
 import * as product from '../actions/productActions.jsx';
 
-import Config from '../Config.jsx';
+import Config from '../Config';
 import Helper from '../components/Helper.jsx';
 import Header from '../components/dumb/Header.jsx';
 import Message from '../components/dumb/Message.jsx';

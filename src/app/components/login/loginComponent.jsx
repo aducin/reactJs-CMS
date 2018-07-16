@@ -4,7 +4,7 @@ import Footer from '../dumb/Footer.jsx';
 
 import './login.css';
 
-import Config from '../../Config.jsx';
+import Config from '../../Config';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import Cookies from 'universal-cookie';
 import axios from 'axios';

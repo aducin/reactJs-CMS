@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Config from '../../Config.jsx';
+import Config from '../../Config';
 import Helper from '../Helper.jsx';
 import Title from '../dumb/Title.jsx';
 

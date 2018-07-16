@@ -1,7 +1,7 @@
 import React from 'react';
 import OverlayLoader from 'react-loading-indicator-overlay/lib/OverlayLoader';
 
-import Config from '../../Config.jsx';
+import Config from '../../Config';
 import './busy.css';
 
 const busy = ( props ) => {

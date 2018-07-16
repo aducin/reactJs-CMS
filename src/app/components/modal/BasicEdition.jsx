@@ -6,10 +6,10 @@ import { Modal } from 'react-bootstrap';
 import { reactLocalStorage } from 'reactjs-localstorage';
 
 import axios from 'axios';
-import store from '../../store.jsx';
+import store from '../../store';
 import * as product from '../../actions/productActions.jsx';
 
-import Config from '../../Config.jsx';
+import Config from '../../Config';
 import Helper from '../Helper.jsx';
 import Busy from '../dumb/Busy.jsx';
 import ButtonSingle from '../dumb/ButtonSingle.jsx';

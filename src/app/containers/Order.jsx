@@ -3,11 +3,11 @@ import { Router, Route, IndexRoute, browserHistory, hashHistory } from 'react-ro
 import { connect } from 'react-redux';
 import { reactLocalStorage } from 'reactjs-localstorage';
 
-import store from '../store.jsx';
+import store from '../store';
 import * as order from '../actions/orderActions.jsx';
 
 import Busy from '../components/dumb/Busy.jsx';
-import Config from '../Config.jsx';
+import Config from '../Config';
 import Header from '../components/dumb/Header.jsx';
 import Message from '../components/dumb/Message.jsx';
 

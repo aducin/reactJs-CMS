@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { Router, Route, IndexRoute, hashHistory } from 'react-router';
 import axios from 'axios';
 
-import store from './store.jsx';
+import store from './store';
 
 import Main from './containers/Main.jsx';
 import LoginComponent from './components/login/loginComponent.jsx';

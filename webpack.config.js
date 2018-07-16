@@ -30,7 +30,7 @@ var config;
 process.traceDeprecation = true;
 config = {
   entry: {
-    bundle: APP_DIR + '/index.jsx',
+    bundle: APP_DIR + '/index.js',
     vendor: VENDOR_LIBS 
   },
   output: {

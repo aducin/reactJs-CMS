@@ -6,9 +6,9 @@ import 'rxjs/add/observable/fromPromise';
 
 import axios from 'axios';
 
-import Config from '../Config.jsx';
+import Config from '../Config';
 import Helper from '../components/Helper.jsx';
-import AccountCountings from '../components/AccountCountings.jsx';
+import { appendTime, getAmounts, getTaxes } from '../components/AccountCountings';
 
 let path;
 let pathUrl = Config.url.serverPath + 'accounts';
@@ -29,9 +29,9 @@ const AccountModel = {
       let finalObj = {...response};
       if (response.data.success) {
         if (response.data.list) {
-          let amounts = AccountCountings.setAmounts(response.data.list);
-          finalObj.data.amounts = AccountCountings.setTaxes(amounts);
-          finalObj.data.list = AccountCountings.setList(response.data.list);
+          let amounts = getAmounts(response.data.list);
+          finalObj.data.amounts = getTaxes(amounts);
+          finalObj.data.list = appendTime(response.data.list);
         }
       } else {
         throw new Error(response.data.reason);

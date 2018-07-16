@@ -26,10 +26,11 @@ const Config = {
 		{ id: 2, name: 'Nieodebrany' }
 	],
 	accountTypes: [
-		{ id: 1, name: 'Przelew' },
-		{ id: 2, name: 'Pobranie' },
-		{ id: 3, name: 'Usł. inf.' },
-		{ id: 4, name: 'Sprzedaż bezp.' }
+		{ id: 1, name: 'Przelew', func: 'taxRate3' },
+		{ id: 2, name: 'Pobranie', func: 'taxRate3' },
+		{ id: 3, name: 'Usł. inf.', func: 'taxRate17' },
+		{ id: 4, name: 'Sprzedaż bezp.', func: 'taxRate3' },
+		{ id: 5, name: 'Zwrot', func: 'return' }
 	],
 	active: [
 		{

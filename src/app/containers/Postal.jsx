@@ -4,11 +4,11 @@ import { connect } from 'react-redux';
 import { reactLocalStorage } from 'reactjs-localstorage';
 //import axios from 'axios';
 
-import store from '../store.jsx';
+import store from '../store';
 import * as postal from '../actions/postalActions.jsx';
 
 import Busy from '../components/dumb/Busy.jsx';
-import Config from '../Config.jsx';
+import Config from '../Config';
 import Header from '../components/dumb/Header.jsx';
 //import Helper from '../components/Helper.jsx';
 import Message from '../components/dumb/Message.jsx';

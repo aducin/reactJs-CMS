@@ -2,14 +2,14 @@ import React from 'react';
 import { Router, Route, IndexRoute, browserHistory, hashHistory } from 'react-router';
 import { connect } from 'react-redux';
 
-import store from '../store.jsx';
+import store from '../store';
 import * as customer from '../actions/customerActions.jsx';
 
 import Busy from '../components/dumb/Busy.jsx';
-import Config from '../Config.jsx';
+import Config from '../Config';
 import Header from '../components/dumb/Header.jsx';
 import Message from '../components/dumb/Message.jsx';
-import Validator from '../components/Validator.jsx';
+import { validateEmail } from '../components/Validator';
 
 import CustomerDetails from '../components/customer/CustomerDetails.jsx';
 import CustomerHeader from '../components/customer/CustomerHeader.jsx';
@@ -103,7 +103,7 @@ export default class CustomerContainer extends React.Component {
 
   setAddress(e) {
     let value = e.target.value;
-    let emailCheck = Validator.validateEmail(value);
+    let emailCheck = validateEmail(value);
     let address = {
       text: value,
       valid: emailCheck
