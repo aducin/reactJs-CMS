@@ -19,7 +19,6 @@ import AccountModel from '../model/accountModel.jsx';
 import State from '../components/account/state';
 import { createReducedObj } from '../components/Helper.jsx';
 
-
 @connect((store) => {
 	return {
 		account: store.account

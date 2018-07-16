@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Config from '../Config';
+import Config from '../../Config';
 
 const getTime =  time => (new Date(time)).getTime() / 1000;
 const typeReturn = 'return';

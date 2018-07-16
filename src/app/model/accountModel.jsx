@@ -8,7 +8,7 @@ import axios from 'axios';
 
 import Config from '../Config';
 import Helper from '../components/Helper.jsx';
-import { appendTime, getAmounts, getTaxes } from '../components/AccountCountings';
+import { appendTime, getAmounts, getTaxes } from '../components/account/functions';
 
 let path;
 let pathUrl = Config.url.serverPath + 'accounts';
