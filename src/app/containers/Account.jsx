@@ -128,7 +128,7 @@ export default class AccountContainer extends React.Component {
 		} else {
 			let disabled = false;
 			Config.accountObligatory.forEach((el) => {
-				if (this.state.modalObj[el] === undefined || this.state.modalObj[el] === '' || this.state.modalObj[el] === -1) {
+				if (!this.state.modalObj[el] || this.state.modalObj[el] === -1) {
 					disabled = true;
 				}
 			});
