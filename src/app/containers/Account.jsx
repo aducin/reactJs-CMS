@@ -14,7 +14,7 @@ import AccountDetail from '../components/account/AccountDetail.jsx';
 import AccountModal from '../components/modal/AccountModal.jsx';
 import AccountModel from '../model/accountModel.jsx';
 import AccountHeader from '../components/account/AccountHeader.jsx';
-import State from '../helper/accountState';
+import { State } from '../helper/accountState';
 import { createReducedObj } from '../helper/functions.js';
 import { setModalData } from '../helper/accountFunctions';
 

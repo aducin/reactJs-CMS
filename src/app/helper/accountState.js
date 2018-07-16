@@ -1,4 +1,4 @@
-const state = {
+export const State = {
   action: null,
   ajaxSent: false,
   ascending: false,
@@ -24,6 +24,4 @@ const state = {
   modalObjError: {},
   selectedRow: null,
   sortBy: 'id'
-}
-
-export default state;
+};
