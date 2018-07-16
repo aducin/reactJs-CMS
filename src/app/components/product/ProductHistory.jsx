@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import Config from '../../Config';
-import Helper from '../Helper.jsx';
+import Helper from '../../helper/Helper.jsx';
 import Title from '../dumb/Title.jsx';
 
 import Busy from '../dumb/Busy.jsx';

@@ -3,13 +3,14 @@ import React from 'react';
 import axios from 'axios';
 
 import Config from '../Config';
-import Helper from '../components/Helper.jsx';
+import Helper from '../helper/Helper.jsx';
+import { setUrl } from '../helper/functions.js';
 
 let path;
 
 const PostalModel = {
   getData: (token) => {
-    path = Helper.setUrl('pathPostal', token);
+    path = setUrl('pathPostal', token);
     return axios.get(path);
   },
   setData: (amount, modal, config) => {

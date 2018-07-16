@@ -3,7 +3,6 @@ import React from 'react';
 import axios from 'axios';
 
 import Config from '../Config';
-import Helper from '../components/Helper.jsx';
 
 const url = Config.url;
 const orderUrl = url.serverPath + url.pathOrder;

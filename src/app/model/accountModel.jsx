@@ -7,8 +7,8 @@ import 'rxjs/add/observable/fromPromise';
 import axios from 'axios';
 
 import Config from '../Config';
-import Helper from '../components/Helper.jsx';
-import { appendTime, getAmounts, getTaxes } from '../components/account/functions';
+import { setUrl } from '../helper/functions.js';
+import { appendTime, getAmounts, getTaxes } from '../helper/accountFunctions';
 
 let path;
 let pathUrl = Config.url.serverPath + 'accounts';

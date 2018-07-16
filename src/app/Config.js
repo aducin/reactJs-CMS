@@ -18,7 +18,12 @@ const Config = {
 		{ id: 14, name: 'Auta', value: 'car' },
 		{ id: 15, name: 'Uwagi', value: 'remarks' }
 	],
-	accountNumbers: ['receipt', 'amount', 'locs', 'coach', 'element', 'accessories', 'book', 'car'],
+	accountConditions: {
+		CLOSED: 1,
+		TAX17: 3,
+		RETURN: 5
+	},
+	accountNumbers: ['amount', 'locs', 'coach', 'element', 'accessories', 'book', 'car'],
 	accountObligatory: ['recipient', 'amount', 'closed', 'type'],
 	accountStates: [
 		{ id: 0, name: 'Otwarty' },

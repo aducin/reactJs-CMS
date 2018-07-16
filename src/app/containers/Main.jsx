@@ -19,7 +19,7 @@ import './main.css';
 
 import Config from '../Config';
 import Footer from '../components/dumb/Footer.jsx';
-import Helper from '../components/Helper.jsx';
+import { setUrl } from '../helper/functions.js';
 
 //let observable;
 //let subscription;
@@ -82,7 +82,7 @@ export default class App extends React.Component {
 		}, () => {
 		*/
 		store.dispatch(product.setOrdersSearch());
-		let url = Helper.setUrl('pathOrder', 'last', this.state.token);
+		let url = setUrl('pathOrder', 'last', this.state.token);
 		store.dispatch(product.setAction('setLastOrders', url));
 /*
 			Observable

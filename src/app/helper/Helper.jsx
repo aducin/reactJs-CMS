@@ -6,14 +6,6 @@ const styles = {
 	centered: {textAlign: 'center'}
 };
 
-export let createReducedObj = (src, keys, obj = {}) => keys.reduce((current, next) => {
-	if (typeof(current) === 'string') {
-		obj[current] = src[current];
-	}
-	obj[next] = src[next];
-	return obj;
-});
-
 const Helper = {
 	createTableHead: (list) => {
 		let finalList = list.map((el, index) => {
@@ -43,13 +35,6 @@ const Helper = {
 			</div>
 		)
 		return final;
-	},
-	setUrl: (path, secondPath, token) => {
-		let url = Config.url.serverPath + Config.url[path] + '/' + secondPath;
-		if (token) {
-			url += '/' + token;
-		}
-		return url;
 	}
 }
 

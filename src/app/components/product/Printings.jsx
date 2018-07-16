@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import 'font-awesome/css/font-awesome.min.css';
 
-import Helper from '../Helper.jsx';
+import Helper from '../../helper/Helper.jsx';
 
 import Busy from '../dumb/Busy.jsx';
 import Title from '../dumb/Title.jsx';

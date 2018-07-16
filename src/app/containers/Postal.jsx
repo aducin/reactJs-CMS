@@ -10,7 +10,6 @@ import * as postal from '../actions/postalActions.jsx';
 import Busy from '../components/dumb/Busy.jsx';
 import Config from '../Config';
 import Header from '../components/dumb/Header.jsx';
-//import Helper from '../components/Helper.jsx';
 import Message from '../components/dumb/Message.jsx';
 
 import PostalChange from '../components/modal/PostalChange.jsx';
@@ -63,10 +62,6 @@ export default class PostalContainer extends React.Component {
 
 	getPostal() {
 		let data = PostalModel.getData(this.props.token);
-		/*
-		let url = Helper.setUrl('pathPostal', this.props.token);
-		axios.get(url)
-		*/
 		data.then((response) => {
 			this.setState({
 				inProgress: false

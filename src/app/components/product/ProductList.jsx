@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import ReactTooltip from 'react-tooltip';
 import 'font-awesome/css/font-awesome.min.css';
 
-import Helper from '../Helper.jsx';
+import Helper from '../../helper/Helper.jsx';
 import Title from '../dumb/Title.jsx';
 
 import Busy from '../dumb/Busy.jsx';

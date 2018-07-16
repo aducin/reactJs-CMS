@@ -1,7 +1,10 @@
 const state = {
+  action: null,
   ajaxSent: false,
   ascending: false,
   createXml: false,
+  display: false,
+  errorHandler: false,
   innerFields: ['amount', 'amounts', 'automatic', 'list', 'maxAmount', 'message'],
   inProgress: false,
   link: undefined,

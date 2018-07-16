@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Helper from '../Helper.jsx';
+import Helper from '../../helper/Helper.jsx';
 
 import Href from '../dumb/Href.jsx';
 import Label from '../dumb/Label.jsx';

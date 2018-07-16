@@ -8,7 +8,7 @@ import store from '../store';
 import * as product from '../actions/productActions.jsx';
 
 import Config from '../Config';
-import Helper from '../components/Helper.jsx';
+import { setUrl } from '../helper/functions.js';
 import Header from '../components/dumb/Header.jsx';
 import Message from '../components/dumb/Message.jsx';
 
@@ -147,7 +147,7 @@ export default class ProductContainer extends React.Component {
 			modified: true,
 			modifiedSearch: true
 		}, () => {
-			let url = Helper.setUrl('pathProducts', 'modified');
+			let url = setUrl('pathProducts', 'modified');
 			axios.get(url)
 	    	.then((response) => {
 	    		this.setState({
@@ -180,7 +180,7 @@ export default class ProductContainer extends React.Component {
 		this.setState({
 			printingSearch: true
 		}, () => {
-			let url = Helper.setUrl('pathProducts', 'printing', this.props.token);
+			let url = setUrl('pathProducts', 'printing', this.props.token);
 			axios.get(url)
 				.then((response) => {
 					if (response.status === 200 && response.data.success) {

@@ -10,7 +10,7 @@ import store from '../../store';
 import * as product from '../../actions/productActions.jsx';
 
 import Config from '../../Config';
-import Helper from '../Helper.jsx';
+import Helper from '../../helper/Helper.jsx';
 import Busy from '../dumb/Busy.jsx';
 import ButtonSingle from '../dumb/ButtonSingle.jsx';
 import Input from '../dumb/Input.jsx';

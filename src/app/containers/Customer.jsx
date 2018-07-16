@@ -9,7 +9,7 @@ import Busy from '../components/dumb/Busy.jsx';
 import Config from '../Config';
 import Header from '../components/dumb/Header.jsx';
 import Message from '../components/dumb/Message.jsx';
-import { validateEmail } from '../components/Validator';
+import { validateEmail } from '../helper/validator';
 
 import CustomerDetails from '../components/customer/CustomerDetails.jsx';
 import CustomerHeader from '../components/customer/CustomerHeader.jsx';
