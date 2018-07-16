@@ -8,6 +8,7 @@ import axios from 'axios';
 
 import Config from '../Config.jsx';
 import Helper from '../components/Helper.jsx';
+import AccountCountings from '../components/AccountCountings.jsx';
 
 let path;
 let pathUrl = Config.url.serverPath + 'accounts';
@@ -19,7 +20,7 @@ const AccountModel = {
       dateFrom: from,
       dateTo: to
     };
-    return axios.get(path, { params });
+    return axios.post(path, { params }, Config.ajaxConfig);
   },
   getData: (params, token) => {
     path = pathUrl + '/' + token;
@@ -27,33 +28,11 @@ const AccountModel = {
     return Observable.fromPromise(promise).map(response => {
       let finalObj = {...response};
       if (response.data.success) {
-        finalObj.data.amounts = {};
         if (response.data.list) {
-          let amount3 = 0;
-          let amount17 = 0;
-          response.data.list.forEach((el) => {
-            el.floatAmount = parseFloat(el.amount);
-            el.cashTimestamp = (new Date(el.cashTime)).getTime() / 1000;
-            el.createTimestamp = (new Date(el.createTime)).getTime() / 1000;
-            el.receiptTimestamp = (new Date(el.receiptTime)).getTime() / 1000;
-            if (el.closed === 1) {
-              if (el.type === 3) {
-                amount17 += el.floatAmount;
-              } else if (el.type !== 4){
-                amount3 += el.floatAmount;
-              } else {
-                amount3 = amount3 - el.floatAmount;
-              }
-            }
-          });
-          finalObj.data.amounts.amount3 = amount3;
-          finalObj.data.amounts.amount17 = amount17;
-          finalObj.data.amounts.tax3 = amount3 * 0.03;
-          finalObj.data.amounts.tax17 = amount17 * 0.17;
+          let amounts = AccountCountings.setAmounts(response.data.list);
+          finalObj.data.amounts = AccountCountings.setTaxes(amounts);
+          finalObj.data.list = AccountCountings.setList(response.data.list);
         }
-        finalObj.data.dateFrom = response.data.dateFrom !== undefined ? response.data.dateFrom : null;
-        finalObj.data.dateTo = response.data.dateTo !== undefined ? response.data.dateTo : null;
-        finalObj.data.empty = Boolean(response.data.empty);
       } else {
         throw new Error(response.data.reason);
       }

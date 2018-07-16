@@ -106,21 +106,9 @@ export default class AccountContainer extends React.Component {
 					text: null,
 					type: null
 				};
-				/*
-				let selected = {...this.state.selected};
-				if (type === 'success') {
-					selected = {
-						type: -1,
-						state: -1,
-						dateFrom: null,
-						dateTo: null
-					};
-				}
-				*/
 				this.setState({
 					modalDisable: false,
 					modalMessage: message,
-					//selected: selected
 				}, () => {
 					this.closeModal();
 					if (type === 'success') {
@@ -145,13 +133,13 @@ export default class AccountContainer extends React.Component {
 			}, () => {
 				observable.subscribe((response) => {
 					let data = {};
-					this.state.innerFields.forEach((el) => {
+					this.state.innerFields.map((el) => {
 						data[el] = response.data[el];
+						return false;
 					});
-					let accountData = {...this.state.accountData};
-					accountData.list = response.data.list;
+					let accountData = {...this.state.accountData, list: response.data.list};
 					this.setState({
-						accountData: accountData,
+						accountData: accountData
 					}, () => {
 						store.dispatch(account.setList(data));
 					});
@@ -169,12 +157,10 @@ export default class AccountContainer extends React.Component {
 		if (name === 'amount') {
 			value = value.replace(',', '.');
 		}
-		let obj = {...this.state.modalObj};
-		obj[name] = value;
+		let obj = {...this.state.modalObj, [name]: value};
 		this.setState({
 			modalObj: obj
 		}, () => {
-			console.log(this.state.modalObj);
 			this.modalErrorHandler();
 		});
 	}
@@ -189,7 +175,7 @@ export default class AccountContainer extends React.Component {
 				if (this.state.modalObj[el] === undefined || this.state.modalObj[el] === '' || this.state.modalObj[el] === -1) {
 					disabled = true;
 				}
-			})
+			});
 			if ((!this.state.modalObj.cashDate || this.state.modalObj.cashDate === '') && (!this.state.modalObj.receiptDate || this.state.modalObj.receiptDate === '')) {
 				disabled = true;
 			}
@@ -208,8 +194,8 @@ export default class AccountContainer extends React.Component {
 			}
 		});
 		let saveDisabled = this.modalDisableHandler(error);
-		let modalObj = {...this.state.modalObj};
-		modalObj.saveDisabled = saveDisabled;
+		let modalObj = {...this.state.modalObj, saveDisabled: saveDisabled};
+		//modalObj.saveDisabled = saveDisabled;
 		this.setState({
 			modalObj: modalObj,
 			modalObjError: error
