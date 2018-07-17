@@ -13,7 +13,7 @@ import OrderDetail from '../components/order/OrderDetail.jsx';
 import OrderHeader from '../components/order/OrderHeader.jsx';
 import OrderModel from '../model/orderModel.jsx';
 import CustomerModel from '../model/customerModel.jsx';
-import { State } from '../helper/orderState';
+import { Header as DefaultHeader, State } from '../helper/orderState';
 
 @connect((store) => {
     return { order: store.order };
@@ -36,20 +36,19 @@ export default class OrderContainer extends React.Component {
 			let newParams = nextProps.params.db !== this.props.params.db && nextProps.params.id !== this.props.params.id;
 			let paramsAvailable = nextProps.params.db !== undefined && nextProps.params.id !== undefined;
 			if (changedDb && changedId) {
-				if (this.state.disable) {
-					this.setState({
-						clear: true,
-						curShipment: Config.message.orders.defaultShipmentNumber,
-						db: undefined,
-						disable: false,
-						id: undefined,
-						shipmentNumber: false
-					});
-				}
+				this.setState({
+					clear: true,
+					curShipment: Config.message.orders.defaultShipmentNumber,
+					db: undefined,
+					disable: false,
+					id: undefined,
+					shipmentNumber: false
+				});
 			} else if (nextState.clear) {
 				store.dispatch(order.clearData());
 				this.setState({
-					clear: false
+					clear: false,
+					header: DefaultHeader
 				});
 			} else if (!this.state.checkDisabled && nextState.checkDisabled) {
 				this.checkDisabled(nextState);
@@ -68,12 +67,12 @@ export default class OrderContainer extends React.Component {
 	}
 
 	checkDisabled(state) {
-		console.log('inside checkDIsabled');
 		let curDisable = {
 			action: true,
 			panel: true
 		};
-		let shortenName = state.header.name.replace('Id', '');
+		let name = state.header.name;
+		let shortenName = name.replace('Id', '');
 		let isNaNCheck = Boolean(isNaN(state.header[name]) || state.header[name] === '');
 		if (state.header.selected[shortenName] !== 0 && !state.error[name] && !isNaNCheck) {
 			curDisable[shortenName] = false;
@@ -84,7 +83,7 @@ export default class OrderContainer extends React.Component {
 		});
 	}
 	checkUrl(props) {
-		let curPromise, url;
+		let curPromise;
 		let token = props.token;
 		let db = props.params.db;
 		let id = props.params.id;
@@ -155,21 +154,18 @@ export default class OrderContainer extends React.Component {
 			});
 	}
 	setData(promise, props) {
-		let action = props.params.action;
-		let db = props.params.db;
-		let id = props.params.id;
 		promise
 			.then((response) => {
 				if (response.data.success !== false) {
-					if (!action) {
-						let data = {...response.data, id: id};
-						store.dispatch(order.setOrderId(data, db));
+					if (!props.params.action) {
+						let data = {...response.data, id: props.params.id};
+						store.dispatch(order.setOrderId(data, props.params.db));
 					} else {
 						let dataObj = {
-							action: action,
+							action: props.params.action,
 							data: response.data,
-							db: db,
-							id: id
+							db: props.params.db,
+							id: props.params.id
 						};
 						store.dispatch(order.setAdditional(dataObj));
 					}
@@ -179,6 +175,10 @@ export default class OrderContainer extends React.Component {
 			}).catch((err) =>{
 			let message = err.message || Config.message.error;
 			this.props.setWarning(message);
+			setTimeout(() => {
+				let url = Config.url.path + Config.url.pathSuffix + Config.url.pathOrder;
+				window.location.href = url;
+			}, Config.timer);
 		}).finally(() => {
 			this.setState({
 				inProgress: false,
@@ -199,6 +199,11 @@ export default class OrderContainer extends React.Component {
     	this.setState({
     		display: curCover,
     	});
+	}
+	setError(data) {
+		this.setState({
+			error: data
+		});
 	}
 	setShipmentNumber(e) {
 		this.setState({
@@ -247,13 +252,13 @@ export default class OrderContainer extends React.Component {
 			);
 			orderHeader = (
 				<OrderHeader
-					clear={this.state.clear}
 					disable={this.state.disable}
 					error={this.state.error}
 					header={this.state.header}
 					headerDisable={this.state.headerDisable}
 					search={this.searchOrder.bind(this)}
 					setData={this.setHeaderData.bind(this)}
+					setError={this.setError.bind(this)}
 				/>
 			);
 			if (this.state.inProgress) {

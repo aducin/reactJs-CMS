@@ -6,50 +6,16 @@ import Select from '../dumb/Select.jsx';
 import Title from '../dumb/Title.jsx';
 
 export default class OrderHeader extends React.Component {
-	constructor(props) {
-		super(props);	 
-		this.state = {
-			actionId: '',
-			currentSelect: null,
-			disable: {
-				action: true,
-				panel: true
-			},
-			error: {
-				actionId: false,
-				panelId: false
-			},
-			panelId: '',
-			selected: {
-				action: 0,
-				panel: 0
-			}
-		}
-	}
-
-	componentWillUpdate(nextProps, nextState) {
-		let empty = this.state.actionId === '' && this.state.panelId === '' && this.state.currentSelect === null;
-		if (nextProps.clear && !empty) {
-			this.setState({
-				actionId: '',
-				currentSelect: null,
-				panelId: '',
-				selected: {
-					action: 0,
-					panel: 0
-				}
-			});
-		}
-	}
 
 	checkDisabled(name) {
+		let header = this.props.header;
 		let curDisable = {
 			action: true,
 			panel: true
 		};
 		let shortenName = name.replace('Id', '');
-		let isNaNCheck = Boolean(isNaN(this.state[name]) || this.state[name] === '');
-		if (this.state.selected[shortenName] !== 0 && !this.state.error[name] && !isNaNCheck) {
+		let isNaNCheck = Boolean(isNaN(header[name]) || header[name] === '');
+		if (header.selected[shortenName] !== 0 && !this.props.error[name] && !isNaNCheck) {
 			curDisable[shortenName] = false;
 		}
 		this.setState({
@@ -58,14 +24,15 @@ export default class OrderHeader extends React.Component {
 	}
 
 	handleSelectChange(e) {
+		let header = this.props.header;
 		let name = e.target.name;
 		let curSelected = {
 			action: 0,
 			panel: 0
 		};
 		curSelected[e.target.name] = e.target.value;
-		let curActionId = name === 'action' ? this.state.actionId : '';
-		let curPanelId = name === 'panel' ? this.state.panelId : '';
+		let curActionId = name === 'action' ? header.actionId : '';
+		let curPanelId = name === 'panel' ? header.panelId : '';
 		let data = {
 			header: {
 				actionId: curActionId,
@@ -89,18 +56,18 @@ export default class OrderHeader extends React.Component {
 	}
 
 	setId(e) {
+		let header = this.props.header;
 		let name = e.target.name;
 		let value = e.target.value;
 		let check = isNaN(value);
-		let curAction = name === 'actionId' ? this.state.selected.action : 0;
-		let curPanel = name === 'panelId' ? this.state.selected.panel : 0;
+		let curAction = name === 'actionId' ? header.selected.action : 0;
+		let curPanel = name === 'panelId' ? header.selected.panel : 0;
 		let selected = {
 			action: curAction,
 			panel: curPanel
 		};
 		if (!check) {
-			let curState = {...this.state};
-			let curError = {...this.state.error};
+			let curError = {...this.props.error};
 			curError[name] = false;
 			let actionName = name.replace('Id', '');
 			let curActionId = name === 'actionId' ? value : '';
@@ -127,17 +94,16 @@ export default class OrderHeader extends React.Component {
 				this.checkDisabled(name);
 			});
 		} else {
-			let curError = {...this.state.error};
+			let curError = {...this.props.error};
 			curError[name] = true;
-			this.setState({
-				error: curError
-			});
+			this.props.setError(curError);
 		}
 	}
 
 	setIdSearch() {
-		let id = this.state.currentSelect === 'action' ? this.state.actionId : this.state.panelId;
-		let selectedId = this.state.currentSelect === 'action' ? this.state.selected.action : this.state.selected.panel;
+		let header = this.props.header;
+		let id = header.currentSelect === 'action' ? header.actionId : header.panelId;
+		let selectedId = header.currentSelect === 'action' ? header.selected.action : header.selected.panel;
 		let actions = [...Config.orderActions];
 		let panels = [...Config.orderPanels];
 		let concated = actions.concat(panels);
@@ -155,18 +121,19 @@ export default class OrderHeader extends React.Component {
 	}
 
 	render() {
-		console.log(this.props.error);
-		console.log(this.props.header);
-		console.log(this.props.headerDisable);
-		let actionId = this.state.actionId;
-		let panelId = this.state.panelId;
+		let actionId = this.props.header.actionId;
+		let currentSelect = this.props.header.currentSelect;
+		let error = this.props.error;
+		let headerDisable = this.props.headerDisable;
+		let panelId = this.props.header.panelId;
+		let selected = this.props.header.selected;
 		let actions = Config.orderActions;
 		let panels = Config.orderPanels;
 		let message = Config.message;
 		var actionOptions = actions.map((el, index) => {
       		return <option key={index + 1} value={el.id}>{el.name}</option>;
       	});
-      	if (!this.state.currentSelect || !this.state.selected.action) {
+      	if (!currentSelect || !selected.action) {
       		let checkId = actions.findIndex((el) => { return el.id === 0; });
       		if (checkId === -1) {
       			actionOptions.unshift(<option key="0" value={ message.pleaseChoose.id }>{ message.pleaseChoose.name }</option>);
@@ -175,14 +142,14 @@ export default class OrderHeader extends React.Component {
 		var panelOptions = panels.map((el, index) => {
       		return <option key={index + 1} value={el.id}>{el.name}</option>;
       	});
-      	if (!this.state.currentSelect || !this.state.selected.panel) {
+      	if (!currentSelect || !selected.panel) {
       		let checkId = panels.findIndex((el) => { return el.id === 0; });
       		if (checkId === -1) {
       			panelOptions.unshift(<option key="0" value={ message.pleaseChoose.id }>{ message.pleaseChoose.name }</option>);
       		}
       	}
-      	let classAction = this.state.error.actionId !== false ? 'form-control borderWarning textAlignCenter' : 'form-control textAlignCenter';
-		let classPanel = this.state.error.panelId !== false ? 'form-control borderWarning textAlignCenter' : 'form-control textAlignCenter';
+      	let classAction = error.actionId !== false ? 'form-control borderWarning textAlignCenter' : 'form-control textAlignCenter';
+		let classPanel = error.panelId !== false ? 'form-control borderWarning textAlignCenter' : 'form-control textAlignCenter';
 		return (
     		<div class="container bgrContent borderRadius10 marginTop40px paddingBottom40px">
 				<div class="col-xs-12">
@@ -198,14 +165,14 @@ export default class OrderHeader extends React.Component {
 					      		name="panel" 
 					      		selectChange={ this.handleSelectChange.bind(this) } 
 					      		title={message.orders.choosePanel}
-					      		value={ this.state.selected.panel } 
+					      		value={ selected.panel }
 					      	/>
 					    </div>
 					    <div class="col-xs-12 col-md-3">
 							<input class={classPanel} type="text" disabled={this.props.disable} name="panelId" value={panelId} placeholder={message.labels.receipt} onChange={ this.setId.bind(this) } />
 						</div>
 						<div class="col-xs-12 col-md-3">
-							<input class="form-control btn btn-primary cursorPointer" disabled={this.props.disable || this.state.disable.panel} type="button" value={message.orders.find} onClick={ this.setIdSearch.bind(this) } />
+							<input class="form-control btn btn-primary cursorPointer" disabled={this.props.disable || headerDisable.panel} type="button" value={message.orders.find} onClick={ this.setIdSearch.bind(this) } />
 						</div>
 					</div>
 			    	<div class="col-xs-12">
@@ -217,14 +184,14 @@ export default class OrderHeader extends React.Component {
 					      		name="action" 
 					      		selectChange={ this.handleSelectChange.bind(this) } 
 					      		title={message.orders.chooseAction}
-					      		value={ this.state.selected.action } 
+					      		value={ selected.action }
 					      	/>
 					    </div>
 					    <div class="col-xs-12 col-md-3">
 							<input class={classAction} type="text" disabled={this.props.disable} name="actionId" value={actionId} placeholder={message.labels.receipt} onChange={ this.setId.bind(this) } />
 						</div>
 						<div class="col-xs-12 col-md-3">
-							<input class="form-control btn btn-primary cursorPointer" disabled={this.props.disable || this.state.disable.action} type="button" value={message.orders.find} onClick={ this.setIdSearch.bind(this) } />
+							<input class="form-control btn btn-primary cursorPointer" disabled={this.props.disable || headerDisable.action} type="button" value={message.orders.find} onClick={ this.setIdSearch.bind(this) } />
 						</div>
 					</div>
 			    </div>

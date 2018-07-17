@@ -1,5 +1,16 @@
 import Config from '../Config';
 
+export const Header = {
+  actionId: '',
+  currentSelect: null,
+  name: undefined,
+  panelId: '',
+  selected: {
+    action: 0,
+    panel: 0
+  }
+};
+
 export const State = {
   checkDisabled: false,
   clear: false,
@@ -12,16 +23,7 @@ export const State = {
     actionId: false,
     panelId: false
   },
-  header: {
-    actionId: '',
-    currentSelect: null,
-    name: undefined,
-    panelId: '',
-    selected: {
-      action: 0,
-      panel: 0
-    },
-  },
+  header: Header,
   headerDisable: false,
   inProgress: false,
   panel: null,
@@ -29,3 +31,4 @@ export const State = {
   shipmentNumber: false,
   urlCheck: false
 };
+
