@@ -81,7 +81,7 @@ export default class AccountContainer extends React.Component {
 		let stringVar = field + 'Time';
 		obj[momentVar] = data;
 		obj[stringVar] = data.format("YYYY-MM-DD");
-		obj.saveDisabled = this.modalDisableHandler(this.state.modalObjError);
+		obj.saveDisabled = this.modalDisableHandler(this.state);
 		this.setState({
 			modalObj: obj
 		});
@@ -121,22 +121,12 @@ export default class AccountContainer extends React.Component {
 			modalObj: obj
 		});
 	}
-	modalDisableHandler(error) {
-		let errorLength = Object.keys(error).length;
-		if (errorLength > 0) {
-			return true;
-		} else {
-			let disabled = false;
-			Config.accountObligatory.forEach((el) => {
-				if (!this.state.modalObj[el] || this.state.modalObj[el] === -1) {
-					disabled = true;
-				}
-			});
-			if ((!this.state.modalObj.cashDate || this.state.modalObj.cashDate === '') && (!this.state.modalObj.receiptDate || this.state.modalObj.receiptDate === '')) {
-				disabled = true;
-			}
-			return disabled;
+	modalDisableHandler(state) {
+		let disabled = Config.accountObligatory.find((el) => !state.modalObj[el] || state.modalObj[el] === -1) !== undefined;
+		if ((!state.modalObj.cashDate || state.modalObj.cashDate === '') && (!state.modalObj.receiptDate || state.modalObj.receiptDate === '')) {
+			disabled = true;
 		}
+		return disabled;
 	}
 	modalErrorHandler(state) {
 		let error = {};
@@ -147,7 +137,7 @@ export default class AccountContainer extends React.Component {
 				}
 			}
 		});
-		let saveDisabled = this.modalDisableHandler(error);
+		let saveDisabled = this.modalDisableHandler(state);
 		let modalObj = {...state.modalObj, saveDisabled: saveDisabled};
 		this.setState({
 			errorHandler: false,
@@ -203,6 +193,7 @@ export default class AccountContainer extends React.Component {
 				data[el] = 0;
 			}
 		});
+
 		if (this.state.modal === 'add') {
 			ajax = AccountModel.rowSave(data);
 		} else {
