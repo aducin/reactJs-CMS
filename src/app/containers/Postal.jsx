@@ -2,153 +2,147 @@ import React from 'react';
 import { Router, Route, IndexRoute, browserHistory, hashHistory } from 'react-router';
 import { connect } from 'react-redux';
 import { reactLocalStorage } from 'reactjs-localstorage';
-//import axios from 'axios';
 
 import store from '../store';
 import * as postal from '../actions/postalActions.jsx';
-
 import Busy from '../components/dumb/Busy.jsx';
 import Config from '../Config';
 import Header from '../components/dumb/Header.jsx';
 import Message from '../components/dumb/Message.jsx';
-
 import PostalChange from '../components/modal/PostalChange.jsx';
 import PostalDetail from '../components/postal/PostalDetail.jsx';
 import PostalHeader from '../components/postal/PostalHeader.jsx';
 import PostalModel from '../model/postalModel.jsx';
+import { State } from '../helper/postalState';
+import { validateNumber } from '../helper/validator';
 
 @connect((store) => {
-	return {
-		postal: store.postal
-	};
+	return { postal: store.postal };
 })
 
 export default class PostalContainer extends React.Component {
 	constructor(props) {
 		super(props);	 
-		this.state = {
-			action: null,
-			actionMessage: {
-				type: undefined,
-				text: undefined
-			},
-			ajaxSent: false,
-			amountToChange: 0,
-			error: false,
-			inProgress: false,
-			modal: false,
-			modalInProgres: false
-		}
+		this.state = State;
+	}
+
+	componentDidMount() {
+		this.props.unsubscribe();
 	}
 
 	componentWillUpdate(nextProps, nextState) {
 		if (nextProps.approved && nextProps.token) {
 			if (!nextState.ajaxSent) {
 				this.setState({
+					action: 'getPostal',
 					ajaxSent: true,
 					inProgress: true
-				}, () => {
-					this.getPostal();
 				});
+			} else if (nextState.action && nextState.ajaxSent) {
+				let action = nextState.action;
+				this[action](nextState);
 			}
 		}
 	}
 
-	closeModal() {
+	closeModal(state = null) {
+		let action = null;
+		if (state && state.refresh) {
+			action = 'getPostal';
+		}
 		this.setState({
+			action: action,
 			modal: false
 		});
 	}
-
-	getPostal() {
-		let data = PostalModel.getData(this.props.token);
-		data.then((response) => {
+	displayMessage(state) {
+		setTimeout(() => {
 			this.setState({
-				inProgress: false
-			}, () => {
+				action: 'closeModal',
+				actionMessage: {
+					text: undefined,
+					type: undefined
+				},
+				amountToChange: 0
+			});
+		}, Config.timer);
+	}
+	getPostal() {
+		PostalModel.getData(this.props.token)
+			.then((response) => {
 				if (response.data.success) {
 					store.dispatch(postal.getAmount(response.data.list));
 				} else {
 					throw new Error(response.data.reason);
 				}
+			})
+			.catch((err) =>{
+				let message = err.message || Config.message.error;
+				this.props.setWarning(message);
+			})
+			.finally(() => {
+				this.setState({
+					action: null,
+					inProgress: false
+				});
 			});
-		}).catch((err) =>{
-			let message = err.message || Config.message.error;
-			this.props.setWarning(message);
-		});
 	}
-
 	handleAmountToChange(e) {
-		let value = e.target.value.replace(',', '.');
-		let error = isNaN(value);
-		let curAmount = error ? this.state.amountToChange : value;
+		let error = validateNumber(e.target.value);
+		let curAmount = error ? this.state.amountToChange : e.target.value;
 		this.setState({
 			amountToChange: curAmount,
 			error: error
 		});
 	}
-
 	openModal(type) {
 		this.setState({
 			modal: type
 		});
 	}
-
 	saveNewAmount() {
-		let data = {
-			action: this.state.modal,
-			amount: this.state.amountToChange
-		};
-		let url = Config.url.serverPath + 'postal';
 		this.setState({
+			action: 'setAmount',
 			modalInProgress: true
-		}, () => {
-			//axios.put(url, {data}, this.state.config)
-			PostalModel.setData(this.state.amountToChange, this.state.modal, this.state.config)
-				.then((response) => {
-					if (response.data.success) {
-						this.setState({
-							actionMessage: {
-								text: response.data.reason,
-								type: 'success'
-							},
-							modalInProgress: false
-						}, () => {
-							setTimeout(() => {
-								this.setState({
-									actionMessage: {
-										text: undefined,
-										type: undefined
-									},
-									amountToChange: 0
-								}, () => {
-									if (response.data.success) {
-										this.getPostal();
-									}
-									this.closeModal();
-								});
-							}, Config.timer);
-						});
-					} else {
-						throw new Error(response.data.reason);
-					}
-				})
-				.catch((err) =>{
-					this.closeModal();
-					let message = err.message || Config.message.error;
-					this.props.setWarning(message);
-				});
 		});
+	}
+	setAmount(state) {
+		let data = {
+			action: state.modal,
+			amount: state.amountToChange
+		};
+		PostalModel.setData(this.state.amountToChange, state.modal)
+			.then((response) => {
+				if (response.data.success) {
+					this.setState({
+						action: 'displayMessage',
+						actionMessage: {
+							text: response.data.reason,
+							type: 'success'
+						},
+						refresh: true
+					});
+				} else {
+					throw new Error(response.data.reason);
+				}
+			})
+			.catch((err) =>{
+				this.closeModal();
+				let message = err.message || Config.message.error;
+				this.props.setWarning(message);
+			})
+			.finally(() => {
+				this.setState({
+					action: null,
+					modalInProgress: false
+				});
+			});
 	}
 
 	render() {
 		let data = this.props.postal;
-		let busy, header, message, messageStyle, modal, postalDetail, postalHeader;
-		if (this.props.success) {
-		  	messageStyle = "alert alert-success alertHeight textAlignCenter";
-		} else if (this.props.error) {
-	  		messageStyle = "alert alert-danger alertHeight textAlignCenter";
-		}
+		let busy, header, message, modal, postalDetail, postalHeader;
+		let messageStyle = this.props.success ? Config.alertSuccess : Config.alertError;
 		if (this.props.approved) {
 			header = (
 				<div class="height12">
@@ -217,4 +211,3 @@ export default class PostalContainer extends React.Component {
 		)
 	}
 }
-

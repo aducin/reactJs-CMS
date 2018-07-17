@@ -48,8 +48,10 @@ const Config = {
 		}
 	],
 	ajaxConfig: {
-		  		headers: {'X-My-Custom-Header': 'Header-Value'}
-			},
+		headers: {'X-My-Custom-Header': 'Header-Value'}
+	},
+	alertError: 'alert alert-danger alertHeight textAlignCenter',
+	alertSuccess: 'alert alert-success alertHeight textAlignCenter',
 	condition: [
 		{
 			id: 'new',

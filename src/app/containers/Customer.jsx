@@ -4,37 +4,25 @@ import { connect } from 'react-redux';
 
 import store from '../store';
 import * as customer from '../actions/customerActions.jsx';
-
 import Busy from '../components/dumb/Busy.jsx';
 import Config from '../Config';
 import Header from '../components/dumb/Header.jsx';
 import Message from '../components/dumb/Message.jsx';
-import { validateEmail } from '../helper/validator';
-
 import CustomerDetails from '../components/customer/CustomerDetails.jsx';
 import CustomerHeader from '../components/customer/CustomerHeader.jsx';
 import CustomerDelete from '../components/modal/CustomerDelete.jsx';
 import CustomerModel from '../model/customerModel.jsx';
+import { State } from '../helper/customerState';
+import { validateEmail } from '../helper/validator';
 
 @connect((store) => {
-  return {
-    customer: store.customer
-  };
+  return { customer: store.customer };
 })
 
 export default class CustomerContainer extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      address: {
-        text: '',
-        valid: false
-      },
-      curAddress: undefined,
-      inProgress: false,
-      email: undefined,
-      showModal: false
-    }
+    this.state = State;
   }
 
   componentDidMount() {
@@ -45,62 +33,75 @@ export default class CustomerContainer extends React.Component {
     if (nextProps.approved && nextProps.token) {
       if (nextProps.params.email !== undefined && nextProps.params.email !== nextState.curAddress) {
         this.setState({
-          curAddress: nextProps.params.email
-        }, () => {
-          this.searchCustomer();
+          action: 'search',
+          curAddress: nextProps.params.email,
+          inProgress: true
         });
       } else if (nextProps.params.email === undefined && nextState.curAddress !== undefined) {
         this.setState({
+          action: null,
           curAddress: undefined
         });
+      } else if (nextState.action) {
+        this.setAction(nextState);
       }
     }
   }
 
+  emailAction(action) {
+    this.setState({
+      action: 'email',
+      emailAction: action,
+      inProgress: true
+    });
+  }
   searchCustomer() {
-    this.setState({
-      inProgress: true
-    }, () => {
-      CustomerModel.getCustomerByEmail(this.state.curAddress, this.props.token)
-        .then((response) => {
-          if (response.data.success) {
-            store.dispatch(customer.setData(response.data));
-          } else {
-            throw new Error(response.data.reason);
-          }
-          this.setState({
-            inProgress: false
-          });
-        })
-        .catch((err) =>{
-          let message = err.message || Config.message.error;
-          this.props.setWarning(message);
+    CustomerModel.getCustomerByEmail(this.state.curAddress, this.props.token)
+      .then((response) => {
+        if (response.data.success) {
+          store.dispatch(customer.setData(response.data));
+        } else {
+          throw new Error(response.data.reason);
+        }
+      })
+      .catch((err) =>{
+        let message = err.message || Config.message.error;
+        this.props.setWarning(message);
+      })
+      .finally(() => {
+        this.setState({
+          action: null,
+          inProgress: false
         });
-    });
+      });
   }
-
   sendEmail(action) {
-    this.setState({
-      inProgress: true
-    }, () => {
-      CustomerModel.sendCustomerEmail(action, this.state.curAddress, this.props.token)
-        .then((response) => {
-          if (response.data.success) {
-            this.props.setSuccess(response.data.reason);
-          } else {
-            throw new Error(response.data.reason);
-          }
-          this.setState({
-            inProgress: false
-          });
-        })
-        .catch((err) =>{
-          let message = err.message || Config.message.error;
-          this.props.setWarning(message);
+    CustomerModel.sendCustomerEmail(this.state.emailAction, this.state.curAddress, this.props.token)
+      .then((response) => {
+        if (response.data.success) {
+          this.props.setSuccess(response.data.reason);
+        } else {
+          throw new Error(response.data.reason);
+        }
+      })
+      .catch((err) =>{
+        let message = err.message || Config.message.error;
+        this.props.setWarning(message);
+      })
+      .finally(() =>{
+        this.setState({
+          emailAction: null,
+          inProgress: false
         });
-    });
+      });
   }
-
+  setAction(state) {
+    if (state.action === 'search' && state.curAddress) {
+      this.searchCustomer();
+    } else if (state.action === 'email') {
+      this.sendEmail(state.emailAction);
+    }
+  }
   setAddress(e) {
     let value = e.target.value;
     let emailCheck = validateEmail(value);
@@ -112,13 +113,11 @@ export default class CustomerContainer extends React.Component {
       address: address
     });
   }
-
   setModal(bool) {
     this.setState({
       showModal: bool
     });
   }
-
   setUrl() {
     let url = Config.url.path + Config.url.pathSuffix + Config.url.pathCustomers + '/' + this.state.address.text;
     window.location.href = url;
@@ -159,9 +158,7 @@ export default class CustomerContainer extends React.Component {
         />
       );
       if (this.state.inProgress) {
-        busy = (
-          <Busy title={Config.message.loading} />
-        );
+        busy = <Busy title={Config.message.loading} />;
       }
       if (!this.state.inProgress) {
         customerDetails = (
@@ -172,7 +169,7 @@ export default class CustomerContainer extends React.Component {
             disable={this.state.inProgress}
             empty={empty}
             message={Config.message}
-            send={this.sendEmail.bind(this)}
+            send={this.emailAction.bind(this)}
             token={this.props.token}
             url={Config.url}
           />

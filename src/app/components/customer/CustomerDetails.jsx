@@ -51,8 +51,14 @@ const customerDetails = ( props ) => {
   const setDisplay = (notEmpty, address, order, panel) => {
     let curAddress, curOrder;
     if (notEmpty[panel]) {
-      curAddress = setAddress(address[panel]);
-      curOrder = setOrder(order[panel]);
+      curAddress = null;
+      if (address[panel].length > 0) {
+        curAddress = setAddress(address[panel]);
+      }
+      curOrder = null;
+      if (order[panel].length > 0) {
+        curOrder = setOrder(order[panel]);
+      }
       return setContent(curAddress, curOrder, panel);
     } else {
       return setEmpty(panel);
@@ -102,16 +108,19 @@ const customerDetails = ( props ) => {
   let customer = props.data.customer;
   let order = props.data.orders;
   let notEmpty = {
-    new: Boolean(props.data.customer.new),
-    old: Boolean(props.data.customer.old)
+    new: false,
+    old: false
   };
   let content, curClass, email, name;
   let id = [];
-  if (customer.old) {
+  if (customer && customer.old) {
+    notEmpty.old = Boolean(props.data.customer.old);
     email = customer.old.email;
     name = setName(customer.old);
     id.push(message.customer.panels.old + ' - ID: ' + customer.old.id_customer);
-  } else if (customer.new) {
+  }
+  if (customer && customer.new) {
+    notEmpty.new = Boolean(props.data.customer.new);
     email = customer.new.email;
     name = setName(customer.new);
     id.push(message.customer.panels.new + ' - ID: ' + customer.new.id_customer);

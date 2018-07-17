@@ -196,6 +196,22 @@ export default class AccountContainer extends React.Component {
 				}
 			}
 		}
+		/*
+		let ajax;
+		let data = {...this.state.modalObj, token: this.props.token};
+		data.address = this.state.modalObj.address ? this.state.modalObj.address : null;
+		data.remarks = this.state.modalObj.remarks ? this.state.modalObj.remarks : null;
+		Config.accountNumbers.forEach((el) => {
+			if (!this.state.modalObj[el]) {
+				data[el] = 0;
+			}
+		});
+		 if (this.state.modal === 'add') {
+		 ajax = AccountModel.rowSave(data);
+		 } else {
+		 ajax = AccountModel.rowUpdate(data);
+		 }
+		*/
 		let action = this.state.modal === 'add' ? 'rowSave' : 'rowUpdate';
 		AccountModel[action](data).then((response) => {
 			let type = response.data.success ? 'success' : 'error';
@@ -259,12 +275,8 @@ export default class AccountContainer extends React.Component {
 			return obj;
 		};
 		let data = this.props.account;
-		let accountsHeader, accountsDetails, busy, header, message, messageStyle, modal, stateOptions, typeOptions;
-		if (this.props.success) {
-			messageStyle = "alert alert-success alertHeight textAlignCenter";
-		} else if (this.props.error) {
-			messageStyle = "alert alert-danger alertHeight textAlignCenter";
-		}
+		let accountsHeader, accountsDetails, busy, header, message, modal, stateOptions, typeOptions;
+		let messageStyle = this.props.success ? Config.alertSuccess : Config.alertError;
 		stateOptions = Config.accountStates.map((el, index) => {
 			return ( <option key={ index } value={ el.id }>{ el.name }</option> );
 		});

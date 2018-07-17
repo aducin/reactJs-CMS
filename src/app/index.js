@@ -8,10 +8,13 @@ import store from './store';
 
 import Main from './containers/Main.jsx';
 import LoginComponent from './components/login/loginComponent.jsx';
+import Polyfill from './polyfill.js';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../assets/scss/style.scss';
+
+Promise.prototype.finally = Polyfill;
 
 const app = document.getElementById('app');
 

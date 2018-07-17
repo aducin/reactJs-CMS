@@ -1,5 +1,6 @@
 import React from 'react';
 
+import Config from '../../Config';
 import Label from '../dumb/Label.jsx';
 import Select from '../dumb/Select.jsx';
 import Title from '../dumb/Title.jsx';
@@ -48,7 +49,6 @@ export default class OrderHeader extends React.Component {
 		};
 		let shortenName = name.replace('Id', '');
 		let isNaNCheck = Boolean(isNaN(this.state[name]) || this.state[name] === '');
-		//if (this.state.currentSelect === shortenName && !this.state.error[name] && !isNaNCheck) {
 		if (this.state.selected[shortenName] !== 0 && !this.state.error[name] && !isNaNCheck) {
 			curDisable[shortenName] = false;
 		}
@@ -59,7 +59,6 @@ export default class OrderHeader extends React.Component {
 
 	handleSelectChange(e) {
 		let name = e.target.name;
-		let value = e.target.value;
 		let curSelected = {
 			action: 0,
 			panel: 0
@@ -67,6 +66,18 @@ export default class OrderHeader extends React.Component {
 		curSelected[e.target.name] = e.target.value;
 		let curActionId = name === 'action' ? this.state.actionId : '';
 		let curPanelId = name === 'panel' ? this.state.panelId : '';
+		let data = {
+			header: {
+				actionId: curActionId,
+				currentSelect: name,
+				name: name + 'Id',
+				panelId: curPanelId,
+				selected: curSelected
+			},
+			updateError: false
+		};
+		this.props.setData(data);
+
 		this.setState({
 			actionId: curActionId,
 			currentSelect: e.target.name,
@@ -94,6 +105,18 @@ export default class OrderHeader extends React.Component {
 			let actionName = name.replace('Id', '');
 			let curActionId = name === 'actionId' ? value : '';
 			let curPanelId = name === 'panelId' ? value : '';
+			let data = {
+				error: curError,
+				header: {
+					actionId: curActionId,
+					currentSelect: actionName,
+					name: name,
+					panelId: curPanelId,
+					selected: selected
+				},
+				updateError: true
+			};
+			this.props.setData(data);
 			this.setState({
 				actionId: curActionId,
 				currentSelect: actionName,
@@ -115,8 +138,8 @@ export default class OrderHeader extends React.Component {
 	setIdSearch() {
 		let id = this.state.currentSelect === 'action' ? this.state.actionId : this.state.panelId;
 		let selectedId = this.state.currentSelect === 'action' ? this.state.selected.action : this.state.selected.panel;
-		let actions = [...this.props.actions];
-		let panels = [...this.props.panels];
+		let actions = [...Config.orderActions];
+		let panels = [...Config.orderPanels];
 		let concated = actions.concat(panels);
 		let action;
 		let idCheck = concated.findIndex((el) => { return parseInt(el.id) === parseInt(selectedId); });
@@ -132,11 +155,14 @@ export default class OrderHeader extends React.Component {
 	}
 
 	render() {
+		console.log(this.props.error);
+		console.log(this.props.header);
+		console.log(this.props.headerDisable);
 		let actionId = this.state.actionId;
 		let panelId = this.state.panelId;
-		let actions = this.props.actions;
-		let panels = this.props.panels;
-		let message = this.props.message;
+		let actions = Config.orderActions;
+		let panels = Config.orderPanels;
+		let message = Config.message;
 		var actionOptions = actions.map((el, index) => {
       		return <option key={index + 1} value={el.id}>{el.name}</option>;
       	});

@@ -13,13 +13,13 @@ const PostalModel = {
     path = setUrl('pathPostal', token);
     return axios.get(path);
   },
-  setData: (amount, modal, config) => {
+  setData: (amount, modal) => {
     path = Config.url.serverPath + 'postal';
     let data = {
       action: modal,
       amount: amount
     };
-    return axios.put(path, {data}, config);
+    return axios.put(path, {data}, Config.ajaxConfig);
   }
 }
 
