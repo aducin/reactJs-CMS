@@ -122,7 +122,8 @@ export default class AccountContainer extends React.Component {
 		});
 	}
 	modalDisableHandler(state) {
-		let disabled = Config.accountObligatory.find((el) => !state.modalObj[el] || state.modalObj[el] === -1) !== undefined;
+		let disableCHeck = Config.accountObligatory.find((el) => !state.modalObj[el] || state.modalObj[el] === -1 || state.modalObj[el] === undefined);
+		let disabled = (this.state.modal === 'modify' && disableCHeck === 'closed') ? false : Boolean(disableCHeck);
 		if ((!state.modalObj.cashDate || state.modalObj.cashDate === '') && (!state.modalObj.receiptDate || state.modalObj.receiptDate === '')) {
 			disabled = true;
 		}
@@ -184,22 +185,19 @@ export default class AccountContainer extends React.Component {
 		});
 	}
 	setAccount() {
-		let ajax;
 		let data = {...this.state.modalObj, token: this.props.token};
-		data.address = this.state.modalObj.address ? this.state.modalObj.address : null;
-		data.remarks = this.state.modalObj.remarks ? this.state.modalObj.remarks : null;
-		Config.accountNumbers.forEach((el) => {
-			if (!this.state.modalObj[el]) {
-				data[el] = 0;
+		for (let key in data) {
+			if (data.hasOwnProperty(key)) {
+				let index = Config.accountNumbers.findIndex((el) => key === el);
+				if (index !== -1 && !this.state.modalObj[key]) {
+					data[key] = 0;
+				} else if (key === 'address' || key === 'remarks') {
+					data[key] = this.state.modalObj[key] ? this.state.modalObj[key] : null;
+				}
 			}
-		});
-
-		if (this.state.modal === 'add') {
-			ajax = AccountModel.rowSave(data);
-		} else {
-			ajax = AccountModel.rowUpdate(data);
 		}
-		ajax.then((response) => {
+		let action = this.state.modal === 'add' ? 'rowSave' : 'rowUpdate';
+		AccountModel[action](data).then((response) => {
 			let type = response.data.success ? 'success' : 'error';
 			this.displayMessage(response.data.reason, type);
 		}).catch((err) =>{
