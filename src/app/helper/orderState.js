@@ -21,10 +21,14 @@ export const State = {
   empty: true,
   error: {
     actionId: false,
-    panelId: false
+    panelId: false,
+    value: null
   },
   header: Header,
-  headerDisable: false,
+  headerDisable: {
+    action: true,
+    panel: true
+  },
   inProgress: false,
   panel: null,
   promise: null,

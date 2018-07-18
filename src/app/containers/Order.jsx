@@ -11,8 +11,8 @@ import Header from '../components/dumb/Header.jsx';
 import Message from '../components/dumb/Message.jsx';
 import OrderDetail from '../components/order/OrderDetail.jsx';
 import OrderHeader from '../components/order/OrderHeader.jsx';
-import OrderModel from '../model/orderModel.jsx';
-import CustomerModel from '../model/customerModel.jsx';
+import OrderModel from '../model/orderModel.js';
+import CustomerModel from '../model/customerModel.js';
 import { Header as DefaultHeader, State } from '../helper/orderState';
 
 @connect((store) => {
@@ -23,10 +23,6 @@ export default class OrderContainer extends React.Component {
 	constructor(props) {
 		super(props);	 
 		this.state = State;
-	}
-
-	componentDidMount() {
-		this.props.unsubscribe();
 	}
 
 	componentWillUpdate(nextProps, nextState) {
@@ -201,6 +197,8 @@ export default class OrderContainer extends React.Component {
     	});
 	}
 	setError(data) {
+		let message = data.value + Config.notANumber;
+		this.props.setWarning(message);
 		this.setState({
 			error: data
 		});

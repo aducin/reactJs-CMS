@@ -364,6 +364,7 @@ const Config = {
 		},
 		today: 'Dzisiaj'
 	},
+	notANumber: ' - to chyba nie liczba...',
 	orderActions: [
 		{
 			id: 3,

@@ -11,7 +11,7 @@ import Message from '../components/dumb/Message.jsx';
 import CustomerDetails from '../components/customer/CustomerDetails.jsx';
 import CustomerHeader from '../components/customer/CustomerHeader.jsx';
 import CustomerDelete from '../components/modal/CustomerDelete.jsx';
-import CustomerModel from '../model/customerModel.jsx';
+import CustomerModel from '../model/customerModel.js';
 import { State } from '../helper/customerState';
 import { validateEmail } from '../helper/validator';
 
@@ -23,10 +23,6 @@ export default class CustomerContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = State;
-  }
-
-  componentDidMount() {
-    this.props.unsubscribe();
   }
 
   componentWillUpdate(nextProps, nextState) {

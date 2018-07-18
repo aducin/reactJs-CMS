@@ -12,7 +12,7 @@ import Message from '../components/dumb/Message.jsx';
 import PostalChange from '../components/modal/PostalChange.jsx';
 import PostalDetail from '../components/postal/PostalDetail.jsx';
 import PostalHeader from '../components/postal/PostalHeader.jsx';
-import PostalModel from '../model/postalModel.jsx';
+import PostalModel from '../model/postalModel.js';
 import { State } from '../helper/postalState';
 import { validateNumber } from '../helper/validator';
 
@@ -24,10 +24,6 @@ export default class PostalContainer extends React.Component {
 	constructor(props) {
 		super(props);	 
 		this.state = State;
-	}
-
-	componentDidMount() {
-		this.props.unsubscribe();
 	}
 
 	componentWillUpdate(nextProps, nextState) {

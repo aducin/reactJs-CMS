@@ -6,12 +6,10 @@ import axios from 'axios';
 
 import store from '../store';
 import * as product from '../actions/productActions.jsx';
-
 import Config from '../Config';
-import { setUrl } from '../helper/functions.js';
+import { setUrl } from '../helper/functions';
 import Header from '../components/dumb/Header.jsx';
 import Message from '../components/dumb/Message.jsx';
-
 import BasicEdition from '../components/modal/BasicEdition.jsx';
 import ProductEdition from '../components/product/ProductEdition.jsx';
 import ProductHeader from '../components/product/ProductHeader.jsx';
@@ -20,6 +18,8 @@ import ProductList from '../components/product/ProductList.jsx';
 import Modified from '../components/product/Modified.jsx';
 import LastOrders from '../components/product/LastOrders.jsx';
 import Printings from '../components/product/Printings.jsx';
+import ProductModel from '../model/productModel';
+import { State } from '../helper/productState';
 
 @connect((store) => {
     return {
@@ -33,35 +33,7 @@ import Printings from '../components/product/Printings.jsx';
 export default class ProductContainer extends React.Component {
 	constructor(props) {
 		super(props);	 
-		this.state = {
-			askForData: false,
-			category: 0,
-			categoryDisplay: false,
-			cleared: false,
-			constant: false,
-			currentId: {
-				full: null,
-				simple: null
-			},
-			disable: true,
-			disabledEdition: false,
-			editionSearched: false,
-			error: false,
-			file: null,
-			historySearched: false,
-			imageDisplay: false,
-			manufactorer: 0,
-			modified: false,
-			modifiedSearch: false,
-			nameSearch: false,
-			printingSearch: false,
-			restoreList: false,
-			searching: false,
-			simpleSearched: false,
-			success: false,
-			toDisplay: undefined,
-			warning: false,
-		}
+		this.state = State;
 	}
 
 	componentDidMount() {
@@ -147,8 +119,7 @@ export default class ProductContainer extends React.Component {
 			modified: true,
 			modifiedSearch: true
 		}, () => {
-			let url = setUrl('pathProducts', 'modified');
-			axios.get(url)
+			ProductModel.getModyfied()
 	    	.then((response) => {
 	    		this.setState({
     				modifiedSearch: false
@@ -180,8 +151,7 @@ export default class ProductContainer extends React.Component {
 		this.setState({
 			printingSearch: true
 		}, () => {
-			let url = setUrl('pathProducts', 'printing', this.props.token);
-			axios.get(url)
+			ProductModel.getPrintings(this.props.token)
 				.then((response) => {
 					if (response.status === 200 && response.data.success) {
 						let ajaxResponse = response.data;
