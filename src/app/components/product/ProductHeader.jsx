@@ -1,210 +1,148 @@
 import React from 'react';
 
+import Config from '../../Config';
 import Label from '../dumb/Label.jsx';
 import Select from '../dumb/Select.jsx';
 import Title from '../dumb/Title.jsx';
 
-export default class ProductHeader extends React.Component {
-	constructor(props) {
-		super(props);	 
-		this.state = {
-			activeCategory: 0,
-			activeManufactorer: 0,
-			nameInQueue: false,
-			productId: 0,
-			productName: '',
-			productLabel: this.props.message.labels.productName,
-			searchDisabled: true,
-			title: this.props.message.title.products,
-			warning: {
-				id: false,
-				name: false
-			}
-		}
-	}
+let nameInQueue = false;
 
-	componentWillUpdate(nextProps, nextState) {
-		if (!this.props.cleared && nextProps.cleared) {
-			this.setState({
-				activeCategory: 0,
-				activeManufactorer: 0,
-				productId: 0,
-				productName: ''
-			});
-		}
-	}
+export default class ProductHeader extends React.Component {
 
 	handleIdChange(value) {
+		let data = {...this.props.data, origin: 'id'};
 		let check = isNaN(value);
-		var warning = this.state.warning;
+		let warning = {...this.props.data.warning};
 		if (check || value === 0) {
 			warning['id'] = true;
-			this.setState({ 
-				searchDisabled: true,
-				warning: warning
-			});
+			data.warning = warning;
+			data.searchDisabled = true;
 		} else {
-			let searchActive = parseInt(value) < 1;
+			let activeSearch = parseInt(value) < 1;
 			warning['id'] = false;
-			this.setState({
-				productId: value,
-				productName: '',
-				searchDisabled: searchActive,
-				warning: warning
-			});
+			data.productId = value;
+			data.productName = '';
+			data.searchDisabled = activeSearch;
+			data.warning = warning;
 		}
+		this.props.setHeader(data);
 	}
 
 	handleIdSearch() {
-		let check = isNaN(this.state.productId);
-		if (check || this.state.productId.length === 0) {
-			this.setState({ searchDisabled: true });
+		let value = this.props.data.productId;
+		let check = isNaN(value);
+		let data = {...this.props.data, origin: 'idSearch'};
+		if (check || value === 0) {
+			data.searchDisabled = true;
 		} else {
-			this.setState({
-				productName: ''
-			}, () => {
-				let data = {
-					id: this.state.productId,
-					edition: 'simple'
-				};
-				this.props.searchId(data);
-			});
+			data.productName = '';
 		}
+		this.props.setHeader(data);
 	}
 
 	handleNameChange(value) {
-		this.setState({
-			productName: value
-		}, () => {
-			if (value.length === 0) {
-				this.setWarning('name', this.props.message.emptyField);
-			} else if (value.length < 4) {
-				this.setWarning('name', this.props.message.min3characters);	
-			} else {
-				this.setWarning('name', false);
-				this.setState({
-					productId: 0
-				}, () => {
-					if (!this.state.nameInQueue) {
-						this.setState({
-							nameInQueue: true
-						}, () => {
-							setTimeout(function() { 
-								this.setState({
-									nameInQueue: false
-								}, () => {
-									this.proceedSelect();
-								});	
-							}.bind(this), 1000);
-						});	
-					}
-				});
+		let data = {...this.props.data, origin: 'name'};
+		let proceed = false;
+		let timeout = false;
+		data.productName = value;
+		if (value.length === 0 || value.length < 4) {
+			data.warning.name = true;
+			data.productLabel = value.length === 0 ? Config.message.emptyField : Config.message.min3characters;
+			timeout = true;
+		} else {
+			data.productId = 0;
+			if (!nameInQueue) {
+				nameInQueue = true;
+				proceed = true;
 			}
-		});
+		}
+		this.props.setHeader(data);
+		if (proceed) {
+			setTimeout(function () {
+				nameInQueue = false;
+				this.proceedSelect();
+			}.bind(this), Config.queueTime);
+		} else if (timeout) {
+			setTimeout(function () {
+				let finalData = {...data, origin: 'avoidName'};
+				finalData.warning = {
+					id: false,
+					name: false
+				};
+				this.props.setHeader(finalData);
+			}.bind(this), Config.queueTime);
+		}
 	}
 
 	handleSelectChange(e) {
-    	let value = e.target.value;
-    	let name = e.target.name;
-    	let state = {...this.state};
-    	if (name === 'category') {
-    		this.setState({
-				activeCategory: value
-			}, () => {
-    			this.proceedSelect();
-			});
-    	} else if (name === 'manufactorer') {
-    		this.setState({
-				activeManufactorer: value
-			}, () => {
-    			this.proceedSelect();
-			});
-    	}
-    }
+		let value = e.target.value;
+		let name = e.target.name;
+		let data = {...this.props.data, origin: 'select'};
+		if (name === 'category') {
+			data.activeCategory = value;
+		} else if (name === 'manufactorer') {
+			data.activeManufactorer = value;
+		}
+		this.props.setHeader(data);
+		this.proceedSelect(data);
+	}
 
-    proceedSelect() {
-    	if (this.state.productName !== '' && this.state.productName.length > 3) {
-    		let data = {
-    			search: this.state.productName,
-				category: this.state.activeCategory,
-				manufactorer: this.state.activeManufactorer
+	proceedSelect(data = null) {
+		if (!data) {
+			data = this.props.data;
+		}
+		if (data.productName !== '' && data.productName.length > 3) {
+			let searchData = {
+				search: data.productName,
+				category: data.activeCategory,
+				manufactorer: data.activeManufactorer
 			};
-			this.props.searchName(data);
+			this.props.searchName(searchData);
 		}
-    }
-
-    setWarning(field, message) {
-    	var warning = this.state.warning;
-    	if (!message) {
-    		warning[field] = false;
-    		this.setState({
-	    		productLabel: this.props.message.labels.productName,
-				warning: warning
-			});	
-    	} else {
-    		warning[field] = true;
-	    	this.setState({
-	    		productLabel: message,
-				warning: warning
-			}, () => {
-				setTimeout(function() { 
-					warning[field] = false;
-					this.setState({
-	    				productLabel: this.props.message.labels.productName,
-						warning: warning
-					});	
-				}.bind(this), 3000);
-			});	
-		}
-    }
+	}
 
 	render() {
-		let productId = this.state.productId !== 0 ? this.state.productId : '';
-		let productName = this.state.productName;
-		let message = this.props.message;
-		/*
-		if (!this.props.constant && !this.props.error) {
-      		return (
-		  		<Title title={this.props.message.loading} />
-	        );
-      	} else if (this.props.constant) {
-      	*/
-      	if (!this.props.error) {
-      		const noData = {
-      			id: 0,
-      			nameCategory: message.nameCategory,
-      			nameManufactorer: message.nameManufactorer,
-      		};
-      		const chooseFrom = 'Wybierz sposród ';
-      		const categoryLength = this.props.category.length;
-      		const titleCategory = chooseFrom + categoryLength + ' kategorii:';
-      		var listCategories = this.props.category.map((el, index) => {
-      			return <option key={index + 1} value={this.props.category[index].id}>{this.props.category[index].metaTitle}</option>;
-      		});
-      		if (this.state.activeCategory === 0) {
-      			var check = this.props.category.findIndex(function(el) { el.id == noData.id; });
-      			if (check === -1) {
-      				listCategories.unshift(<option key="0" value={ noData.id }>{ noData.nameCategory }</option>);
-      			}
-      		}
-      		const manufactorerLength = this.props.manufactorer.length;
-      		const titleManufactorer = chooseFrom + manufactorerLength + ' producentów:';
-      		var listManufactorers = this.props.manufactorer.map((el, index) => {
-      			return <option key={index + 1} value={this.props.manufactorer[index].id}>{this.props.manufactorer[index].name}</option>;
-      		});
-      		if (this.state.activeManufactorer === 0) {
-      			var check = this.props.manufactorer.findIndex(function(el) { el.id == noData.id; });
-      			if (check === -1) {
-      				listManufactorers.unshift(<option key="0" value={ noData.id }>{ noData.nameManufactorer }</option>);
-      			}
-      		}
-      		let inputStyleId = this.state.warning['id'] ? {borderColor: "#a94442"} : null;
-      		let inputStyleName = this.state.warning['name'] ? {borderColor: "#a94442"} : null;
-      		let labelClass = this.state.warning['name'] ? "colorWarning" : null;
-      		return (
+		let data = this.props.data;
+		let productId = data.productId !== 0 ? data.productId : '';
+		let productName = data.productName;
+		let message = Config.message;
+		let warning = this.props.data.warning;
+		if (!this.props.error) {
+			const noData = {
+				id: 0,
+				nameCategory: message.nameCategory,
+				nameManufactorer: message.nameManufactorer,
+			};
+			const chooseFrom = 'Wybierz sposród ';
+			const categoryLength = this.props.category.length;
+			const titleCategory = chooseFrom + categoryLength + ' kategorii:';
+			var listCategories = this.props.category.map((el, index) => {
+				return <option key={index + 1} value={this.props.category[index].id}>{this.props.category[index].metaTitle}</option>;
+			});
+			if (data.activeCategory === 0) {
+				var check = this.props.category.findIndex(function(el) { el.id == noData.id; });
+				if (check === -1) {
+					listCategories.unshift(<option key="0" value={ noData.id }>{ noData.nameCategory }</option>);
+				}
+			}
+			const manufactorerLength = this.props.manufactorer.length;
+			const titleManufactorer = chooseFrom + manufactorerLength + ' producentów:';
+			var listManufactorers = this.props.manufactorer.map((el, index) => {
+				return <option key={index + 1} value={this.props.manufactorer[index].id}>{this.props.manufactorer[index].name}</option>;
+			});
+			if (data.activeManufactorer === 0) {
+				var check = this.props.manufactorer.findIndex(function(el) { el.id == noData.id; });
+				if (check === -1) {
+					listManufactorers.unshift(<option key="0" value={ noData.id }>{ noData.nameManufactorer }</option>);
+				}
+			}
+			let inputStyleId = warning['id'] ? {borderColor: "#a94442"} : null;
+			let inputStyleName = warning['name'] ? {borderColor: "#a94442"} : null;
+			let labelClass = warning['name'] ? "colorWarning" : null;
+			return (
 				<div class="container bgrContent borderRadius10 marginTop40px paddingBottom40px">
 					<div class="col-xs-12">
-						<Title title={this.state.title} />
+						<Title title={data.title} />
 					</div>
 					<div class="col-xs-12">
 						<div class="col-xs-12 col-lg-7 pull-left">
@@ -219,7 +157,7 @@ export default class ProductHeader extends React.Component {
 									name="category"
 									selectChange={ this.handleSelectChange.bind(this) }
 									title={ titleCategory }
-									value={ this.state.activeCategory }
+									value={ data.activeCategory }
 								/>
 								</div>
 								<div class="marginBottom20px">
@@ -230,10 +168,10 @@ export default class ProductHeader extends React.Component {
 										name="manufactorer"
 										selectChange={ this.handleSelectChange.bind(this) }
 										title={titleManufactorer}
-										value={ this.state.activeManufactorer }
+										value={ data.activeManufactorer }
 									/>
 								</div>
-							<Label curClass={labelClass} name={this.state.productLabel} />
+							<Label curClass={labelClass} name={data.productLabel} />
 							<div class="col-xs-12 col-lg-6">
 								<input class="form-control" disabled={this.props.disable} type="text" value={productName} placeholder="Podaj nazwę" onChange={ e => this.handleNameChange(e.target.value) } style={ inputStyleName } />
 							</div>
@@ -247,16 +185,16 @@ export default class ProductHeader extends React.Component {
 										<input class="centered form-control" disabled={this.props.disable} type="text" value={productId} placeholder="Podaj ID" onChange={ e => this.handleIdChange(e.target.value) } style={ inputStyleId } />
 								</div>
 								<div>
-									<input class="form-control btn btn-primary" disabled={this.state.searchDisabled} type="button" value="Wyszukaj" onClick={ this.handleIdSearch.bind(this) } />
+									<input class="form-control btn btn-primary" disabled={data.searchDisabled} type="button" value="Wyszukaj" onClick={ this.handleIdSearch.bind(this) } />
 								</div>
 						</div>
 					</div>
 				</div>
-	    	);
-      	} else if (this.props.error) {
-	        return (
-		  		<Title title={this.props.message.error} />
-	    	);
-	    }
+			);
+		} else if (this.props.error) {
+			return (
+				<Title title={this.props.message.error} />
+			);
+		}
 	}
 }

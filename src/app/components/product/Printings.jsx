@@ -3,6 +3,7 @@ import axios from 'axios';
 import 'font-awesome/css/font-awesome.min.css';
 
 import Helper from '../../helper/Helper.jsx';
+import { setUrl } from '../../helper/functions.js';
 
 import Busy from '../dumb/Busy.jsx';
 import Title from '../dumb/Title.jsx';
@@ -33,7 +34,7 @@ export default class Printings extends React.Component {
   }
 
   deleteHandler(id) {
-    let url = Helper.setUrl('pathProducts', 'printing');
+    let url = setUrl('pathProducts', 'printing');
     url +=  '/' + id + '/' + this.props.token;
     axios.delete(url)
       .then((response) => {
@@ -64,7 +65,7 @@ export default class Printings extends React.Component {
     this.setState({
       disabled: true
     }, () => {
-      let url = Helper.setUrl('pathProducts', 'printing');
+      let url = setUrl('pathProducts', 'printing');
       url += '/' + this.props.token + '?description=' + this.state.description;
       const fd = new FormData();
       fd.append('file[]', this.state.file, this.state.file.name);
@@ -114,43 +115,48 @@ export default class Printings extends React.Component {
         <Busy title={text.printingsSearch} />
       );
     } else {
+      let modal;
+      let inputs = (
+        <div>
+          <input
+            type="file"
+            style={{display: 'none'}}
+            onChange={ this.fileSelectedHandler }
+            ref={fileInput => this.fileInput = fileInput}
+          />
+          <input
+            class="form-control btn btn-primary"
+            type="button"
+            value={text.products.chooseFile}
+            onClick={() => this.fileInput.click()}
+          />
+        </div>
+      );
+      if (this.state.modal) {
+        modal = (
+          <PrintingAdd
+            close={this.closeModal.bind(this)}
+            description={this.state.description}
+            descriptionChangeHandler={this.setDescription.bind(this)}
+            disabled={this.state.disabled}
+            file={this.state.file.name}
+            message={text}
+            messageContent={this.state.messageContent}
+            messageType={this.state.messageType}
+            save={this.saveFile.bind(this)}
+            saveDisable={this.state.saveDisable}
+            show={this.state.modal}
+          />
+        );
+      }
       if (data.empty) {
-        let modal;
-        if (this.state.modal) {
-          modal = (
-            <PrintingAdd
-              close={this.closeModal.bind(this)}
-              description={this.state.description}
-              descriptionChangeHandler={this.setDescription.bind(this)}
-              disabled={this.state.disabled}
-              file={this.state.file.name}
-              message={text}
-              messageContent={this.state.messageContent}
-              messageType={this.state.messageType}
-              save={this.saveFile.bind(this)}
-              saveDisable={this.state.saveDisable}
-              show={this.state.modal}
-            />
-          );
-        }
         return (
           <div class="container">
             <div class="col-xs-12 col-md-10">
               <h3>{text.noPrintings}</h3>
             </div>
             <div class="col-xs-12 col-md-2 marginTop15px paddingBottomResp">
-              <input
-                type="file"
-                style={{display: 'none'}}
-                onChange={ this.fileSelectedHandler }
-                ref={fileInput => this.fileInput = fileInput}
-              />
-              <input
-                class="form-control btn btn-primary"
-                type="button"
-                value={text.products.chooseFile}
-                onClick={() => this.fileInput.click()}
-              />
+              {inputs}
               {modal}
             </div>
           </div>
@@ -180,6 +186,10 @@ export default class Printings extends React.Component {
         let table = Helper.setTable(title, head, list);
         return (
           <div class="container bgrContent paddingBottom2 marginTop2 borderRadius10">
+            <div class="col-xs-12 col-md-2 marginTop15px">
+              {inputs}
+              {modal}
+            </div>
             {table}
           </div>
         )

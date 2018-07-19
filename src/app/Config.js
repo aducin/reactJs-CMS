@@ -399,6 +399,7 @@ const Config = {
 			name: 'Stary panel'
 		}
 	],
+	queueTime: 1000,
 	timer: 3000,
 	url: {
 		filePath: 'http://modele-ad9bis.pl/cms_spa/files/',

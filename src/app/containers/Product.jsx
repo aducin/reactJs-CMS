@@ -35,174 +35,150 @@ export default class ProductContainer extends React.Component {
 		this.state = State;
 	}
 
-	componentWillUpdate(nextProps, nextState) {
-		this.setDisabled(nextProps, nextState);
-		if (nextProps.approved && nextProps.token) {
-			if (!nextState.askForData) {
-				this.checkComponent(nextProps, nextState);
-			} else {
-				this.checkUrl(nextProps, nextState);
-			}
-		}
-	}
-
 	componentWillUnmount() {
 		this.props.unsubscribe();
 	}
 
-	checkComponent(props, state) {
-		this.setState({
-			askForData: true,
-		}, () => {
-			this.clearData();
-			this.getConstant();
-			this.checkUrl(props, state);
-		});
+	componentWillUpdate(nextProps, nextState) {
+		if (nextProps.approved && nextProps.token) {
+			this.setDisabled(nextProps, nextState);
+			if (!nextState.componentChecked) {
+				this.checkComponent(nextProps, nextState);
+			} else {
+				let action = nextState.action;
+				if (action === 'checkUrl') {
+					this.checkUrl(nextProps, nextState);
+				} else {
+					this[action](nextState);
+				}
+			}
+		}
 	}
 
+	checkComponent(props, state) {
+		this.clearData();
+		this.getConstant();
+		this.setState({
+			action: 'checkUrl',
+			componentChecked: true
+		});
+	}
 	checkUrl(nextProps, nextState) {
 		if (nextProps.params.action !== undefined && nextProps.params.id !== undefined) {
 			let action = nextProps.params.action;
-			let id = nextProps.params.id;
-			if (action === 'edition' && nextState.editionSearched !== id) {
+			let edition = action === 'edition' && nextState.editionSearched !== this.props.params.id;
+			let history = action === 'history' && nextState.historySearched !== this.props.params.id;
+			if (edition || history) {
+				store.dispatch(product.clearData());
+				let currentAction = action === 'edition' ? 'searchId' : 'searchHistory';
+				let editionSearched = edition ? nextProps.params.id : false;
+				let historySearched = history ? nextProps.params.id : false;
 				this.setState({
-					editionSearched: id,
-					historySearched: false,
+					action: currentAction,
+					editionSearched: editionSearched,
+					historySearched: historySearched,
+					searching: true,
 					simpleSearched: false
-				}, () => {
-					store.dispatch(product.clearData());
-					this.searchId();
-				});
-			} else if (action === 'history' && nextState.historySearched !== id) {
-				this.setState({
-					editionSearched: false,
-					historySearched: id,
-					simpleSearched: false
-				}, () => {
-					store.dispatch(product.clearData());
-					this.searchHistory();
 				});
 			}
 		} else {
 			if (nextState.restoreList) {
 				this.setState({
+					action: 'restoreList',
 					editionSearched: false,
 					restoreList: false
-				}, () => {
-					let data = {
-						category: reactLocalStorage.get('categorySearch'),
-						manufactorer: reactLocalStorage.get('manufactorerSearch'),
-						search: reactLocalStorage.get('nameSearch')
-					};
-					this.nameSearch(data);
 				});
 			} else if (nextState.editionSearched || nextState.historySearched) {
 				this.setState({
+					action: 'clearData',
 					editionSearched: false,
 					historySearched: false,
-				}, () => {
-					this.clearData();
 				});
 			}
 		}
 	}
-
 	checkModified() {
-		this.setState({
-			modified: true,
-			modifiedSearch: true
-		}, () => {
-			ProductModel.getModyfied()
-	    	.then((response) => {
-	    		this.setState({
-    				modifiedSearch: false
-    			}, () => {
-		    		if (response.status === 200 && response.data[0]) {
-		    			var data = {
-		    				empty: false,
-		    				list: response.data,
-		    			};
-		    		} else if (response.status === 200 && !response.data[0]) {
-		    			var data = {
-		    				empty: true,
-		    				list: null,
-		    			};
-		    		}
-		    		store.dispatch(product.setModified(data));
-						this.props.searchOrders();
-						this.checkPrintings();
-		    	});
-	    	})
-	    	.catch((err) =>{
-					console.log(err);
-					this.props.setWarning(err.message);
-		    });	
-		});
-	}
-
-	checkPrintings() {
-		this.setState({
-			printingSearch: true
-		}, () => {
-			ProductModel.getPrintings(this.props.token)
-				.then((response) => {
-					if (response.status === 200 && response.data.success) {
-						let ajaxResponse = response.data;
-						let data = {
-							deliveryList: ajaxResponse.deliveryList,
-							list: ajaxResponse.list || null,
-							empty: ajaxResponse.empty,
-							emptyDelivery: ajaxResponse.emptyDelivery || null
-						};
-						this.setState({
-							printingSearch: false
-						}, () => {
-							store.dispatch(product.setPrintings(data));
-						});
-					}
-				})
-				.catch((err) =>{
-					this.displayError(err);
+		ProductModel.getModyfied()
+			.then((response) => {
+				if (response.status === 200 && response.data[0]) {
+					var data = {
+						empty: false,
+						list: response.data,
+					};
+				} else if (response.status === 200 && !response.data[0]) {
+					var data = {
+						empty: true,
+						list: null,
+					};
+				}
+				store.dispatch(product.setModified(data));
+				this.props.searchOrders();
+			})
+			.catch((err) =>{
+				this.props.setWarning(err.message);
+			})
+			.finally(() => {
+				this.setState({
+					action: 'checkPrintings',
+					modifiedSearch: false,
+					printingSearch: true
 				});
+			});
+	}
+	checkPrintings() {
+		let promise = ProductModel.getPrintings(this.props.token);
+		this.setPrintings(promise);
+		this.setState({
+			action: 'checkUrl'
 		});
 	}
-
-	clearData(button) {
+	clearData(button = null) {
+		reactLocalStorage.set('categorySearch', null);
+		reactLocalStorage.set('manufactorerSearch', null);
+		reactLocalStorage.set('nameSearch', null);
+		store.dispatch(product.clearData());
+		let modified, modifiedSearch;
+		if(!this.state.modified) {
+			this.checkModified();
+			modified = true;
+			modifiedSearch = true;
+		} else {
+			modified = this.state.modified;
+			modifiedSearch = false;
+			if (button) {
+				store.dispatch(product.clearInputs(true));
+			}
+		}
 		this.setState({
+			action: 'checkUrl',
 			cleared: true,
-			modifiedSearch: false,
+			modified: modified,
+			modifiedSearch: modifiedSearch,
 			nameSearch: false
 		}, () => {
-			reactLocalStorage.set('categorySearch', null);
-			reactLocalStorage.set('manufactorerSearch', null);
-			reactLocalStorage.set('nameSearch', null);
-			store.dispatch(product.clearData());
-			if(!this.state.modified) {
-				this.checkModified();
-			}
-			if (button) {
-				store.dispatch(product.clearInputs(bool));
-			}
 			this.setState({
 				cleared: false
-			});	
+			});
 		});
 	}
 
 	clearEdition() {
 		this.setState({
+			action: 'clearUrl',
 			restoreList: true
-		}, () => {
-			clearUrl(Config.url.pathProducts);
 		});
 	}
-
+	clearUrl() {
+		clearUrl(Config.url.pathProducts);
+		this.setState({
+			action: 'checkUrl'
+		});
+	}
 	closeModal() {
 		this.setState({
 			simpleSearched: false
 		});
 	}
-
 	deleteModified(id) {
 		ProductModel.deleteModified(id, this.props.token)
 		.then((response) => {
@@ -216,19 +192,16 @@ export default class ProductContainer extends React.Component {
 			store.dispatch(product.setError(err));
 		});
 	}
-
 	getConstant() {
 		var cached = reactLocalStorage.getObject('constant');
-		var manufactorerCache = reactLocalStorage.getObject('manufactorer');
 		if (cached !== undefined && cached.category !== undefined && cached.manufactorer !== undefined) {
 			let data = {
 				category: cached.category,
 				manufactorer: cached.manufactorer,
 			};
+			store.dispatch(product.setConstant(data));
 			this.setState({
 				constant: true,
-			}, () => {
-				store.dispatch(product.setConstant(data));
 			});
 		} else {
 			var category = ProductModel.getCategories();
@@ -237,24 +210,17 @@ export default class ProductContainer extends React.Component {
 			Promise.all([category, manufactorer])
 			.then(response => { 
 				if (response[0].status === 200 && response[1].status === 200) {
+					let data = {
+						category: response[0].data,
+						manufactorer: response[1].data,
+					};
+					reactLocalStorage.setObject('constant', {'category': response[0].data, 'manufactorer': response[1].data});
+					store.dispatch(product.setConstant(data));
 					this.setState({
 						constant: true,
-					}, () => {
-						let data = {
-							category: response[0].data,
-							manufactorer: response[1].data,
-						};
-						reactLocalStorage.setObject('constant', {'category': response[0].data, 'manufactorer': response[1].data});
-						store.dispatch(product.setConstant(data));
 					});
 				} else {
-					var reason;
-					if (!response[0].data.success) {
-						reason = response[0].data.reason;
-					} else {
-						reason = response[0].data.reason;
-					}
-					throw new Error(reason);
+					throw new Error(response[0].data.reason);
 				}
 			})   
 			.catch((err) =>{
@@ -262,7 +228,57 @@ export default class ProductContainer extends React.Component {
 			});
 		}
 	}
-
+	handleHistory(state) {
+		state.promise
+			.then((response) => {
+				if (response.status === 200 && response.data) {
+					store.dispatch(product.setHistory(response.data, this.state.historySearched));
+				} else {
+					throw new Error(response.data.reason);
+				}
+			})
+			.catch((err) =>{
+				store.dispatch(product.setError(err.message));
+			})
+			.finally(() => {
+				this.setState({
+					action: 'checkUrl',
+					disable: true,
+					promise: null,
+					searching: false
+				});
+			});
+	}
+	handleSearch(state) {
+		state.promise
+			.then((response) => {
+				if (response.status === 200) {
+					if (state.editionSearched) {
+						let respData = {
+							edition: 'full',
+							first: response.data,
+							second: null,
+						};
+						store.dispatch(product.setIdResult(respData));
+					} else if (state.simpleSearched) {
+						store.dispatch(product.setBasicData(response.data));
+					}
+				} else {
+					throw new Error(response.data.reason);
+				}
+			})
+			.catch((err) =>{
+				this.props.setWarning(Config.message.error);
+			})
+			.finally(() => {
+				this.setState({
+					action: 'checkUrl',
+					disable: true,
+					promise: null,
+					searching: false
+				});
+			});
+	}
 	modifyLastOrder(base, id) {
 		ProductModel.modifyLastOrder(base, id, this.props.token)
 			.then((response) => {
@@ -277,40 +293,57 @@ export default class ProductContainer extends React.Component {
 				store.dispatch(product.setError(err));
 			});
 	}
-
-	nameSearch(data) {
+	setNameData(promise, data) {
+		promise
+			.then((response) => {
+				if (response.status === 200 && response.data) {
+					if (response.data.success !== undefined) {
+						var finalData = {empty: true, reason: response.data.reason};
+					} else {
+						reactLocalStorage.set('categorySearch', data.category);
+						reactLocalStorage.set('manufactorerSearch', data.manufactorer);
+						reactLocalStorage.set('nameSearch', data.search);
+						var finalData = {
+							list: response.data,
+							anotherSearch: Boolean(data.anotherSearch),
+						};
+					}
+					store.dispatch(product.setNameResult(finalData));
+				} else {
+					throw new Error(response.data.reason);
+				}
+			})
+			.catch((err) =>{
+				store.dispatch(product.setError(err));
+			})
+			.finally(() => {
+				this.setState({
+					searching: false
+				});
+			});
+	}
+	nameSearch(state) {
+		let data = state.nameSearchData;
+		let promise = ProductModel.nameSearch(data);
+		this.setNameData(promise, data);
 		this.setState({
-			nameSearch: true
-		}, () => {
-			ProductModel.nameSearch(data)
-				.then((response) => {
-	    		if (response.status === 200 && response.data) {
-	    			if (response.data.success !== undefined) {
-	    				var finalData = {empty: true, reason: response.data.reason};
-	    			} else {
-	    				reactLocalStorage.set('categorySearch', data.category);
-	    				reactLocalStorage.set('manufactorerSearch', data.manufactorer);
-	    				reactLocalStorage.set('nameSearch', data.search);
-	    				var finalData = {
-	    					list: response.data,
-	    					anotherSearch: Boolean(data.anotherSearch),
-	    				};
-	    			}
-	    			store.dispatch(product.setNameResult(finalData));
-	    		}
-	    	})
-	    	.catch((err) =>{
-	    		store.dispatch(product.setError(err));
-	    	});
+			action: 'checkUrl'
 		});
 	}
-
 	redirect(path, id) {
 		let url = Config.url.path + Config.url.pathSuffix + Config.url.pathProducts + '/' + path + '/' + id;
 		window.location = url;
 	}
-	
-	saveProduct(data) {
+	restoreList() {
+		let data = {
+			category: reactLocalStorage.get('categorySearch'),
+			manufactorer: reactLocalStorage.get('manufactorerSearch'),
+			search: reactLocalStorage.get('nameSearch')
+		};
+		this.setNameSearch(data);
+	}
+	saveProduct(state) {
+		let data = {...state.saveData};
 		if (data.quantity.modified !== undefined) {
 			var curQuantity = data.quantity.modified;
 		} else if (data.quantity.old !== undefined) {
@@ -319,80 +352,41 @@ export default class ProductContainer extends React.Component {
 			var curQuantity = data.quantity;
 		}
 		data.quantity = curQuantity;
-		this.setState({
-			disabledEdition: true,
-		}, () => {
-			window.scrollTo(0, 0);
-			let newAttr = this.props.product.fullDataFirst.attribute.new;
-			let oldAttr = this.props.product.fullDataFirst.attribute.old;
-			ProductModel.saveProduct(newAttr, oldAttr, this.state.config, data)
-    		.then((response) => {
-    			this.setState({
-    				disabledEdition: false
-    			}, () => {
-    				let action = response.data.success ? 'setSuccess' : 'setWarning';
-    				this.props[action](response.data.reason);
-						this.checkModified();
-    			});
-    		})
-    		.catch((err) =>{
-    			this.setState({
-    				disabledEdition: false
-    			}, () => {
-					this.props.setWarning(Config.message.error);
+		window.scrollTo(0, 0);
+		let newAttr = this.props.product.fullDataFirst.attribute.new;
+		let oldAttr = this.props.product.fullDataFirst.attribute.old;
+		ProductModel.saveProduct(newAttr, oldAttr, this.state.config, data)
+			.then((response) => {
+				let action = response.data.success ? 'setSuccess' : 'setWarning';
+				this.props[action](response.data.reason);
+				this.checkModified();
+			})
+			.catch((err) =>{
+				this.props.setWarning(Config.message.error);
+			})
+			.finally(() => {
+				this.setState({
+					disabledEdition: false
 				});
 			});
-		});
 	}
-
-	searchId() {
+	searchId(state) {
 		store.dispatch(product.prepareResult());
+		let promise = ProductModel.searchId(state.editionSearched, state.simpleSearched);
 		this.setState({
-			searching: true,
-		}, () => {
-			ProductModel.searchId(this.state.editionSearched, this.state.simpleSearched)
-	    	.then((response) => {
-	    		if (response.status === 200) {
-	    			this.setState({
-		    			disable: false,
-		    			searching: false,
-		    		}, () => {
-		    			if (this.state.editionSearched) {
-		    				let respData = {
-    							edition: 'full',
-	    						first: response.data,
-	    						second: null,
-	    					};
-	    					store.dispatch(product.setIdResult(respData));
-		    			} else if (this.state.simpleSearched) {
-		    				store.dispatch(product.setBasicData(response.data));
-		    			}	
-		    		});
-	    		} else {
-	    			throw new Error(response.data.reason);
-	    		}
-	    	})
-	    	.catch((err) =>{
-	    		this.props.setWarning(Config.message.error);
-	    	});
+			action: 'handleSearch',
+			promise: promise
 		});
 	}
-
-	searchHistory() {
+	searchHistory(state = null) {
+		let curState = state ? state : this.state;
 		store.dispatch(product.prepareResult());
-		ProductModel.searchHistory(this.state.historySearched)
-    	.then((response) => {
-    		if (response.status === 200 && response.data) {
-    			store.dispatch(product.setHistory(response.data, this.state.historySearched));
-    		} else {
-    			store.dispatch(product.setError(response.reason));
-    		}
-    	})
-    	.catch((err) =>{
-    		store.dispatch(product.setError(err));
-    	});
+		let promise = ProductModel.searchHistory(curState.historySearched);
+		this.setState({
+			action: 'handleHistory',
+			promise: promise
+		});
 	}
-
 	setDisabled(props, state) {
 		let disabled = !state.constant || (props.params.action !== undefined && props.params.id !== undefined);
 		if (disabled !== this.state.disable) {
@@ -401,21 +395,68 @@ export default class ProductContainer extends React.Component {
 			});
 		}
 	}
-
 	setError(error) {
 		this.props.setError(error);
 	}
-
+	setHeader(data) {
+		let curData = {...data};
+		if (curData.origin === 'idSearch') {
+			this.setSimpleId({ id: curData.productId });
+		} else if (data.origin === 'avoidName') {
+			curData.productName = this.state.header.productName;
+		}
+		this.setState({
+			header: curData
+		});
+	}
+	setNameSearch(data) {
+		this.setState({
+			action: 'nameSearch',
+			nameSearch: true,
+			nameSearchData: data,
+			searching: true
+		});
+	}
+	setPrintings(promise) {
+		promise
+			.then((response) => {
+				if (response.status === 200 && response.data.success) {
+					let ajaxResponse = response.data;
+					let data = {
+						deliveryList: ajaxResponse.deliveryList,
+						list: ajaxResponse.list || null,
+						empty: ajaxResponse.empty,
+						emptyDelivery: ajaxResponse.emptyDelivery || null
+					};
+					store.dispatch(product.setPrintings(data));
+				} else {
+					throw new Error(response.data.reason);
+				}
+			})
+			.catch((err) =>{
+				this.props.setWarning(err.message);
+			})
+			.finally(() => {
+				this.setState({
+					printingSearch: false
+				});
+			});
+	}
+	setSave(data) {
+		this.setState({
+			action: 'saveProduct',
+			disabledEdition: true,
+			saveData: data
+		});
+	}
 	setSimpleId(data) {
 		this.setState({
+			action: 'searchId',
 			editionSearched: false,
 			historySearched: false,
 			simpleSearched: parseInt(data.id)
-		}, () => {
-			this.searchId();
 		});
 	}
-
 	setSuccess(message) {
 		this.props.setSuccess(message);
 	}
@@ -487,7 +528,7 @@ export default class ProductContainer extends React.Component {
 					list={this.state.nameSearch}
 					message={Config.message}
 					modified={this.props.product.modifiedList}
-					save={this.saveProduct.bind(this)}
+					save={this.setSave.bind(this)}
 					url={Config.url}
 				/>
 			)
@@ -508,6 +549,7 @@ export default class ProductContainer extends React.Component {
 					product={this.props.product}
 					message={Config.message}
 					redirect={this.redirect.bind(this)}
+					searching={this.state.searching}
 					simpleModal={this.setSimpleId.bind(this)}
 					url={Config.url}
 				/>
@@ -530,13 +572,13 @@ export default class ProductContainer extends React.Component {
 				category={this.props.category}
 				cleared={this.state.cleared}
 				constant={this.state.constant}
+				data={this.state.header}
 				disable={this.state.disable}
 				error={this.state.error}
 				manufactorer={this.props.manufactorer}
-				message={Config.message}
 				searched={searchedCheck}
-				searchId={this.setSimpleId.bind(this)}
-				searchName={this.nameSearch.bind(this)}
+				searchName={this.setNameSearch.bind(this)}
+				setHeader={this.setHeader.bind(this)}
 			/>
 		);
 		let padding = 'paddingBottom2';

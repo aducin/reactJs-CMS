@@ -31,7 +31,6 @@ export const State = {
   },
   inProgress: false,
   panel: null,
-  promise: null,
   shipmentNumber: false,
   urlCheck: false
 };

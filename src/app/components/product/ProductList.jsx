@@ -17,7 +17,7 @@ const ProductList = ( props ) => {
 	var product = props.product;
 	var text = props.message;
 	var url = props.url;
-	if (!product.searched) {
+	if (!product.searched || props.searching) {
 		return(
 			<Busy title={text.loading} />
 		)
@@ -39,17 +39,6 @@ const ProductList = ( props ) => {
 			let finalList = list.map((el) => {
 				let price = el.price;
 				let discount = el.discount;
-				/*
-				let finalPrice = <p class="textCentered marginTop40px">{price.old}zł</p>;
-				if (price.new !== price.old && !discount.new && !discount.old) {
-					finalPrice = (
-						<div>
-							<p class="textCentered marginTop20px">Nominalnie (SP): {price.old}zł</p>
-							<p class="textCentered marginTop20px">Nominalnie (NP): {price.new}zł</p>
-						</div>
-					);
-				} 
-				*/
 				let priceNew, priceOld;
 				if (!discount.new) {
 					priceNew = (

@@ -25,52 +25,62 @@ export default class OrderContainer extends React.Component {
 		this.state = State;
 	}
 
-	componentWillUpdate(nextProps, nextState) {
-		if (nextProps.approved && nextProps.token) {
-			let changedDb = nextProps.params.db === undefined && this.props.params.db !== undefined;
-			let changedId = nextProps.params.id === undefined && this.props.params.id !== undefined;
-			let newParams = nextProps.params.db !== this.props.params.db && nextProps.params.id !== this.props.params.id;
-			let paramsAvailable = nextProps.params.db !== undefined && nextProps.params.id !== undefined;
-			if (changedDb && changedId) {
-				this.setState({
-					clear: true,
-					curShipment: Config.message.orders.defaultShipmentNumber,
-					db: undefined,
-					disable: false,
-					id: undefined,
-					shipmentNumber: false
-				});
-			} else if (nextState.clear) {
-				store.dispatch(order.clearData());
-				this.setState({
-					clear: false,
-					header: DefaultHeader
-				});
-			} else if (!this.state.checkDisabled && nextState.checkDisabled) {
-				this.checkDisabled(nextState);
-			} else if (!this.state.promise && nextState.promise) {
-				this.setData(nextState.promise, nextProps);
-			} else if (newParams && paramsAvailable) {
-				this.setState({
-					disable: true,
-					inProgress: true,
-					urlCheck: true
-				});
-			} else if (nextState.urlCheck && paramsAvailable) {
-				this.checkUrl(nextProps);
-			}
+	componentDidMount() {
+		this.checkUrl();
+	}
+	componentDidUpdate() {
+		if (this.state.clear) {
+			store.dispatch(order.clearData());
+		} else if (this.state.checkDisabled) {
+			this.checkDisabled();
+		} else if (this.state.urlCheck) {
+			this.checkUrl();
 		}
 	}
+	componentWillUpdate(nextProps, nextState) {
+		let newParams = nextProps.params.db !== this.props.params.db || nextProps.params.id !== this.props.params.id;
+		let newAction = nextProps.params.action !== this.props.params.action;
+		let noData = !nextProps.order.orderData && !this.props.order.orderData;
+		let paramsAvailable = nextProps.params.db !== undefined && nextProps.params.id !== undefined;
+		let removedDb = nextProps.params.db === undefined && this.props.params.db !== undefined;
+		let removedId = nextProps.params.id === undefined && this.props.params.id !== undefined;
+		if (removedDb && removedId) {
+			this.setState({
+				clear: true,
+				curShipment: Config.message.orders.defaultShipmentNumber,
+				db: undefined,
+				disable: false,
+				header: DefaultHeader,
+				id: undefined,
+				shipmentNumber: false
+			});
+		} else if ((newParams || newAction) && paramsAvailable) {
+			this.setState({
+				disable: true,
+				inProgress: true,
+				urlCheck: true
+			});
+		} else if (this.state.checkDisabled && nextState.checkDisabled) {
+			this.setState({ checkDisabled: false });
+		} else if (nextState.clear && this.state.clear) {
+			this.setState({ clear: false });
+		} else if (nextState.urlCheck && this.state.urlCheck) {
+			this.setState({ urlCheck: false });
+		}
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		return (nextProps.approved && nextProps.token);
+	}
 
-	checkDisabled(state) {
+	checkDisabled() {
 		let curDisable = {
 			action: true,
 			panel: true
 		};
-		let name = state.header.name;
+		let name = this.state.header.name;
 		let shortenName = name.replace('Id', '');
-		let isNaNCheck = Boolean(isNaN(state.header[name]) || state.header[name] === '');
-		if (state.header.selected[shortenName] !== 0 && !state.error[name] && !isNaNCheck) {
+		let isNaNCheck = Boolean(isNaN(this.state.header[name]) || this.state.header[name] === '');
+		if (this.state.header.selected[shortenName] !== 0 && !this.state.error[name] && !isNaNCheck) {
 			curDisable[shortenName] = false;
 		}
 		this.setState({
@@ -78,13 +88,13 @@ export default class OrderContainer extends React.Component {
 			headerDisable: curDisable
 		});
 	}
-	checkUrl(props) {
+	checkUrl() {
 		let curPromise;
-		let token = props.token;
-		let db = props.params.db;
-		let id = props.params.id;
-		let action = props.params.action;
-		if (db !== this.state.db || id !== this.state.id || action !== this.state.action) {
+		const action = this.props.params.action;
+		const db = this.props.params.db;
+		const id = this.props.params.id;
+		const token = this.props.token;
+		if (db && id && token) {
 			if (!action || action !== 'voucher') {
 				if (action === 'even') {
 					curPromise = OrderModel.evenData(db, id);
@@ -93,30 +103,51 @@ export default class OrderContainer extends React.Component {
 				} else {
 					curPromise = OrderModel.getData(db, id, token);
 				}
-				this.handlePromise(curPromise, action, db, id);
+				this.handlePromise(curPromise);
 			} else {
 				OrderModel.getVoucher(db, id).then((response) => {
-					if (!response.data.customer) {
-						throw new Error(response.data.reason);
+					if (response.data.customer) {
+						curPromise = CustomerModel.getCustomerById(db, response.data.customer.id, token);
+						this.handlePromise(curPromise);
 					} else {
-						curPromise = CustomerModel.getCustomerById(db, response.data.customer.id, this.props.token);
-						this.handlePromise(curPromise, action, db, id);
+						throw new Error(response.data.reason);
 					}
 				}).catch((err) =>{
 					let message = err.message || Config.message.error;
 					this.props.setWarning(message);
-				}).finally(() => {
-					this.setState({
-						urlCheck: false
-					});
 				});
 			}
 		}
 	}
-	handlePromise(curPromise) {
-		this.setState({
-			promise: curPromise,
-			urlCheck: false
+	handlePromise(promise) {
+		let params = this.props.params;
+		promise
+			.then((response) => {
+				if (response.data.success !== false) {
+					if (!params.action) {
+						let data = {...response.data, id: params.id};
+						store.dispatch(order.setOrderId(data, params.db));
+					} else {
+						let dataObj = {
+							action: params.action,
+							data: response.data,
+							db: params.db,
+							id: params.id
+						};
+						store.dispatch(order.setAdditional(dataObj));
+					}
+				} else {
+					throw new Error(response.data.reason);
+				}
+			}).catch((err) =>{
+				let message = err.message || Config.message.error;
+				this.props.setWarning(message);
+				setTimeout(() => {
+					let url = Config.url.path + Config.url.pathSuffix + Config.url.pathOrder;
+					window.location.href = url;
+				}, Config.timer);
+			}).finally(() => {
+			this.setState({ inProgress: false });
 		});
 	}
 	searchOrder(data) {
@@ -148,39 +179,6 @@ export default class OrderContainer extends React.Component {
 				let message = err.message || Config.message.error;
 				this.props.setWarning(message);
 			});
-	}
-	setData(promise, props) {
-		promise
-			.then((response) => {
-				if (response.data.success !== false) {
-					if (!props.params.action) {
-						let data = {...response.data, id: props.params.id};
-						store.dispatch(order.setOrderId(data, props.params.db));
-					} else {
-						let dataObj = {
-							action: props.params.action,
-							data: response.data,
-							db: props.params.db,
-							id: props.params.id
-						};
-						store.dispatch(order.setAdditional(dataObj));
-					}
-				} else {
-					throw new Error(response.data.reason);
-				}
-			}).catch((err) =>{
-			let message = err.message || Config.message.error;
-			this.props.setWarning(message);
-			setTimeout(() => {
-				let url = Config.url.path + Config.url.pathSuffix + Config.url.pathOrder;
-				window.location.href = url;
-			}, Config.timer);
-		}).finally(() => {
-			this.setState({
-				inProgress: false,
-				promise: null
-			});
-		});
 	}
 	setHeaderData(data) {
 		let error = data.updateError ? data.error : this.state.error;
