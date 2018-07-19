@@ -18,7 +18,7 @@ import Modified from '../components/product/Modified.jsx';
 import LastOrders from '../components/product/LastOrders.jsx';
 import Printings from '../components/product/Printings.jsx';
 import ProductModel from '../model/productModel';
-import { State } from '../helper/productState';
+import { Header as DefaultHeader, State } from '../helper/productState';
 
 @connect((store) => {
     return {
@@ -38,21 +38,21 @@ export default class ProductContainer extends React.Component {
 	componentWillUnmount() {
 		this.props.unsubscribe();
 	}
-
 	componentWillUpdate(nextProps, nextState) {
-		if (nextProps.approved && nextProps.token) {
-			this.setDisabled(nextProps, nextState);
-			if (!nextState.componentChecked) {
-				this.checkComponent(nextProps, nextState);
+		this.setDisabled(nextProps, nextState);
+		if (!nextState.componentChecked) {
+			this.checkComponent(nextProps, nextState);
+		} else {
+			let action = nextState.action;
+			if (action === 'checkUrl') {
+				this.checkUrl(nextProps, nextState);
 			} else {
-				let action = nextState.action;
-				if (action === 'checkUrl') {
-					this.checkUrl(nextProps, nextState);
-				} else {
-					this[action](nextState);
-				}
+				this[action](nextState);
 			}
 		}
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		return (nextProps.approved && nextProps.token);
 	}
 
 	checkComponent(props, state) {
@@ -151,14 +151,10 @@ export default class ProductContainer extends React.Component {
 		}
 		this.setState({
 			action: 'checkUrl',
-			cleared: true,
+			header: DefaultHeader,
 			modified: modified,
 			modifiedSearch: modifiedSearch,
 			nameSearch: false
-		}, () => {
-			this.setState({
-				cleared: false
-			});
 		});
 	}
 
@@ -570,7 +566,6 @@ export default class ProductContainer extends React.Component {
 		let productHeader = (
 			<ProductHeader
 				category={this.props.category}
-				cleared={this.state.cleared}
 				constant={this.state.constant}
 				data={this.state.header}
 				disable={this.state.disable}

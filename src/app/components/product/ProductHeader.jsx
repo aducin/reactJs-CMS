@@ -7,12 +7,11 @@ import Title from '../dumb/Title.jsx';
 
 let nameInQueue = false;
 
-export default class ProductHeader extends React.Component {
-
-	handleIdChange(value) {
-		let data = {...this.props.data, origin: 'id'};
+const ProductHeader = ( props ) => {
+	const handleIdChange = (value) => {
+		let data = {...props.data, origin: 'id'};
 		let check = isNaN(value);
-		let warning = {...this.props.data.warning};
+		let warning = {...props.data.warning};
 		if (check || value === 0) {
 			warning['id'] = true;
 			data.warning = warning;
@@ -25,23 +24,21 @@ export default class ProductHeader extends React.Component {
 			data.searchDisabled = activeSearch;
 			data.warning = warning;
 		}
-		this.props.setHeader(data);
-	}
-
-	handleIdSearch() {
-		let value = this.props.data.productId;
+		props.setHeader(data);
+	};
+	const handleIdSearch = () => {
+		let value = props.data.productId;
 		let check = isNaN(value);
-		let data = {...this.props.data, origin: 'idSearch'};
+		let data = {...props.data, origin: 'idSearch'};
 		if (check || value === 0) {
 			data.searchDisabled = true;
 		} else {
 			data.productName = '';
 		}
-		this.props.setHeader(data);
-	}
-
-	handleNameChange(value) {
-		let data = {...this.props.data, origin: 'name'};
+		props.setHeader(data);
+	};
+	const handleNameChange = (value) => {
+		let data = {...props.data, origin: 'name'};
 		let proceed = false;
 		let timeout = false;
 		data.productName = value;
@@ -56,11 +53,11 @@ export default class ProductHeader extends React.Component {
 				proceed = true;
 			}
 		}
-		this.props.setHeader(data);
+		props.setHeader(data);
 		if (proceed) {
 			setTimeout(function () {
 				nameInQueue = false;
-				this.proceedSelect();
+				proceedSelect();
 			}.bind(this), Config.queueTime);
 		} else if (timeout) {
 			setTimeout(function () {
@@ -69,27 +66,25 @@ export default class ProductHeader extends React.Component {
 					id: false,
 					name: false
 				};
-				this.props.setHeader(finalData);
+				props.setHeader(finalData);
 			}.bind(this), Config.queueTime);
 		}
-	}
-
-	handleSelectChange(e) {
+	};
+	const handleSelectChange = (e) => {
 		let value = e.target.value;
 		let name = e.target.name;
-		let data = {...this.props.data, origin: 'select'};
+		let data = {...props.data, origin: 'select'};
 		if (name === 'category') {
 			data.activeCategory = value;
 		} else if (name === 'manufactorer') {
 			data.activeManufactorer = value;
 		}
-		this.props.setHeader(data);
-		this.proceedSelect(data);
-	}
-
-	proceedSelect(data = null) {
+		props.setHeader(data);
+		proceedSelect(data);
+	};
+	const proceedSelect = (data = null) => {
 		if (!data) {
-			data = this.props.data;
+			data = props.data;
 		}
 		if (data.productName !== '' && data.productName.length > 3) {
 			let searchData = {
@@ -97,104 +92,103 @@ export default class ProductHeader extends React.Component {
 				category: data.activeCategory,
 				manufactorer: data.activeManufactorer
 			};
-			this.props.searchName(searchData);
+			props.searchName(searchData);
 		}
-	}
-
-	render() {
-		let data = this.props.data;
-		let productId = data.productId !== 0 ? data.productId : '';
-		let productName = data.productName;
-		let message = Config.message;
-		let warning = this.props.data.warning;
-		if (!this.props.error) {
-			const noData = {
-				id: 0,
-				nameCategory: message.nameCategory,
-				nameManufactorer: message.nameManufactorer,
-			};
-			const chooseFrom = 'Wybierz sposród ';
-			const categoryLength = this.props.category.length;
-			const titleCategory = chooseFrom + categoryLength + ' kategorii:';
-			var listCategories = this.props.category.map((el, index) => {
-				return <option key={index + 1} value={this.props.category[index].id}>{this.props.category[index].metaTitle}</option>;
-			});
-			if (data.activeCategory === 0) {
-				var check = this.props.category.findIndex(function(el) { el.id == noData.id; });
-				if (check === -1) {
-					listCategories.unshift(<option key="0" value={ noData.id }>{ noData.nameCategory }</option>);
-				}
+	};
+	let data = props.data;
+	let productId = data.productId !== 0 ? data.productId : '';
+	let productName = data.productName;
+	let message = Config.message;
+	let warning = props.data.warning;
+	if (props.error) {
+		return (
+			<Title title={props.message.error} />
+		);
+	} else {
+		const noData = {
+			id: 0,
+			nameCategory: message.nameCategory,
+			nameManufactorer: message.nameManufactorer,
+		};
+		const chooseFrom = 'Wybierz sposród ';
+		const categoryLength = props.category.length;
+		const titleCategory = chooseFrom + categoryLength + ' kategorii:';
+		var listCategories = props.category.map((el, index) => {
+			return <option key={index + 1} value={props.category[index].id}>{props.category[index].metaTitle}</option>;
+		});
+		if (data.activeCategory === 0) {
+			var check = props.category.findIndex(function(el) { el.id == noData.id; });
+			if (check === -1) {
+				listCategories.unshift(<option key="0" value={ noData.id }>{ noData.nameCategory }</option>);
 			}
-			const manufactorerLength = this.props.manufactorer.length;
-			const titleManufactorer = chooseFrom + manufactorerLength + ' producentów:';
-			var listManufactorers = this.props.manufactorer.map((el, index) => {
-				return <option key={index + 1} value={this.props.manufactorer[index].id}>{this.props.manufactorer[index].name}</option>;
-			});
-			if (data.activeManufactorer === 0) {
-				var check = this.props.manufactorer.findIndex(function(el) { el.id == noData.id; });
-				if (check === -1) {
-					listManufactorers.unshift(<option key="0" value={ noData.id }>{ noData.nameManufactorer }</option>);
-				}
+		}
+		const manufactorerLength = props.manufactorer.length;
+		const titleManufactorer = chooseFrom + manufactorerLength + ' producentów:';
+		var listManufactorers = props.manufactorer.map((el, index) => {
+			return <option key={index + 1} value={props.manufactorer[index].id}>{props.manufactorer[index].name}</option>;
+		});
+		if (data.activeManufactorer === 0) {
+			var check = props.manufactorer.findIndex(function(el) { el.id == noData.id; });
+			if (check === -1) {
+				listManufactorers.unshift(<option key="0" value={ noData.id }>{ noData.nameManufactorer }</option>);
 			}
-			let inputStyleId = warning['id'] ? {borderColor: "#a94442"} : null;
-			let inputStyleName = warning['name'] ? {borderColor: "#a94442"} : null;
-			let labelClass = warning['name'] ? "colorWarning" : null;
-			return (
-				<div class="container bgrContent borderRadius10 marginTop40px paddingBottom40px">
-					<div class="col-xs-12">
-						<Title title={data.title} />
-					</div>
-					<div class="col-xs-12">
-						<div class="col-xs-12 col-lg-7 pull-left">
-							<div class="col-xs-12 paddingBottom10px">
-								<h4>{message.products.nameSearch}</h4>
-							</div>
-							<div>
-								<Select
-									curClass="col-xs-12 marginBottom10px"
-									setDisabled={this.props.disable}
-									list={ listCategories }
-									name="category"
-									selectChange={ this.handleSelectChange.bind(this) }
-									title={ titleCategory }
-									value={ data.activeCategory }
-								/>
-								</div>
-								<div class="marginBottom20px">
-									<Select
-										curClass="col-xs-12 marginBottom10px"
-										setDisabled={this.props.disable}
-										list={ listManufactorers }
-										name="manufactorer"
-										selectChange={ this.handleSelectChange.bind(this) }
-										title={titleManufactorer}
-										value={ data.activeManufactorer }
-									/>
-								</div>
-							<Label curClass={labelClass} name={data.productLabel} />
-							<div class="col-xs-12 col-lg-6">
-								<input class="form-control" disabled={this.props.disable} type="text" value={productName} placeholder="Podaj nazwę" onChange={ e => this.handleNameChange(e.target.value) } style={ inputStyleName } />
-							</div>
+		}
+		let inputStyleId = warning['id'] ? {borderColor: "#a94442"} : null;
+		let inputStyleName = warning['name'] ? {borderColor: "#a94442"} : null;
+		let labelClass = warning['name'] ? "colorWarning" : null;
+		return (
+			<div class="container bgrContent borderRadius10 marginTop40px paddingBottom40px">
+				<div class="col-xs-12">
+					<Title title={data.title} />
+				</div>
+				<div class="col-xs-12">
+					<div class="col-xs-12 col-lg-7 pull-left">
+						<div class="col-xs-12 paddingBottom10px">
+							<h4>{message.products.nameSearch}</h4>
 						</div>
-						<div class="col-xs-12 col-lg-2 pull-left"></div>
-						<div class="col-xs-12 col-lg-3 pull-left">
-							<div class="paddingBottom10px">
-								<h4>{message.products.idSearch}</h4>
-							</div>
-							<div class="marginBottom10px">
-										<input class="centered form-control" disabled={this.props.disable} type="text" value={productId} placeholder="Podaj ID" onChange={ e => this.handleIdChange(e.target.value) } style={ inputStyleId } />
-								</div>
-								<div>
-									<input class="form-control btn btn-primary" disabled={data.searchDisabled} type="button" value="Wyszukaj" onClick={ this.handleIdSearch.bind(this) } />
-								</div>
+						<div>
+							<Select
+								curClass="col-xs-12 marginBottom10px"
+								setDisabled={props.disable}
+								list={ listCategories }
+								name="category"
+								selectChange={ handleSelectChange.bind(this) }
+								title={ titleCategory }
+								value={ data.activeCategory }
+							/>
+						</div>
+						<div class="marginBottom20px">
+							<Select
+								curClass="col-xs-12 marginBottom10px"
+								setDisabled={props.disable}
+								list={ listManufactorers }
+								name="manufactorer"
+								selectChange={ handleSelectChange.bind(this) }
+								title={titleManufactorer}
+								value={ data.activeManufactorer }
+							/>
+						</div>
+						<Label curClass={labelClass} name={data.productLabel} />
+						<div class="col-xs-12 col-lg-6">
+							<input class="form-control" disabled={props.disable} type="text" value={productName} placeholder="Podaj nazwę" onChange={ e => handleNameChange(e.target.value) } style={ inputStyleName } />
+						</div>
+					</div>
+					<div class="col-xs-12 col-lg-2 pull-left"></div>
+					<div class="col-xs-12 col-lg-3 pull-left">
+						<div class="paddingBottom10px">
+							<h4>{message.products.idSearch}</h4>
+						</div>
+						<div class="marginBottom10px">
+							<input class="centered form-control" disabled={props.disable} type="text" value={productId} placeholder="Podaj ID" onChange={ e => handleIdChange(e.target.value) } style={ inputStyleId } />
+						</div>
+						<div>
+							<input class="form-control btn btn-primary" disabled={data.searchDisabled} type="button" value="Wyszukaj" onClick={ handleIdSearch.bind(this) } />
 						</div>
 					</div>
 				</div>
-			);
-		} else if (this.props.error) {
-			return (
-				<Title title={this.props.message.error} />
-			);
-		}
+			</div>
+		);
 	}
-}
+};
+
+export default ProductHeader;
