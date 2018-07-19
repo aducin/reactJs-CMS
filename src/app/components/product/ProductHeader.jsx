@@ -6,6 +6,8 @@ import Select from '../dumb/Select.jsx';
 import Title from '../dumb/Title.jsx';
 
 let nameInQueue = false;
+let nameValue;
+
 
 const ProductHeader = ( props ) => {
 	const handleIdChange = (value) => {
@@ -38,6 +40,7 @@ const ProductHeader = ( props ) => {
 		props.setHeader(data);
 	};
 	const handleNameChange = (value) => {
+		nameValue = value;
 		let data = {...props.data, origin: 'name'};
 		let proceed = false;
 		let timeout = false;
@@ -85,6 +88,7 @@ const ProductHeader = ( props ) => {
 	const proceedSelect = (data = null) => {
 		if (!data) {
 			data = props.data;
+			data.productName = nameValue;
 		}
 		if (data.productName !== '' && data.productName.length > 3) {
 			let searchData = {
