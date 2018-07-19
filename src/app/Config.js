@@ -71,6 +71,7 @@ const Config = {
 			textAlign: 'center'
 		},
 	},
+	defaultPage: 'products',
 	fields: [
 		{
 			link: 'products', 

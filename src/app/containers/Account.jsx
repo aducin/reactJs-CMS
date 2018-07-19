@@ -13,7 +13,7 @@ import Message from '../components/dumb/Message.jsx';
 import AccountDetail from '../components/account/AccountDetail.jsx';
 import AccountHeader from '../components/account/AccountHeader.jsx';
 import AccountModal from '../components/modal/AccountModal.jsx';
-import AccountModel from '../model/accountModel.js';
+import AccountModel from '../model/accountModel';
 import { State } from '../helper/accountState';
 import { createReducedObj } from '../helper/functions';
 import { setModalData } from '../helper/accountFunctions';

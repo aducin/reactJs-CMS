@@ -5,7 +5,6 @@ import { Link } from 'react-router';
 import { Router, Route, IndexRoute, hashHistory } from 'react-router';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import Cookies from 'universal-cookie';
-import axios from 'axios';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
@@ -18,8 +17,9 @@ import * as product from '../actions/productActions.jsx';
 import './main.css';
 import Config from '../Config';
 import Footer from '../components/dumb/Footer.jsx';
+import MainModel from '../model/mainModel';
+import { State } from '../helper/mainState';
 import { setUrl } from '../helper/functions.js';
-
 
 @connect((store) => {
     return {
@@ -31,23 +31,25 @@ import { setUrl } from '../helper/functions.js';
 export default class App extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			approvalInProgress: false,
-			approved: false,
-			curPage: null,
-			defaultPath: '/',
-			error: false,
-			ordersSearch: false,
-			success: false,
-			toDisplay: undefined,
-			token: null
-		};
+		this.state = State;
 		this.subscription = null;
 	}
 
 	componentDidMount() {
-		if (!this.state.approved) {
-			this.authorisation();
+		this.getToken(true);
+	}
+	componentDidUpdate() {
+		if (this.state.logout) {
+			this.setLogout();
+		}
+	}
+	componentWillUpdate(nextProps, nextState) {
+		if (nextState.approved) {
+			if (nextState.curPage === 'login') {
+				this.setState({ curPage: Config.defaultPage });
+			} else if (nextState.removeDisplay) {
+				this.removeDisplay();
+			}
 		}
 	}
 	shouldComponentUpdate(nextProps, nextState) {
@@ -55,19 +57,9 @@ export default class App extends React.Component {
 			return true;
 		} else {
 			if (this.props.location.pathname === this.state.defaultPath && nextProps.location.pathname !== this.state.defaultPath) {
-				this.getToken(1);
+				this.getToken(true);
 			}
 			return false;
-		}
-	}
-
-	authorisation() {
-		if (!this.state.approved && !this.state.approvalInProgress) {
-			this.setState({
-				approvalInProgress: true,
-			}, () => {
-				this.getToken(1);
-			});
 		}
 	}
 
@@ -76,37 +68,25 @@ export default class App extends React.Component {
 		let url = setUrl('pathOrder', 'last', this.state.token);
 		store.dispatch(product.setAction('setLastOrders', url));
 	}
-
 	checkToken(token) {
 		let data = {
 			action: 'tokenCheck',
-			token: token,
+			token: token
 		};
-		let url = Config.url;
-		let curUrl = url.serverPath + 'login?token=' + token;
-		axios.get(curUrl)
+		MainModel.checkToken(token)
     	.then((response) => {
     		if (response.data.success) {
     			this.setState({
-    				approvalInProgress: false,
     				approved: true,
     				token: token
     			});	
     		} else {
-    			this.navigateToLogin();
+    			throw new Error(response.data.reason);
     		}
     	})
     	.catch((err) =>{
     		this.navigateToLogin();
     	});
-	}
-
-	confirmApproved = () => {
-		this.setState({
-			approvalInProgress: false
-		}, () => {
-			this.authorisation();
-		});
 	}
 
 	clearToken() {
@@ -116,15 +96,14 @@ export default class App extends React.Component {
 			cookies.remove('ad9bis');
 		}
 		reactLocalStorage.clear('token');
-	}
-
+	};
 	getToken(action) {
 		const cookies = new Cookies();
 		let curCookie = cookies.get('ad9bis');
 		let tokenCheck = reactLocalStorage.get('token');
 		if (tokenCheck !== undefined || curCookie !== undefined) {
 			let token = tokenCheck !== undefined ? tokenCheck : curCookie;
-			if (action === 1) {
+			if (action) {
 				this.checkToken(token);
 			} else {
 				return token;
@@ -132,116 +111,93 @@ export default class App extends React.Component {
 		} else {
 			this.navigateToLogin();
 		}
-	}
-
-	logout() {
+	};
+	logout = () => {
 		this.clearToken();
 		reactLocalStorage.clear('category');
 		reactLocalStorage.clear('manufactorer');
 		this.setState({
+			curPage: 'login',
+			logout: true,
 			success: true,
 			toDisplay: Config.message.logout
-		}, () => {
-			setTimeout(function() {
-				this.setState({
-					approvalInProgress: false,
-					approved: false,
-					success: false,
-					toDisplay: undefined
-				}, () => {
-					window.location.href = Config.url.path + Config.url.pathSuffix;
-				});
-			}.bind(this), Config.timer);
 		});
-	}
-
+	};
 	navigateToLogin() {
-		this.setState({
-			curPage: 'login',
-		}, () => {
-			let loginUrl = Config.url.path + Config.url.pathSuffix;
-			if (window.location.href !== loginUrl) {
-				window.location.href = loginUrl;
-			}
-		});
-	}
-
-	removeDisplay = () => {
+		this.setState({ curPage: 'login' });
+		let url = Config.url.path + Config.url.pathSuffix;
+		if (window.location.href !== url) {
+			window.location.href = url;
+		}
+	};
+	removeDisplay() {
 		setTimeout(function() {
 			this.setState({
 				error: false,
 				toDisplay: undefined
 			});
 		}.bind(this), Config.timer);
-	}
-
+	};
+	setLogout() {
+		setTimeout(function() {
+			window.location.href = Config.url.path + Config.url.pathSuffix;
+			this.setState({
+				approved: false,
+				logout: false,
+				success: false,
+				toDisplay: undefined
+			});
+		}.bind(this), Config.timer);
+	};
 	setMessage = (error, success, message) => {
 		window.scrollTo(0, 0);
 		this.setState({
 			error: error,
+			removeDisplay: true,
 			success: success,
 			toDisplay: message
-		}, () => {
-			this.removeDisplay();
 		});
-	}
-
+	};
 	setOrdersSearch = () => {
 		this.checkOrders();
 		this.subscription = Observable.interval(300000)
 		.subscribe(int => this.checkOrders());
-	}
-/*
-	setOrdersSearch = () => {
-		observable = Observable.create((observer) => {
-			observer.next(this.checkOrders());
-			subscription = setInterval(() => {
-				observer.next(this.checkOrders());
-			}, 300000);
-		});
-		observable.subscribe();
-	}
-*/
+	};
 	setSuccess = (message) => {
 		this.setMessage(false, true, message);
-	}
-
+	};
 	setWarning = (message) => {
 		this.setMessage(true, false, message);
-	}
-
-	unsubscribe() {
+	};
+	unsubscribe = () => {
 		if (this.subscription) {
 			this.subscription.unsubscribe();
 		}
-	}
+	};
 
-    render () {
-			let footer, margin, padding;
-			if (this.state.curPage !== 'login') {
-				footer = <Footer />
-				margin = 'marginTop1';
-				padding = 'paddingBottom2';
-			}
-			return (
-				<div class={padding}>
-					{React.cloneElement(this.props.children, {
-						approvalInProgress: this.state.approvalInProgress,
-						approved: this.state.approved,
-						confirmApproved: this.confirmApproved,
-						error: this.state.error,
-						logoutHandler: this.logout.bind(this),
-						ordersSearch: this.state.ordersSearch,
-						searchOrders: this.setOrdersSearch.bind(this),
-						setSuccess: this.setSuccess,
-						setWarning: this.setWarning,
-						success: this.state.success,
-						toDisplay: this.state.toDisplay,
-						token: this.state.token,
-						unsubscribe: this.unsubscribe.bind(this)
-					})}
-					{footer}
-				</div>
-			);
+	render () {
+		let footer, padding;
+		if (this.state.curPage && this.state.curPage !== 'login') {
+			footer = <Footer />
+			padding = 'paddingBottom2';
 		}
+		return (
+			<div class={padding}>
+				{React.cloneElement(this.props.children, {
+					approved: this.state.approved,
+					error: this.state.error,
+					logoutHandler: this.logout,
+					ordersSearch: this.state.ordersSearch,
+					searchOrders: this.setOrdersSearch.bind(this),
+					setSuccess: this.setSuccess,
+					setWarning: this.setWarning,
+					success: this.state.success,
+					toDisplay: this.state.toDisplay,
+					token: this.state.token,
+					unsubscribe: this.unsubscribe
+				})}
+				{footer}
+			</div>
+		);
+	}
 }
