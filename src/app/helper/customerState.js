@@ -4,9 +4,9 @@ export const State = {
     text: '',
     valid: false
   },
-  curAddress: undefined,
   inProgress: false,
   email: undefined,
   emailAction: null,
+  paramAddress: undefined,
   showModal: false
 };

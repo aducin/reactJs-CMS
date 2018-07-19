@@ -24,6 +24,7 @@ export const State = {
     panelId: false,
     value: null
   },
+  freeze: false,
   header: Header,
   headerDisable: {
     action: true,

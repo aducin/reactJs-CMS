@@ -26,24 +26,30 @@ export default class PostalContainer extends React.Component {
 		this.state = State;
 	}
 
-	componentWillUpdate(nextProps, nextState) {
-		if (nextProps.approved && nextProps.token) {
-			if (!nextState.ajaxSent) {
-				this.setState({
-					action: 'getPostal',
-					ajaxSent: true,
-					inProgress: true
-				});
-			} else if (nextState.action && nextState.ajaxSent) {
-				let action = nextState.action;
-				this[action](nextState);
-			}
+	componentDidUpdate() {
+		if (this.state.action) {
+			let action = this.state.action;
+			this[action]();
 		}
 	}
+	componentWillUpdate(nextProps, nextState) {
+		if (!nextState.ajaxSent) {
+			this.setState({
+				action: 'getPostal',
+				ajaxSent: true,
+				inProgress: true
+			});
+		} else if (nextState.action) {
+			this.setState({ action: null });
+		}
+	}
+	shouldComponentUpdate(nextProps, extState) {
+		return (nextProps.approved && nextProps.token);
+	}
 
-	closeModal(state = null) {
+	closeModal() {
 		let action = null;
-		if (state && state.refresh) {
+		if (this.state.refresh) {
 			action = 'getPostal';
 		}
 		this.setState({
@@ -77,10 +83,7 @@ export default class PostalContainer extends React.Component {
 				this.props.setWarning(message);
 			})
 			.finally(() => {
-				this.setState({
-					action: null,
-					inProgress: false
-				});
+				this.setState({ inProgress: false });
 			});
 	}
 	handleAmountToChange(e) {
@@ -92,9 +95,7 @@ export default class PostalContainer extends React.Component {
 		});
 	}
 	openModal(type) {
-		this.setState({
-			modal: type
-		});
+		this.setState({ modal: type });
 	}
 	saveNewAmount() {
 		this.setState({
@@ -102,12 +103,12 @@ export default class PostalContainer extends React.Component {
 			modalInProgress: true
 		});
 	}
-	setAmount(state) {
+	setAmount() {
 		let data = {
-			action: state.modal,
-			amount: state.amountToChange
+			action: this.state.modal,
+			amount: this.state.amountToChange
 		};
-		PostalModel.setData(this.state.amountToChange, state.modal)
+		PostalModel.setData(this.state.amountToChange, this.state.modal)
 			.then((response) => {
 				if (response.data.success) {
 					this.setState({
@@ -128,10 +129,7 @@ export default class PostalContainer extends React.Component {
 				this.props.setWarning(message);
 			})
 			.finally(() => {
-				this.setState({
-					action: null,
-					modalInProgress: false
-				});
+				this.setState({ modalInProgress: false });
 			});
 	}
 

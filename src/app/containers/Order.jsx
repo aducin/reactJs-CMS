@@ -22,12 +22,9 @@ import { Header as DefaultHeader, State } from '../helper/orderState';
 export default class OrderContainer extends React.Component {
 	constructor(props) {
 		super(props);	 
-		this.state = State;
+		this.state = {...State};
 	}
 
-	componentDidMount() {
-		this.checkUrl();
-	}
 	componentDidUpdate() {
 		if (this.state.clear) {
 			store.dispatch(order.clearData());
@@ -44,7 +41,13 @@ export default class OrderContainer extends React.Component {
 		let paramsAvailable = nextProps.params.db !== undefined && nextProps.params.id !== undefined;
 		let removedDb = nextProps.params.db === undefined && this.props.params.db !== undefined;
 		let removedId = nextProps.params.id === undefined && this.props.params.id !== undefined;
-		if (removedDb && removedId) {
+		if (nextState.urlCheck) {
+			this.setState({urlCheck: false});
+		} else if (this.state.checkDisabled) {
+			this.setState({ checkDisabled: false });
+		} else if (nextState.clear) {
+			this.setState({ clear: false });
+		} else if (removedDb && removedId) {
 			this.setState({
 				clear: true,
 				curShipment: Config.message.orders.defaultShipmentNumber,
@@ -54,18 +57,10 @@ export default class OrderContainer extends React.Component {
 				id: undefined,
 				shipmentNumber: false
 			});
+		} else if (noData && paramsAvailable && !this.state.inProgress) {
+			this.setUrlCheck();
 		} else if ((newParams || newAction) && paramsAvailable) {
-			this.setState({
-				disable: true,
-				inProgress: true,
-				urlCheck: true
-			});
-		} else if (this.state.checkDisabled && nextState.checkDisabled) {
-			this.setState({ checkDisabled: false });
-		} else if (nextState.clear && this.state.clear) {
-			this.setState({ clear: false });
-		} else if (nextState.urlCheck && this.state.urlCheck) {
-			this.setState({ urlCheck: false });
+			this.setUrlCheck();
 		}
 	}
 	shouldComponentUpdate(nextProps, nextState) {
@@ -147,8 +142,8 @@ export default class OrderContainer extends React.Component {
 					window.location.href = url;
 				}, Config.timer);
 			}).finally(() => {
-			this.setState({ inProgress: false });
-		});
+				this.setState({ inProgress: false });
+			});
 	}
 	searchOrder(data) {
 		let url;
@@ -206,11 +201,16 @@ export default class OrderContainer extends React.Component {
 			curShipment: e.target.value
 		});
 	}
+	setUrlCheck() {
+		this.setState({
+			disable: true,
+			inProgress: true,
+			urlCheck: true
+		});
+	}
 	shipmentNumberHandler() {
-			let nextState = !this.state.shipmentNumber;
-			this.setState({
-				shipmentNumber: nextState
-			});
+		let nextState = !this.state.shipmentNumber;
+		this.setState({ shipmentNumber: nextState });
 	}
 	voucherChange(action, value) {
 		if ((action === 'add' && value < 5) || (action === 'subtract' && value > 1)) {

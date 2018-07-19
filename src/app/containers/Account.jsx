@@ -15,7 +15,7 @@ import AccountHeader from '../components/account/AccountHeader.jsx';
 import AccountModal from '../components/modal/AccountModal.jsx';
 import AccountModel from '../model/accountModel.js';
 import { State } from '../helper/accountState';
-import { createReducedObj } from '../helper/functions.js';
+import { createReducedObj } from '../helper/functions';
 import { setModalData } from '../helper/accountFunctions';
 
 @connect((store) => {
@@ -28,26 +28,38 @@ export default class AccountContainer extends React.Component {
 		this.state = State;
 	}
 
-	componentWillUpdate(nextProps, nextState) {
-		if (nextProps.approved && nextProps.token) {
-			if (!nextState.ajaxSent && !nextState.action) {
-				this.setState({
-					action: 'automatic'
-				});
-			} else if (nextState.action && !nextState.inProgress) {
-				this.setAjax(nextState);
-			} else if (nextState.errorHandler) {
-				this.modalErrorHandler(nextState);
-			} else if (nextState.display) {
-				this.setMessageTimeout();
-			}
+	componentDidUpdate() {
+		if (this.state.action) {
+			this.setAjax();
+		} else if (this.state.errorHandler) {
+			this.modalErrorHandler();
+		} else if (this.state.display) {
+			this.setMessageTimeout();
 		}
 	}
+	componentWillUpdate(nextProps, nextState) {
+		if (!nextState.ajaxSent) {
+			this.setState({
+				action: 'automatic',
+				ajaxSent: true,
+				inProgress: true
+			});
+		} else if (nextState.action) {
+			this.setState({ action: null });
+		} else if (nextState.errorHandler) {
+			this.setState({ errorHandler: null });
+		} else if (nextState.display) {
+			this.setState({ display: null });
+		}
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		return (nextProps.approved && nextProps.token);
+	}
+
 	closeModal(type) {
 		let action = type === 'success' ? 'getAccounts' : null;
 		this.setState({
 			action: action,
-			display: false,
 			inProgress: false,
 			modal: false,
 			modalDisable: false,
@@ -103,7 +115,6 @@ export default class AccountContainer extends React.Component {
 		}, () => {
 			this.setState({
 				action: null,
-				ajaxSent: true,
 				inProgress: false
 			});
 		});
@@ -129,19 +140,18 @@ export default class AccountContainer extends React.Component {
 		}
 		return disabled;
 	}
-	modalErrorHandler(state) {
+	modalErrorHandler() {
 		let error = {};
 		Config.accountNumbers.forEach((el) => {
-			if (state.modalObj[el]) {
-				if (isNaN(state.modalObj[el])) {
+			if (this.state.modalObj[el]) {
+				if (isNaN(this.state.modalObj[el])) {
 					error[el] = true;
 				}
 			}
 		});
-		let saveDisabled = this.modalDisableHandler(state);
-		let modalObj = {...state.modalObj, saveDisabled: saveDisabled};
+		let saveDisabled = this.modalDisableHandler(this.state);
+		let modalObj = {...this.state.modalObj, saveDisabled: saveDisabled};
 		this.setState({
-			errorHandler: false,
 			modalObj: modalObj,
 			modalObjError: error
 		});
@@ -196,22 +206,6 @@ export default class AccountContainer extends React.Component {
 				}
 			}
 		}
-		/*
-		let ajax;
-		let data = {...this.state.modalObj, token: this.props.token};
-		data.address = this.state.modalObj.address ? this.state.modalObj.address : null;
-		data.remarks = this.state.modalObj.remarks ? this.state.modalObj.remarks : null;
-		Config.accountNumbers.forEach((el) => {
-			if (!this.state.modalObj[el]) {
-				data[el] = 0;
-			}
-		});
-		 if (this.state.modal === 'add') {
-		 ajax = AccountModel.rowSave(data);
-		 } else {
-		 ajax = AccountModel.rowUpdate(data);
-		 }
-		*/
 		let action = this.state.modal === 'add' ? 'rowSave' : 'rowUpdate';
 		AccountModel[action](data).then((response) => {
 			let type = response.data.success ? 'success' : 'error';
@@ -220,17 +214,14 @@ export default class AccountContainer extends React.Component {
 			this.displayMessage(Config.message.error, 'error');
 		});
 	}
-	setAjax(state) {
-		if (state.action === 'automatic' || state.action === 'getAccounts') {
-			let setParams = state.action !== 'automatic';
-			let params = setParams ? this.setParams(state) : null;
+	setAjax() {
+		if (this.state.action === 'automatic' || this.state.action === 'getAccounts') {
+			let setParams = this.state.action !== 'automatic';
+			let params = setParams ? this.setParams() : null;
 			this.getAccounts(setParams, params);
-		} else if (state.action === 'setAccount') {
+		} else if (this.state.action === 'setAccount') {
 			this.setAccount();
 		}
-		this.setState({
-			inProgress: true
-		});
 	}
 	setDate(name, value) {
 		let selected = {...this.state.selected};
@@ -248,10 +239,10 @@ export default class AccountContainer extends React.Component {
 			this.closeModal(type);
 		}.bind(this), Config.timer);
 	}
-	setParams(state) {
+	setParams() {
 		let params = {};
-		let selected = state.selected;
-		for (let el in state.selected) {
+		let selected = this.state.selected;
+		for (let el in this.state.selected) {
 			if (selected[el] && selected[el] !== -1) {
 				params[el] = selected[el] instanceof moment ? selected[el].format("YYYY-MM-DD") : selected[el];
 			}

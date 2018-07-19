@@ -16,13 +16,10 @@ import 'rxjs/add/observable/interval';
 import store from '../store';
 import * as product from '../actions/productActions.jsx';
 import './main.css';
-
 import Config from '../Config';
 import Footer from '../components/dumb/Footer.jsx';
 import { setUrl } from '../helper/functions.js';
 
-//let observable;
-//let subscription;
 
 @connect((store) => {
     return {
@@ -53,7 +50,6 @@ export default class App extends React.Component {
 			this.authorisation();
 		}
 	}
-
 	shouldComponentUpdate(nextProps, nextState) {
 		if (nextState.approved || (nextProps.location.pathname === this.state.defaultPath && this.props.location.pathname !== this.state.defaultPath)) {
 			return true;
@@ -76,41 +72,9 @@ export default class App extends React.Component {
 	}
 
 	checkOrders() {
-		/*
-		this.setState({
-			ordersSearch: true
-		}, () => {
-		*/
 		store.dispatch(product.setOrdersSearch());
 		let url = setUrl('pathOrder', 'last', this.state.token);
 		store.dispatch(product.setAction('setLastOrders', url));
-/*
-			Observable
-				.ajax(url)
-				.subscribe(
-					data => {
-						let result = data.response;
-						this.setState({
-							lastOrdersSearch: false
-						}, () => {
-							this.setState({
-								ordersSearch: false
-							}, () => {
-								if (result.success) {
-									store.dispatch(product.setOrders(result));
-								} else {
-									throw new Error(result.reason);
-								}
-							});
-						});
-					},
-					err => {
-						console.error(err);
-						store.dispatch(product.setError(err.message));
-					}
-				);
-		});
- */
 	}
 
 	checkToken(token) {
@@ -249,8 +213,6 @@ export default class App extends React.Component {
 	unsubscribe() {
 		if (this.subscription) {
 			this.subscription.unsubscribe();
-			//observable = null;
-			//clearInterval(subscription);
 		}
 	}
 
