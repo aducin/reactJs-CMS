@@ -9,11 +9,20 @@ const url = Config.url;
 const productUrl = url.serverPath + url.pathProducts;
 
 const ProductModel = {
+  basicEdition: (data, newAttr, oldAttr, config) => {
+    let path = Config.url.serverPath + 'products' + '/' + data.id + '/' + newAttr + '/' + oldAttr;
+    return axios.put(path, {data}, config);
+  },
   deleteModified: (id, token) => {
     let path = productUrl + '/modified/' + id;
     return axios.delete(url, {
       params: { token: token }
     });
+  },
+  deletePrinting: (id, token) => {
+    let path = setUrl('pathProducts', 'printing');
+    path +=  '/' + id + '/' + token;
+    return axios.delete(path);
   },
   getCategories: () => {
     let path = url.serverPath + 'categories';
@@ -37,6 +46,11 @@ const ProductModel = {
   },
   nameSearch: (data) => {
     return axios.get( productUrl, {params: data} );
+  },
+  saveFile: (description, fd, token) => {
+    let path = setUrl('pathProducts', 'printing');
+    path += '/' + token + '?description=' + description;
+    return axios.post(path, fd);
   },
   saveProduct: (newAttr, oldAttr, config, data) => {
     let path = productUrl + '/' + data.id + '/' + newAttr + '/' + oldAttr;

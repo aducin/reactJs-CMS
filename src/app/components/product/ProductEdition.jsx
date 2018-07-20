@@ -44,43 +44,42 @@ export default class ProductEdition extends React.Component {
 		}
 	}
 
-    /*
-    componentDidMount() {
-    	this.equalState(this.props, this.state);
-    }
-    */
+	/*
+   componentDidMount() {
+    this.equalState(this.props, this.state);
+   }
+   */
 
-    componentWillUpdate(nextProps, nextState) {
-    	this.equalState(nextProps, nextState);
-    }
+	componentWillUpdate(nextProps, nextState) {
+		this.equalState(nextProps, nextState);
+	}
 
-    descriptionChange(e) {
-    	this.setState({
-    		description: e.target.value
-    	});
-    }
+	descriptionChange(e) {
+		this.setState({
+			description: e.target.value
+		});
+	}
 
-    equalState(props, state) {
-    	let product = props.dataFull;
-    	if (state.id !== product.id) {
-    		let curState = {...this.state};
-    		this.state.fields.forEach((el) => {
-    			if (el !== 'deletePhoto' && el !== 'productUpdated') {
-    				curState[el] = product[el];
-    			} else {
-    				curState[el] = false;
-    			}
-    			
-    		});
-    		this.setState(curState);
-	    }
-    }
+	equalState(props, state) {
+		let product = props.dataFull;
+		if (state.id !== product.id) {
+			let curState = {...this.state};
+			this.state.fields.forEach((el) => {
+				if (el !== 'deletePhoto' && el !== 'productUpdated') {
+					curState[el] = product[el];
+				} else {
+					curState[el] = false;
+				}
+			});
+			this.setState(curState);
+		}
+	}
 
-    handleCheckboxChange(list, origin) {
-    	if (origin !== 'checkboxOptions') {
-		    this.setState({
-		    	productCategories: list
-		    });
+	handleCheckboxChange(list, origin) {
+		if (origin !== 'checkboxOptions') {
+			this.setState({
+				productCategories: list
+			});
 		} else {
 			let deletePhoto = list.indexOf(1) !== -1;
 			let updated = list.indexOf(2) !== -1;
@@ -89,65 +88,65 @@ export default class ProductEdition extends React.Component {
 				productUpdated: updated,
 			});	
 		}
-    }
+	}
 
-    handleSelectChange(e) {
-    	let value = e.target.value;
-    	let name = e.target.name;
-    	let active = name === 'active' ? value : this.state.active;
-    	let condition = name === 'condition' ? value : this.state.condition;
-    	let manufactorer = name === 'manufactorer' ? value : this.state.manufactorer;
-    	this.setState({
+	handleSelectChange(e) {
+		let value = e.target.value;
+		let name = e.target.name;
+		let active = name === 'active' ? value : this.state.active;
+		let condition = name === 'condition' ? value : this.state.condition;
+		let manufactorer = name === 'manufactorer' ? value : this.state.manufactorer;
+		this.setState({
 			active: active,
 			condition: condition,
 			manufactorer: manufactorer
 		});	
-    }
+	}
 
-    hideOrShow(field) {
-    	let categoryDisplay = field === 'category' ? !this.state.categoryDisplay : this.state.categoryDisplay;
-    	let imageDisplay = field === 'image' ? !this.state.imageDisplay : this.state.imageDisplay;
-    	this.setState({
-    		categoryDisplay: categoryDisplay,
-    		imageDisplay: imageDisplay
-    	});		
-    }
+	hideOrShow(field) {
+		let categoryDisplay = field === 'category' ? !this.state.categoryDisplay : this.state.categoryDisplay;
+		let imageDisplay = field === 'image' ? !this.state.imageDisplay : this.state.imageDisplay;
+		this.setState({
+			categoryDisplay: categoryDisplay,
+			imageDisplay: imageDisplay
+		});
+	}
 
-    inputModify(data) {
-    	var origin = data.target.name;
-    	var value = data.target.value;
-    	if (origin !== 'priceNew' && origin !== 'priceOld' && origin !== 'quantity') {
-    		let curState = {...this.state};
-    		curState[origin] = value;
-    		this.setState( curState );	
-    	} else if (origin === 'quantity') {
-    		this.state.quantity.modified = parseInt(value);
-    	} else {
-    		let curPrice = {...this.state.price};
-    		if (origin === 'priceNew') {
-    			curPrice.new = value;
-    		} else if (origin === 'priceOld') {
-    			curPrice.old = value;
-    		}
-    		this.setState({
-    			price: curPrice
-    		});		
-    	}
-    }
+	inputModify(data) {
+		var origin = data.target.name;
+		var value = data.target.value;
+		if (origin !== 'priceNew' && origin !== 'priceOld' && origin !== 'quantity') {
+			let curState = {...this.state};
+			curState[origin] = value;
+			this.setState( curState );
+		} else if (origin === 'quantity') {
+			this.state.quantity.modified = parseInt(value);
+		} else {
+			let curPrice = {...this.state.price};
+			if (origin === 'priceNew') {
+				curPrice.new = value;
+			} else if (origin === 'priceOld') {
+				curPrice.old = value;
+			}
+			this.setState({
+				price: curPrice
+			});
+		}
+	}
 
-    saveFull() {
-    	let data = {};
-    	let curState = {...this.state};
-    	this.state.fields.forEach((el) => {
-    		data[el] = curState[el];
-    	});
-    	data.action = 'full';
-    	let tags = data.productTags.map((el) => {
-    		return el.name;
-    	});
-    	data.productTags = tags.join(', ');
-    	this.props.save(data);
-    }
+	saveFull() {
+		let data = {};
+		let curState = {...this.state};
+		this.state.fields.forEach((el) => {
+			data[el] = curState[el];
+		});
+		data.action = 'full';
+		let tags = data.productTags.map((el) => {
+			return el.name;
+		});
+		data.productTags = tags.join(', ');
+		this.props.save(data);
+	}
 
 	render() {
 		function handleSelect(el, id, object) {
@@ -300,8 +299,8 @@ export default class ProductEdition extends React.Component {
 			);
 			let description = (
 				<div>
-				    <Label heightRow="3" name={labels.description.nameFull} />
-				    <div class="col-xs-12 col-lg-9">
+					<Label heightRow="3" name={labels.description.nameFull} />
+					<div class="col-xs-12 col-md-9">
 						<textarea class="form-control" rows="6" onKeyUp={ this.descriptionChange.bind(this) } defaultValue={product.description} disabled={disabled} placeholder={labels.description.placeholder}></textarea>
 					</div>
 				</div>

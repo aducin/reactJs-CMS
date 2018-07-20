@@ -71,8 +71,10 @@ export default class ProductContainer extends React.Component {
 	checkUrl(nextProps, nextState) {
 		if (nextProps.params.action !== undefined && nextProps.params.id !== undefined) {
 			let action = nextProps.params.action;
-			let edition = action === 'edition' && nextState.editionSearched !== this.props.params.id;
-			let history = action === 'history' && nextState.historySearched !== this.props.params.id;
+			//let edition = action === 'edition' && nextState.editionSearched !== this.props.params.id;
+			//let history = action === 'history' && nextState.historySearched !== this.props.params.id;
+			let edition = action === 'edition' && nextState.editionSearched !== nextProps.params.id;
+			let history = action === 'history' && nextState.historySearched !== nextProps.params.id;
 			if (edition || history) {
 				store.dispatch(product.clearData());
 				let currentAction = action === 'edition' ? 'searchId' : 'searchHistory';
@@ -302,8 +304,8 @@ export default class ProductContainer extends React.Component {
 		};
 		this.setNameSearch(data);
 	}
-	saveProduct(state) {
-		let data = {...state.saveData};
+	saveProduct() {
+		let data = {...this.state.saveData};
 		if (data.quantity.modified !== undefined) {
 			var curQuantity = data.quantity.modified;
 		} else if (data.quantity.old !== undefined) {
@@ -347,7 +349,8 @@ export default class ProductContainer extends React.Component {
 	}
 	setDisabled(props, state) {
 		let disabled = !state.constant || (props.params.action !== undefined && props.params.id !== undefined);
-		if (disabled !== this.state.disable) {
+		//if (disabled !== this.state.disable) {
+		if (disabled !== state.disable) {
 			this.setState({ disable: disabled });
 		}
 	}
@@ -473,17 +476,13 @@ export default class ProductContainer extends React.Component {
 					delete={this.deleteModified.bind(this)}
 					disable={this.state.disable}
 					inSearch={this.state.modifiedSearch}
-					message={Config.message}
-					url={Config.url}
 				/>
 			);
 			lastOrders = (
 				<LastOrders
 					data={this.props.product.lastOrders}
 					inSearch={this.props.product.ordersSearch}
-					message={Config.message}
 					setLastOrder={this.modifyLastOrder.bind(this)}
-					url={Config.url}
 				/>
 			);
 			printings = (
@@ -491,11 +490,9 @@ export default class ProductContainer extends React.Component {
 					data={this.props.product.printings}
 					getPrintings={this.checkPrintings.bind(this)}
 					inSearch={this.state.printingSearch}
-					message={Config.message}
 					setError={this.setError.bind(this)}
 					setSuccess={this.setSuccess.bind(this)}
 					token={this.props.token}
-					url={Config.url}
 				/>
 			);
 		} else if (this.state.editionSearched && !this.state.historySearched) {
@@ -518,9 +515,7 @@ export default class ProductContainer extends React.Component {
 				<ProductHistory
 					clear={this.clearData.bind(this)}
 					id={this.state.editionSearched}
-					message={Config.message}
 					product={this.props.product}
-					url={Config.url}
 				/>
 			)
 		} else if (this.state.nameSearch && !this.state.editionSearched && !this.state.historySearched) {
@@ -528,11 +523,9 @@ export default class ProductContainer extends React.Component {
 				<ProductList
 					clearList={this.clearData.bind(this)}
 					product={this.props.product}
-					message={Config.message}
 					redirect={this.redirect.bind(this)}
 					searching={this.state.searching}
 					simpleModal={this.setSimpleId.bind(this)}
-					url={Config.url}
 				/>
 			)
 		}

@@ -10,7 +10,6 @@ const postalChange = ( props ) => {
   let curAmount = parseFloat(props.amount);
   let curAmountToChange = parseFloat(props.amountToChange);
   let curClass = props.error ? 'colorWarning marginTop10px' : 'marginTop10px';
-  let disabled;
   let message = props.message.postal;
   let number = props.show === 'add' ? curAmount + curAmountToChange : curAmount - curAmountToChange;
   let title = props.title;

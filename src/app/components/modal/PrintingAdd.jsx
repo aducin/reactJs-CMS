@@ -22,8 +22,6 @@ const printingAdd = ( props ) => {
     titleClass = props.messageType === 'success' ? 'colorSuccess' : 'colorWarning';
     title = props.messageContent;
   }
-  console.log(title);
-  console.log(titleClass);
   return(
     <Modal show={ props.show !== false } onHide={ () => props.close() }>
       <Modal.Header closeButton>

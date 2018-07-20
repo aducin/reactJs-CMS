@@ -48,15 +48,7 @@ export default class OrderContainer extends React.Component {
 		} else if (nextState.clear) {
 			this.setState({ clear: false });
 		} else if (removedDb && removedId) {
-			this.setState({
-				clear: true,
-				curShipment: Config.message.orders.defaultShipmentNumber,
-				db: undefined,
-				disable: false,
-				header: DefaultHeader,
-				id: undefined,
-				shipmentNumber: false
-			});
+			this.removeDb();
 		} else if (noData && paramsAvailable && !this.state.inProgress) {
 			this.setUrlCheck();
 		} else if ((newParams || newAction) && paramsAvailable) {
@@ -144,6 +136,17 @@ export default class OrderContainer extends React.Component {
 			}).finally(() => {
 				this.setState({ inProgress: false });
 			});
+	}
+	removeDb() {
+		this.setState({
+			clear: true,
+			curShipment: Config.message.orders.defaultShipmentNumber,
+			db: undefined,
+			disable: false,
+			header: DefaultHeader,
+			id: undefined,
+			shipmentNumber: false
+		});
 	}
 	searchOrder(data) {
 		let url;

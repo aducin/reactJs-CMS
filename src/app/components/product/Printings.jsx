@@ -2,9 +2,10 @@ import React from 'react';
 import axios from 'axios';
 import 'font-awesome/css/font-awesome.min.css';
 
+import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
 import { setUrl } from '../../helper/functions.js';
-
+import ProductModel from '../../model/productModel';
 import Busy from '../dumb/Busy.jsx';
 import Title from '../dumb/Title.jsx';
 import PrintingAdd from '../modal/PrintingAdd.jsx';
@@ -23,20 +24,32 @@ export default class Printings extends React.Component {
       messageContent: null,
       messageType: null,
       modal: false,
-      saveDisable: true
+      saveDisable: true,
+      saveFile: false,
+      setTimeout: false
+    }
+  }
+
+  componentDidUpdate() {
+    if (this.state.saveFile) {
+      this.saveFile();
+    } else if (this.state.setTimeout) {
+      this.setTimeout();
+    }
+  }
+  componentWillUpdate(nextProps, nextState) {
+    if (nextState.saveFile) {
+      this.setState({ saveFile: false });
+    } else if (nextState.setTimeout) {
+      this.setState({ setTimeout: false });
     }
   }
 
   closeModal() {
-    this.setState({
-      modal: false
-    });
+    this.setState({ modal: false });
   }
-
   deleteHandler(id) {
-    let url = setUrl('pathProducts', 'printing');
-    url +=  '/' + id + '/' + this.props.token;
-    axios.delete(url)
+    ProductModel.deletePrinting(id, this.props.token)
       .then((response) => {
         let action = response.data.success  ? 'setSuccess' : 'setError';
         this.props[action](response.data.reason);
@@ -48,11 +61,10 @@ export default class Printings extends React.Component {
         this.setError(err.reason);
       });
   }
-
   fileSelectedHandler = event => {
     let files = event.target.files;
     if (files.length > 1) {
-      this.props.setError(this.props.message.products.oneFileOnly);
+      this.props.setError(Config.message.products.oneFileOnly);
     } else {
       this.setState({
         file: files[0],
@@ -60,26 +72,18 @@ export default class Printings extends React.Component {
       });
     }
   }
-
   saveFile = () => {
-    this.setState({
-      disabled: true
-    }, () => {
-      let url = setUrl('pathProducts', 'printing');
-      url += '/' + this.props.token + '?description=' + this.state.description;
-      const fd = new FormData();
-      fd.append('file[]', this.state.file, this.state.file.name);
-      axios.post(url, fd)
-        .then((response) => {
-          let type = response.data.success  ? 'success' : 'warning';
-          this.setMessage(type, response.data.reason);
-        })
-        .catch((err) =>{
-          this.setMessage('warning', err.reason);
-        });
-    });
+    const fd = new FormData();
+    fd.append('file[]', this.state.file, this.state.file.name);
+    ProductModel.saveFile(this.state.description, fd, this.props.token)
+      .then((response) => {
+        let type = response.data.success  ? 'success' : 'warning';
+        this.setMessage(type, response.data.reason);
+      })
+      .catch((err) =>{
+        this.setMessage('warning', err.reason);
+      });
   }
-
   setDescription = event => {
     let value = event.target.value;
     let saveDisable = value.length < 4;
@@ -88,28 +92,29 @@ export default class Printings extends React.Component {
       saveDisable: saveDisable
     });
   }
-
   setMessage(type, message) {
     this.setState({
       messageContent: message,
-      messageType: type
-    }, () => {
-      setTimeout(() => {
-        this.setState({
-          disabled: false,
-          messageContent: null,
-          messageType: null
-        }, () => {
-          this.closeModal();
-          this.props.getPrintings();
-        });
-      }, 3000);
+      messageType: type,
+      setTimeout: true
     });
+  }
+  setSaveFile = () => {
+    this.setState({
+      disabled: true,
+      saveFile: true
+    });
+  }
+  setTimeout() {
+    setTimeout(() => {
+      this.closeModal();
+      this.props.getPrintings();
+    }, Config.timer);
   }
 
   render() {
     let data = this.props.data || {};
-    let text = this.props.message;
+    let text = Config.message;
     if (this.props.inSearch) {
       return (
         <Busy title={text.printingsSearch} />
@@ -143,7 +148,7 @@ export default class Printings extends React.Component {
             message={text}
             messageContent={this.state.messageContent}
             messageType={this.state.messageType}
-            save={this.saveFile.bind(this)}
+            save={this.setSaveFile.bind(this)}
             saveDisable={this.state.saveDisable}
             show={this.state.modal}
           />
@@ -165,7 +170,7 @@ export default class Printings extends React.Component {
         let title = text.labels.printings;
         let head = Helper.createTableHead(['Lp.', 'Nazwa', 'Opis', 'Data', 'Akcja']);
         let list = data.list.map((el, index) => {
-          let linkPath = this.props.url.filePath + 'printing/' + el.id + '/' + el.name;
+          let linkPath = Config.url.filePath + 'printing/' + el.id + '/' + el.name;
           return (
             <tr key={ index } class="textCentered">
               <td style={styles.padding15px}>{index + 1}</td>

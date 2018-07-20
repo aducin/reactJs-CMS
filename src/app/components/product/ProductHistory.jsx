@@ -4,23 +4,29 @@ import ReactDOM from 'react-dom';
 import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
 import Title from '../dumb/Title.jsx';
-
 import Busy from '../dumb/Busy.jsx';
 import ButtonSingle from '../dumb/ButtonSingle.jsx';
 
 const ProductHistory = ( props ) => {
-	var product = props.product;
-	var text = props.message;
-	var url = props.url;
+	const product = props.product;
+	const text = Config.message;
+	let history = product.history;
+	let urlAddress = "products/edition/" + history.id;
 	if (!product.searched) {
 		return (
 			<Busy title={text.loading} />
 		)
+	} else if (product.history.empty) {
+		return (
+		<div class="container bgrContent paddingBottom2 marginTop2 borderRadius10">
+			<Title title={text.products.noHistory} />
+			<ButtonSingle link={urlAddress} classMain="col-xs-12 col-md-2" className="form-control btn btn-primary" content="Edycja" />
+			<ButtonSingle link="products" classMain="col-xs-12 col-md-2" className="form-control btn btn-info" content="Wyczyść" />
+		</div>
+		)
 	} else {
-		let history = product.history;
 		let head = Helper.createTableHead(['Lp.', 'ID', 'Data', 'Ilość', 'Miejsce', 'Sklep']);
-		let title = props.message.historyTitle + history.id;
-		let urlAddress = "products/edition/" + history.id;
+		let title = text.historyTitle + history.id;
 		let finalList = history.list.map((el, index) => {
 			return (
 	    		<tr key={index}>

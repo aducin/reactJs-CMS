@@ -1,12 +1,13 @@
 import React from 'react';
 import DatePicker from 'react-datepicker';
 
+import Config from '../../Config';
 import Label from '../dumb/Label.jsx';
 import Select from '../dumb/Select.jsx';
 import Title from '../dumb/Title.jsx';
 
 const accountHeader = ( props ) => {
-  let message = props.message;
+  let message = Config.message;
   let stateOptions = props.states;
   let typeOptions = props.types;
   let xml;

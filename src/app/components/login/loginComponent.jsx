@@ -1,13 +1,12 @@
 import React from 'react';
 
-import Footer from '../dumb/Footer.jsx';
-
 import './login.css';
 
 import Config from '../../Config';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import Cookies from 'universal-cookie';
 import LoginModel from '../../model/loginModel';
+import Footer from '../dumb/Footer.jsx';
 
 const cookies = new Cookies();
 
@@ -44,15 +43,8 @@ export default class LoginComponent extends React.Component {
 			this.setState({ checkData: false });
 		} else if (nextState.failure) {
 			this.setTimeout();
-		}
-		let curCookie = cookies.get('ad9bis');
-		let tokenCheck = reactLocalStorage.get('token');
-		if (tokenCheck !== undefined || curCookie !== undefined) {
-			let token = tokenCheck !== undefined ? tokenCheck : curCookie;
-			this.setState({
-				checking: true,
-				curToken: token
-			});
+		} else if (!nextState.checking) {
+			this.getToken();
 		}
 	}
 
@@ -73,6 +65,17 @@ export default class LoginComponent extends React.Component {
 			}
 		});
 	};
+	getToken() {
+		let curCookie = cookies.get('ad9bis');
+		let tokenCheck = reactLocalStorage.get('token');
+		if (tokenCheck !== undefined || curCookie !== undefined) {
+			let token = tokenCheck !== undefined ? tokenCheck : curCookie;
+			this.setState({
+				checking: true,
+				curToken: token
+			});
+		}
+	}
 	handleCheckox(e) {
 		this.setState({
 			remember: e.target.checked,
@@ -158,9 +161,9 @@ export default class LoginComponent extends React.Component {
 					<div class="col-sm-3 pull-left">
 					</div>
 					<div class="col-sm-6 pull-left">
-        				<h2>{Config.message.authorisation}</h2>
-        			</div>
-        		</div>
+						<h2>{Config.message.authorisation}</h2>
+					</div>
+				</div>
 			);
 		} else {
 			return (

@@ -1,7 +1,7 @@
 import React from 'react';
 
+import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
-
 import Busy from '../dumb/Busy.jsx';
 import Title from '../dumb/Title.jsx';
 
@@ -10,7 +10,7 @@ const LastOrders = ( props ) => {
     props.setLastOrder(current, id);
   };
   let data = props.data || {};
-  let text = props.message;
+  let text = Config.message;
   const styles = {
     padding15px: {paddingTop: '15px'}
   };

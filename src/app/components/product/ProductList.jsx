@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom';
 import ReactTooltip from 'react-tooltip';
 import 'font-awesome/css/font-awesome.min.css';
 
+import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
 import Title from '../dumb/Title.jsx';
-
 import Busy from '../dumb/Busy.jsx';
 import ButtonSingle from '../dumb/ButtonSingle.jsx';
 
@@ -15,8 +15,8 @@ const styles = {
 
 const ProductList = ( props ) => {
 	var product = props.product;
-	var text = props.message;
-	var url = props.url;
+	var text = Config.message;
+	var url = Config.url;
 	if (!product.searched || props.searching) {
 		return(
 			<Busy title={text.loading} />

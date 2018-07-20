@@ -2,6 +2,7 @@ import React from 'react';
 
 import 'font-awesome/css/font-awesome.min.css';
 
+import Config from '../../Config';
 import Title from '../dumb/Title.jsx';
 
 const leftMargin = {marginLeft: '20px'};
@@ -9,7 +10,7 @@ const leftMargin = {marginLeft: '20px'};
 const accountDetail = ( props ) => {
   if (props.empty) {
     return (
-      <Title title={props.message.account.noData} />
+      <Title title={Config.message.account.noData} />
     )
   } else {
     let field = props.sortBy;
@@ -33,7 +34,7 @@ const accountDetail = ( props ) => {
     let content, head, summary, row3, row17;
     let contentArray = [];
     let list = props.data.list.map((el) => {
-      let curType = props.types.filter((secondEl) => { return parseInt(secondEl.id) === parseInt(el.type); });
+      let curType = Config.accountTypes.filter((secondEl) => { return parseInt(secondEl.id) === parseInt(el.type); });
       if (curType[0]) {
         el.typeName = curType[0].name;
       }
@@ -41,7 +42,7 @@ const accountDetail = ( props ) => {
     });
     list.sort(sortFn);
     if (!props.ascending) list.reverse();
-    let message = props.message;
+    let message = Config.message;
     let title = props.data.automatic ? message.account.automatic : message.account.notAutomatic[0] + list.length + ' ' + message.account.notAutomatic[1];
     if (!props.data.automatic && props.data.amount === props.data.maxAmount) {
       title += message.account.maxAmount;

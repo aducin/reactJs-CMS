@@ -33,8 +33,6 @@ export default class CustomerContainer extends React.Component {
   }
   componentWillUpdate(nextProps, nextState) {
     if (nextProps.params.email && nextProps.params.email !== nextState.paramAddress) {
-      console.log(nextProps.params.email);
-      console.log(nextState.paramAddress);
       //let address = {...nextState.address, text: nextProps.params.email};
       this.setState({
         action: 'searchCustomer',

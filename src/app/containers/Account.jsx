@@ -307,7 +307,6 @@ export default class AccountContainer extends React.Component {
 					disable={this.state.inProgress}
 					handleSelectChange={this.selectChange.bind(this)}
 					link={this.state.link}
-					message={Config.message}
 					selected={this.state.selected}
 					selectedRow={this.state.selectedRow}
 					states={curStateOpt}
@@ -325,12 +324,10 @@ export default class AccountContainer extends React.Component {
 					columns={Config.accountColumns}
 					data={data}
 					empty={empty}
-					message={Config.message}
 					selectedRow={this.state.selectedRow}
 					selectRow={this.selectRow.bind(this)}
 					sortTable={this.sortTable.bind(this)}
 					sortBy={this.state.sortBy}
-					types={Config.accountTypes}
 				/>
 			);
 			if (this.state.modal) {
@@ -348,9 +345,7 @@ export default class AccountContainer extends React.Component {
 						disable={this.state.modalDisable}
 						error={this.state.modalObjError}
 						handleChange={this.modalChange.bind(this)}
-						message={Config.message}
 						modalMessage={this.state.modalMessage}
-						numbers={Config.accountNumbers}
 						saveModal={this.modalSave.bind(this)}
 						show={this.state.modal}
 						states={stateOptions}

@@ -342,6 +342,7 @@ const Config = {
 			oneFileOnly: 'Proszę dodawać pliki pojedynczo',
 			nameSearch: 'Wyszukiwanie po nazwie:',
 			newPrinting: 'Nowy dokument do wydruku',
+			noHistory: 'Brak zapisanych zmian ilości wybranego produktu',
 			printingsLoading: 'Dokumenty są ładowane - proszę czekać...',
 			saveFile: 'Zapisz dokument'
 		},
