@@ -135,16 +135,18 @@ export default class ProductEdition extends React.Component {
 	}
 
 	saveFull() {
-		let data = {};
 		let curState = {...this.state};
-		this.state.fields.forEach((el) => {
-			data[el] = curState[el];
-		});
+		let data = this.state.fields.reduce((obj, key) => {
+			obj[key] = curState[key];
+			return obj;
+		}, {});
+		if (typeof(data.productTags) === 'object') {
+			let tags = data.productTags.map((el) => {
+				return el.name;
+			});
+			data.productTags = tags.join(', ');
+		}
 		data.action = 'full';
-		let tags = data.productTags.map((el) => {
-			return el.name;
-		});
-		data.productTags = tags.join(', ');
 		this.props.save(data);
 	}
 
