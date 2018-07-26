@@ -6,13 +6,13 @@ import Busy from '../dumb/Busy.jsx';
 import Title from '../dumb/Title.jsx';
 
 const Modified = ( props ) => {
-	let text = Config.message;
-	let deleteModified = (id) => {
+	const deleteModified = (id) => {
 		props.delete(id);
 	}
 	const styles = {
 		padding15px: {paddingTop: '15px'}
 	};
+	const text = Config.message;
 	if (props.inSearch) {
 		return (
 			<Busy title={text.modifiedSearch} />
@@ -29,11 +29,11 @@ const Modified = ( props ) => {
 				let linkPath = Config.url.path + 'wagony-n/' + el.id + '-' + el.link_rewrite + '.html';
 				return (
 					<tr key={ index } class="textCentered">
-		        		<td style={styles.padding15px}>{el.id}</td>
-		        		<td style={styles.padding15px}><a href={linkPath} target="blank">{el.name}</a></td>
-		        		<td style={styles.padding15px}>{el.date}</td>
-		        		<td><input class="form-control btn btn-primary" type="button" value="Usuń" onClick={ deleteModified.bind(this, el.id) } /></td>
-		        	</tr>
+						<td style={styles.padding15px}>{el.id}</td>
+						<td style={styles.padding15px}><a href={linkPath} target="blank">{el.name}</a></td>
+						<td style={styles.padding15px}>{el.date}</td>
+						<td><input class="form-control btn btn-primary" type="button" value="Usuń" onClick={ deleteModified.bind(this, el.id) } /></td>
+					</tr>
 				)
 			});
 			let table = Helper.setTable(title, head, list);
