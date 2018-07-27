@@ -15,7 +15,7 @@ const ProductModel = {
   },
   deleteModified: (id, token) => {
     let path = productUrl + '/modified/' + id;
-    return axios.delete(url, {
+    return axios.delete(path, {
       params: { token: token }
     });
   },
