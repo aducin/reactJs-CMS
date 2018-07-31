@@ -39,7 +39,6 @@ export const State = {
   nameSearch: false,
   nameSearchData: {},
   printingSearch: false,
-  promise: null,
   restoreList: false,
   saveData: {},
   searching: false,

@@ -77,7 +77,7 @@ export default class CustomerContainer extends React.Component {
       })
       .catch((err) =>{
         let message = err.message || Config.message.error;
-        this.props.setWarning(message);
+        this.props.mainModel.setMessage('warning', message);
       })
       .finally(() => {
         this.setState({ inProgress: false });
@@ -87,14 +87,14 @@ export default class CustomerContainer extends React.Component {
     CustomerModel.sendCustomerEmail(this.state.emailAction, this.props.params.email, this.props.token)
       .then((response) => {
         if (response.data.success) {
-          this.props.setSuccess(response.data.reason);
+          this.props.mainModel.setMessage('success', response.data.reason);
         } else {
           throw new Error(response.data.reason);
         }
       })
       .catch((err) =>{
         let message = err.message || Config.message.error;
-        this.props.setWarning(message);
+        this.props.mainModel.setMessage('warning', message);
       })
       .finally(() =>{
         this.setState({

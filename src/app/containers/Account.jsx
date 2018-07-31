@@ -16,7 +16,6 @@ import AccountDetail from '../components/account/AccountDetail.jsx';
 import AccountHeader from '../components/account/AccountHeader.jsx';
 import AccountModal from '../components/modal/AccountModal.jsx';
 import AccountModel from '../model/accountModel';
-import MainModel from '../model/mainModel';
 import { State } from '../helper/accountState';
 import { createReducedObj } from '../helper/functions';
 import { setModalData } from '../helper/accountFunctions';
@@ -96,23 +95,18 @@ export default class AccountContainer extends React.Component {
 		obj[momentVar] = data;
 		obj[stringVar] = data.format("YYYY-MM-DD");
 		obj.saveDisabled = this.modalDisableHandler(this.state);
-		this.setState({
-			modalObj: obj
-		});
+		this.setState({ modalObj: obj });
 	}
 	displayMessage(text, type) {
 		this.model.setMessage();
 		this.setState({ modalMessage: { text: text, type: type }});
 	}
 	handleDisplayMessage(bool) {
-		if (bool) {
-			this.setState({ display: true })
-		} else {
+		if (!bool) {
 			let type = this.state.modalMessage.type;
 			this.closeModal(type);
-			this.setState({ display: false })
 		}
-
+		this.setState({ display: bool });
 	}
 	handleList(list) {
 		let data = createReducedObj(list.data, this.state.innerFields);
@@ -186,9 +180,7 @@ export default class AccountContainer extends React.Component {
 				curSelected = id;
 			}
 		}
-		this.setState({
-			selectedRow: curSelected
-		});
+		this.setState({ selectedRow: curSelected });
 	}
 	setAccount() {
 		let data = {

@@ -159,9 +159,8 @@ export default class ProductEdition extends React.Component {
 		const centered = Config.css.centered;
 		const message = Config.message;
 		const labels = message.labels;
-		const url = this.props.url;
+		const url = Config.url;
 		let disabled = Boolean(this.props.disable);
-		let edition;
 		if (this.props.dataFull && this.props.dataFull.id !== undefined && this.props.dataFull.id !== 0) {
 			let product = this.props.dataFull;
 			const curId = product.id;

@@ -101,7 +101,7 @@ export default class OrderContainer extends React.Component {
 					}
 				}).catch((err) =>{
 					let message = err.message || Config.message.error;
-					this.props.setWarning(message);
+					this.props.mainModel.setMessage('warning', message);
 				});
 			}
 		}
@@ -128,7 +128,7 @@ export default class OrderContainer extends React.Component {
 				}
 			}).catch((err) =>{
 				let message = err.message || Config.message.error;
-				this.props.setWarning(message);
+				this.props.mainModel.setMessage('warning', message);
 				setTimeout(() => {
 					let url = Config.url.path + Config.url.pathSuffix + Config.url.pathOrder;
 					window.location.href = url;
@@ -168,14 +168,14 @@ export default class OrderContainer extends React.Component {
 		OrderModel.sendEmail(action, this.props.params.db, this.props.params.id, this.props.token)
 			.then((response) => {
 				if (response.data.success) {
-					this.props.setSuccess(response.data.reason);
+					this.props.mainModel.setMessage('success', response.data.reason);
 				} else {
 					throw new Error(response.data.reason);
 				}
 			})
 			.catch((err) =>{
 				let message = err.message || Config.message.error;
-				this.props.setWarning(message);
+				this.props.mainModel.setMessage('warning', message);
 			});
 	}
 	setHeaderData(data) {
@@ -194,10 +194,8 @@ export default class OrderContainer extends React.Component {
 	}
 	setError(data) {
 		let message = data.value + Config.notANumber;
-		this.props.setWarning(message);
-		this.setState({
-			error: data
-		});
+		this.props.mainModel.setMessage('warning', message);
+		this.setState({ error: data });
 	}
 	setShipmentNumber(e) {
 		this.setState({
@@ -222,9 +220,9 @@ export default class OrderContainer extends React.Component {
 				currentVoucher: number
 			});
 		} else if (action === 'add') {
-			this.props.setWarning(Config.message.orders.voucherMax);
+			this.props.mainModel.setMessage('warning', Config.message.orders.voucherMax);
 		} else if (action === 'subtract') {
-			this.props.setWarning(Config.message.orders.voucherMin);
+			this.props.mainModel.setMessage('warning', Config.message.orders.voucherMin);
 		}
 	}
 

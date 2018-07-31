@@ -80,7 +80,7 @@ export default class PostalContainer extends React.Component {
 			})
 			.catch((err) =>{
 				let message = err.message || Config.message.error;
-				this.props.setWarning(message);
+				this.props.mainModel.setMessage('warning', message);
 			})
 			.finally(() => {
 				this.setState({ inProgress: false });
@@ -126,7 +126,7 @@ export default class PostalContainer extends React.Component {
 			.catch((err) =>{
 				this.closeModal();
 				let message = err.message || Config.message.error;
-				this.props.setWarning(message);
+				this.props.mainModel.setMessage('warning', message);
 			})
 			.finally(() => {
 				this.setState({ modalInProgress: false });
