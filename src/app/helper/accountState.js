@@ -1,5 +1,4 @@
 export const State = {
-  action: null,
   ajaxSent: false,
   ascending: false,
   createXml: false,

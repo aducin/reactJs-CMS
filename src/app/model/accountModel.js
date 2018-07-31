@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Observable } from 'rxjs/Observable';
+import { Subject } from 'rxjs/Subject';
 import { map, mapTo, mergeMap } from 'rxjs/operators';
 import 'rxjs/add/observable/fromPromise';
 
@@ -10,22 +11,30 @@ import Config from '../Config';
 import { setUrl } from '../helper/functions.js';
 import { appendTime, getAmounts, getTaxes } from '../helper/accountFunctions';
 
-let path;
 let pathUrl = Config.url.serverPath + 'accounts';
 
-const AccountModel = {
-  createXml: (from, to, token) => {
-    path = Config.url.serverPath + 'jpk/' + token;
+export default class AccountModel {
+  displayModalMessage = new Subject();
+  list = new Subject();
+  loading = new Subject();
+  path;
+
+  constructor() {}
+
+  createXml(from, to, token) {
+    this.path = Config.url.serverPath + 'jpk/' + token;
     let params = {
       dateFrom: from,
       dateTo: to
     };
-    return axios.post(path, { params }, Config.ajaxConfig);
-  },
-  getData: (params, token) => {
-    path = pathUrl + '/' + token;
-    let promise = axios.get(path, { params });
-    return Observable.fromPromise(promise).map(response => {
+    return axios.post(this.path, { params }, Config.ajaxConfig);
+  }
+
+  getData(params, token) {
+    this.loading.next(true);
+    this.path = pathUrl + '/' + token;
+    let promise = axios.get(this.path, { params });
+    let result = Observable.fromPromise(promise).map(response => {
       let finalObj = {...response};
       if (response.data.success) {
         if (response.data.list) {
@@ -38,13 +47,22 @@ const AccountModel = {
       }
       return finalObj;
     });
-  },
-  rowSave: (data) => {
+    this.list.next(result);
+    this.loading.next(false);
+  }
+
+  rowSave(data) {
     return axios.post(pathUrl, {data}, Config.ajaxConfig);
-  },
-  rowUpdate: (data) => {
+  }
+
+  rowUpdate(data) {
     return axios.put(pathUrl, {data}, Config.ajaxConfig);
   }
-}
 
-export default AccountModel;
+  setMessage() {
+    this.displayModalMessage.next(true);
+    setTimeout(function() {
+      this.displayModalMessage.next(false);
+    }.bind(this), Config.timer);
+  }
+}

@@ -9,11 +9,10 @@ import Input from '../dumb/Input.jsx';
 import Label from '../dumb/Label.jsx';
 import Select from '../dumb/Select.jsx';
 
-const marginLeft = { marginLeft: '-15px'};
-
 const accountModal = ( props ) => {
-  let bodyHeight = { height: '680px'};
-  let message = Config.message;
+  const bodyHeight = { height: '680px'};
+  const marginLeft = { marginLeft: '-15px'};
+  const message = Config.message;
   let title = props.modalMessage.text ? props.modalMessage.text : props.title;
   let titleClass;
   if (props.modalMessage.type) {

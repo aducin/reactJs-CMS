@@ -1,14 +1,26 @@
 import React from 'react';
 
+import axios from 'axios';
+import { Subject } from 'rxjs/Subject';
+
 import Config from '../Config';
 
-import axios from 'axios';
+export default class MainModel {
+  success = new Subject();
+  warning = new Subject();
 
-const MainModel = {
-  checkToken: (token) => {
+  constructor() {}
+
+  checkToken(token) {
     let path = Config.url.serverPath + 'login?token=' + token;
     return axios.get(path);
   }
-}
 
-export default MainModel;
+  setMessage(type, value) {
+    if (type === 'success') {
+      this.success.next(value);
+    } else {
+      this.warning.next(value);
+    }
+  }
+}

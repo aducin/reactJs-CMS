@@ -31,11 +31,13 @@ import { setUrl } from '../helper/functions.js';
 export default class App extends React.Component {
 	constructor(props) {
 		super(props);
+		this.model = new MainModel();
 		this.state = State;
-		this.subscription = null;
 	}
 
 	componentDidMount() {
+		this.model.success.subscribe((value) => this.setMessage(false, true, value));
+		this.model.warning.subscribe((value) => this.setMessage(true, false, value));
 		this.getToken(true);
 	}
 	componentDidUpdate() {
@@ -63,17 +65,12 @@ export default class App extends React.Component {
 		}
 	}
 
-	checkOrders() {
-		store.dispatch(product.setOrdersSearch());
-		let url = setUrl('pathOrder', 'last', this.state.token);
-		store.dispatch(product.setAction('setLastOrders', url));
-	}
 	checkToken(token) {
 		let data = {
 			action: 'tokenCheck',
 			token: token
 		};
-		MainModel.checkToken(token)
+		this.model.checkToken(token)
     	.then((response) => {
     		if (response.data.success) {
     			this.setState({
@@ -81,6 +78,7 @@ export default class App extends React.Component {
     				token: token
     			});	
     		} else {
+					this.clearToken();
     			throw new Error(response.data.reason);
     		}
     	})
@@ -158,21 +156,11 @@ export default class App extends React.Component {
 			toDisplay: message
 		});
 	};
-	setOrdersSearch = () => {
-		this.checkOrders();
-		this.subscription = Observable.interval(300000)
-		.subscribe(int => this.checkOrders());
-	};
 	setSuccess = (message) => {
 		this.setMessage(false, true, message);
 	};
 	setWarning = (message) => {
 		this.setMessage(true, false, message);
-	};
-	unsubscribe = () => {
-		if (this.subscription) {
-			this.subscription.unsubscribe();
-		}
 	};
 
 	render () {
@@ -187,14 +175,13 @@ export default class App extends React.Component {
 					approved: this.state.approved,
 					error: this.state.error,
 					logoutHandler: this.logout,
+					mainModel: this.model,
 					ordersSearch: this.state.ordersSearch,
-					searchOrders: this.setOrdersSearch.bind(this),
 					setSuccess: this.setSuccess,
 					setWarning: this.setWarning,
 					success: this.state.success,
 					toDisplay: this.state.toDisplay,
 					token: this.state.token,
-					unsubscribe: this.unsubscribe
 				})}
 				{footer}
 			</div>

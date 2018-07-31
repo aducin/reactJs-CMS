@@ -2,6 +2,9 @@ import React from 'react';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import axios from 'axios';
 
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/interval';
+
 import Config from '../Config';
 import { setUrl } from '../helper/functions';
 
@@ -47,6 +50,7 @@ const ProductModel = {
   nameSearch: (data) => {
     return axios.get( productUrl, {params: data} );
   },
+  newestOrdersInterval: Observable.interval(Config.intervalOrders),
   saveFile: (description, fd, token) => {
     let path = setUrl('pathProducts', 'printing');
     path += '/' + token + '?description=' + description;

@@ -17,6 +17,7 @@ import ProductList from '../components/product/ProductList.jsx';
 import Modified from '../components/product/Modified.jsx';
 import LastOrders from '../components/product/LastOrders.jsx';
 import Printings from '../components/product/Printings.jsx';
+import MainModel from '../model/mainModel';
 import ProductModel from '../model/productModel';
 import { Header as DefaultHeader, State } from '../helper/productState';
 
@@ -33,6 +34,7 @@ export default class ProductContainer extends React.Component {
 	constructor(props) {
 		super(props);	 
 		this.state = State;
+		this.subscription = ProductModel.newestOrdersInterval.subscribe(() => this.checkNewestOrders());
 	}
 
 	componentDidUpdate() {
@@ -44,7 +46,7 @@ export default class ProductContainer extends React.Component {
 		}
 	}
 	componentWillUnmount() {
-		this.props.unsubscribe();
+		this.subscription.unsubscribe();
 	}
 	componentWillUpdate(nextProps, nextState) {
 		this.setDisabled(nextProps, nextState);
@@ -71,8 +73,6 @@ export default class ProductContainer extends React.Component {
 	checkUrl(nextProps, nextState) {
 		if (nextProps.params.action !== undefined && nextProps.params.id !== undefined) {
 			let action = nextProps.params.action;
-			//let edition = action === 'edition' && nextState.editionSearched !== this.props.params.id;
-			//let history = action === 'history' && nextState.historySearched !== this.props.params.id;
 			let edition = action === 'edition' && nextState.editionSearched !== nextProps.params.id;
 			let history = action === 'history' && nextState.historySearched !== nextProps.params.id;
 			if (edition || history) {
@@ -119,7 +119,7 @@ export default class ProductContainer extends React.Component {
 					};
 				}
 				store.dispatch(product.setModified(data));
-				this.props.searchOrders();
+				this.checkNewestOrders();
 			})
 			.catch((err) =>{
 				this.props.setWarning(err.message);
@@ -131,6 +131,11 @@ export default class ProductContainer extends React.Component {
 					printingSearch: true
 				});
 			});
+	}
+	checkNewestOrders() {
+		store.dispatch(product.setOrdersSearch());
+		let url = setUrl('pathOrder', 'last', this.props.token);
+		store.dispatch(product.setAction('setLastOrders', url));
 	}
 	checkPrintings() {
 		let promise = ProductModel.getPrintings(this.props.token);

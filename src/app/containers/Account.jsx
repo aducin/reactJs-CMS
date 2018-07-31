@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 import { Modal } from 'react-bootstrap';
 import moment from 'moment';
 
+import 'rxjs/add/operator/switchMap';
+
 import store from '../store';
 import * as account from '../actions/accountActions.jsx';
 import Busy from '../components/dumb/Busy.jsx';
@@ -14,6 +16,7 @@ import AccountDetail from '../components/account/AccountDetail.jsx';
 import AccountHeader from '../components/account/AccountHeader.jsx';
 import AccountModal from '../components/modal/AccountModal.jsx';
 import AccountModel from '../model/accountModel';
+import MainModel from '../model/mainModel';
 import { State } from '../helper/accountState';
 import { createReducedObj } from '../helper/functions';
 import { setModalData } from '../helper/accountFunctions';
@@ -23,33 +26,33 @@ import { setModalData } from '../helper/accountFunctions';
 })
 
 export default class AccountContainer extends React.Component {
+
 	constructor(props) {
-		super(props);	 
+		super(props);
+		this.model = new AccountModel();
 		this.state = State;
 	}
 
+	componentDidMount() {
+		this.model.displayModalMessage.subscribe((bool) => this.handleDisplayMessage(bool));
+		this.model.list
+			.switchMap(observable => observable)
+			.subscribe( (list) => this.handleList(list) ),
+			(err) => this.props.mainModel.setMessage('warning', err.message);
+		this.model.loading.subscribe((bool) => this.setState({ inProgress: bool }));
+	}
+
 	componentDidUpdate() {
-		if (this.state.action) {
-			this.setAjax();
-		} else if (this.state.errorHandler) {
+		if (this.state.errorHandler) {
 			this.modalErrorHandler();
-		} else if (this.state.display) {
-			this.setMessageTimeout();
 		}
 	}
 	componentWillUpdate(nextProps, nextState) {
-		if (!nextState.ajaxSent) {
-			this.setState({
-				action: 'automatic',
-				ajaxSent: true,
-				inProgress: true
-			});
-		} else if (nextState.action) {
-			this.setState({ action: null });
+		if (!nextState.ajaxSent && nextProps.token ) {
+			this.model.getData(null, nextProps.token);
+			this.setState({ ajaxSent: true });
 		} else if (nextState.errorHandler) {
 			this.setState({ errorHandler: null });
-		} else if (nextState.display) {
-			this.setState({ display: null });
 		}
 	}
 	shouldComponentUpdate(nextProps, nextState) {
@@ -57,10 +60,11 @@ export default class AccountContainer extends React.Component {
 	}
 
 	closeModal(type) {
-		let action = type === 'success' ? 'getAccounts' : null;
+		if (type === 'success') {
+			let params = this.setParams({...this.state.selected});
+			this.model.getData(params, this.props.token);
+		}
 		this.setState({
-			action: action,
-			inProgress: false,
 			modal: false,
 			modalDisable: false,
 			modalMessage: { text: null, type: null }
@@ -70,20 +74,18 @@ export default class AccountContainer extends React.Component {
 		if (this.state.selected.dateFrom !== null && this.state.selected.dateTo !== null) {
 			let from = this.state.selected.dateFrom.format('YYYY-MM-DD');
 			let to = this.state.selected.dateTo.format('YYYY-MM-DD');
-			AccountModel.createXml(from, to , this.props.token)
+			this.model.createXml(from, to , this.props.token)
 				.then((response) => {
 					if (response.data.success) {
-						this.props.setSuccess(response.data.reason);
-						this.setState({
-							link: response.data.path
-						});
+						this.props.mainModel.setMessage('success', response.data.reason);
+						this.setState({ link: response.data.path });
 					} else {
 						throw new Error(response.data.reason);
 					}
 				})
 				.catch((err) =>{
 					let message = err.message || Config.message.error;
-					this.props.setWarning(message);
+					this.props.mainModel.setMessage('warning', message);
 				});
 		}
 	}
@@ -99,25 +101,22 @@ export default class AccountContainer extends React.Component {
 		});
 	}
 	displayMessage(text, type) {
-		this.setState({
-			display: true,
-			modalMessage: { text: text, type: type }
-		});
+		this.model.setMessage();
+		this.setState({ modalMessage: { text: text, type: type }});
 	}
-	getAccounts(custom = false, params = null) {
-		let observable = AccountModel.getData(params, this.props.token);
-		observable.subscribe((response) => {
-			let data = createReducedObj(response.data, this.state.innerFields);
-			store.dispatch(account.setList(data));
-		}, (err) => {
-			let message = err.message || Config.message.error;
-			this.props.setWarning(message);
-		}, () => {
-			this.setState({
-				action: null,
-				inProgress: false
-			});
-		});
+	handleDisplayMessage(bool) {
+		if (bool) {
+			this.setState({ display: true })
+		} else {
+			let type = this.state.modalMessage.type;
+			this.closeModal(type);
+			this.setState({ display: false })
+		}
+
+	}
+	handleList(list) {
+		let data = createReducedObj(list.data, this.state.innerFields);
+		store.dispatch(account.setList(data));
 	}
 	modalChange(e) {
 		let name = e.target.name;
@@ -157,10 +156,8 @@ export default class AccountContainer extends React.Component {
 		});
 	}
 	modalSave() {
-		this.setState({
-			action: 'setAccount',
-			modalDisable: true
-		});
+		this.setAccount();
+		this.setState({ modalDisable: true });
 	}
 	openModal(action) {
 		let obj = setModalData(action, this.props.account.list, this.state.selectedRow);
@@ -174,10 +171,9 @@ export default class AccountContainer extends React.Component {
 		let value = e.target.value;
 		let selected = {...this.state.selected};
 		selected[name] = value;
-		this.setState({
-			action: 'getAccounts',
-			selected: selected
-		});
+		let params = this.setParams(selected);
+		this.model.getData(params, this.props.token);
+		this.setState({ selected: selected });
 	}
 	selectRow(id) {
 		let curSelected = null;
@@ -185,7 +181,7 @@ export default class AccountContainer extends React.Component {
 		if (this.state.selectedRow !== id && listCheck !== -1) {
 			let closed = this.props.account.list[listCheck].closed;
 			if (closed) {
-				this.props.setWarning(Config.message.account.closed);
+				this.props.mainModel.setMessage('error', Config.message.account.closed);
 			} else {
 				curSelected = id;
 			}
@@ -195,7 +191,10 @@ export default class AccountContainer extends React.Component {
 		});
 	}
 	setAccount() {
-		let data = {...this.state.modalObj, token: this.props.token};
+		let data = {
+			...this.state.modalObj,
+			token: this.props.token
+		};
 		for (let key in data) {
 			if (data.hasOwnProperty(key)) {
 				let index = Config.accountNumbers.findIndex((el) => key === el);
@@ -207,42 +206,27 @@ export default class AccountContainer extends React.Component {
 			}
 		}
 		let action = this.state.modal === 'add' ? 'rowSave' : 'rowUpdate';
-		AccountModel[action](data).then((response) => {
+		this.model[action](data).then((response) => {
 			let type = response.data.success ? 'success' : 'error';
 			this.displayMessage(response.data.reason, type);
 		}).catch((err) =>{
 			this.displayMessage(Config.message.error, 'error');
 		});
 	}
-	setAjax() {
-		if (this.state.action === 'automatic' || this.state.action === 'getAccounts') {
-			let setParams = this.state.action !== 'automatic';
-			let params = setParams ? this.setParams() : null;
-			this.getAccounts(setParams, params);
-		} else if (this.state.action === 'setAccount') {
-			this.setAccount();
-		}
-	}
 	setDate(name, value) {
 		let selected = {...this.state.selected};
 		selected[name] = value;
-		var createXml = selected.dateFrom !== null && selected.dateTo !== null;
+		const createXml = selected.dateFrom !== null && selected.dateTo !== null;
+		let params = this.setParams(selected);
+		this.model.getData(params, this.props.token);
 		this.setState({
-			action: 'getAccounts',
 			createXml: createXml,
 			selected: selected
 		});
 	}
-	setMessageTimeout() {
-		setTimeout(function() {
-			let type = this.state.modalMessage.type;
-			this.closeModal(type);
-		}.bind(this), Config.timer);
-	}
-	setParams() {
+	setParams(selected) {
 		let params = {};
-		let selected = this.state.selected;
-		for (let el in this.state.selected) {
+		for (let el in selected) {
 			if (selected[el] && selected[el] !== -1) {
 				params[el] = selected[el] instanceof moment ? selected[el].format("YYYY-MM-DD") : selected[el];
 			}

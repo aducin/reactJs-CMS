@@ -119,6 +119,7 @@ const Config = {
 			borderRadius: 5,
 		},
 	},
+	intervalOrders: 300000,
 	message: {
 		account: {
 			accessories: 'Części zamienne',
