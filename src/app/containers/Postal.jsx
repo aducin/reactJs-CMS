@@ -1,7 +1,6 @@
 import React from 'react';
 import { Router, Route, IndexRoute, browserHistory, hashHistory } from 'react-router';
 import { connect } from 'react-redux';
-import { reactLocalStorage } from 'reactjs-localstorage';
 
 import store from '../store';
 import * as postal from '../actions/postalActions.jsx';
@@ -23,7 +22,7 @@ import { validateNumber } from '../helper/validator';
 export default class PostalContainer extends React.Component {
 	constructor(props) {
 		super(props);	 
-		this.state = State;
+		this.state = {...State};
 	}
 
 	componentDidUpdate() {
@@ -37,10 +36,7 @@ export default class PostalContainer extends React.Component {
 	}
 	componentWillUpdate(nextProps, nextState) {
 		if (!nextState.ajaxSent) {
-			this.setState({
-				action: 'getPostal',
-				ajaxSent: true
-			});
+			this.setState({ action: 'getPostal', ajaxSent: true });
 		} else if (nextState.action) {
 			this.setState({ action: null });
 		}
@@ -50,14 +46,8 @@ export default class PostalContainer extends React.Component {
 	}
 
 	closeModal() {
-		let action = null;
-		if (this.state.refresh) {
-			action = 'getPostal';
-		}
-		this.setState({
-			action: action,
-			modal: false
-		});
+		let action = this.state.refresh ? 'getPostal' : null;
+		this.setState({ action, modal: false });
 	}
 	displayMessage(state) {
 		setTimeout(() => {
@@ -78,19 +68,13 @@ export default class PostalContainer extends React.Component {
 	handleAmountToChange(e) {
 		let error = validateNumber(e.target.value);
 		let curAmount = error ? this.state.amountToChange : e.target.value;
-		this.setState({
-			amountToChange: curAmount,
-			error: error
-		});
+		this.setState({ amountToChange: curAmount, error: error });
 	}
 	openModal(type) {
 		this.setState({ modal: type });
 	}
 	saveNewAmount() {
-		this.setState({
-			action: 'setAmount',
-			modalInProgress: true
-		});
+		this.setState({ action: 'setAmount', modalInProgress: true });
 	}
 	setAmount() {
 		PostalModel.setData(this.state.amountToChange, this.state.modal)
@@ -98,10 +82,7 @@ export default class PostalContainer extends React.Component {
 				if (response.data.success) {
 					this.setState({
 						action: 'displayMessage',
-						actionMessage: {
-							text: response.data.reason,
-							type: 'success'
-						},
+						actionMessage: { text: response.data.reason, type: 'success' },
 						refresh: true
 					});
 				} else {
@@ -110,12 +91,9 @@ export default class PostalContainer extends React.Component {
 			})
 			.catch((err) =>{
 				this.closeModal();
-				let message = err.message || Config.message.error;
-				this.props.mainModel.setMessage('warning', message);
+				this.props.mainModel.setMessage('warning', err.message);
 			})
-			.finally(() => {
-				this.setState({ modalInProgress: false });
-			});
+			.finally( () => this.setState({ modalInProgress: false }) );
 	}
 
 	render() {
@@ -123,22 +101,8 @@ export default class PostalContainer extends React.Component {
 		let busy, header, message, modal, postalDetail, postalHeader;
 		let messageStyle = this.props.success ? Config.alertSuccess : Config.alertError;
 		if (this.props.approved) {
-			header = (
-				<div class="height12">
-					<Header
-						active="postal"
-						buttonHandler={this.props.logoutHandler.bind(this)}
-						disable={this.state.disable}
-						fields={Config.fields}
-					/>
-				</div>
-			);
-			message = (
-				<Message
-					message={this.props.toDisplay}
-					messageStyle={messageStyle}
-				/>
-			);
+			header = <Header active="postal" buttonHandler={this.props.logoutHandler.bind(this)} disable={this.state.disable} />;
+			message = <Message message={this.props.toDisplay} messageStyle={messageStyle} />;
 			postalHeader = (
 				<PostalHeader
 					amount={data.amount}
@@ -151,16 +115,10 @@ export default class PostalContainer extends React.Component {
 				busy = <Busy title={Config.message.loading} />;
 			}
 			if (data.list && !this.props.postal.loading) {
-				postalDetail = (
-					<PostalDetail
-						list={data.list}
-						message={Config.message}
-					/>
-				);
+				postalDetail = <PostalDetail list={data.list} message={Config.message} />;
 			}
 			if (this.state.modal) {
-				let postalMessage = Config.message.postal;
-				let title = this.state.modal === 'add' ? postalMessage.modalAdd : postalMessage.modalSubtract;
+				let title = this.state.modal === 'add' ? Config.message.postal.modalAdd : Config.message.postal.modalSubtract;
 				modal = (
 					<PostalChange
 						actionMessage={this.state.actionMessage}
