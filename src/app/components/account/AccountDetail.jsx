@@ -47,7 +47,7 @@ const accountDetail = ( props ) => {
     if (!props.data.automatic && props.data.amount === props.data.maxAmount) {
       title += message.account.maxAmount;
     }
-    let headArray = props.columns.map((el, index) => {
+    let headArray = Config.accountColumns.map((el, index) => {
       if (el.value) {
         let icon;
         if (el.value !== field) {
@@ -60,7 +60,7 @@ const accountDetail = ( props ) => {
           }
         }
         return (
-          <th onClick={() => props.sortTable(el.value, el.sort)} key={index} class="textAlignCenter cursorPointer">{el.name}<i class={icon} style={leftMargin} aria-hidden="true"></i></th>
+          <th onClick={() => props.sortTable(el.value)} key={index} class="textAlignCenter cursorPointer">{el.name}<i class={icon} style={leftMargin} aria-hidden="true"></i></th>
         );
       } else {
         return (

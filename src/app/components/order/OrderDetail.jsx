@@ -23,7 +23,7 @@ const voucherFields = ['Numer ID', 'Referencja', 'Koszt produktów', 'Koszt tran
 
 const OrderDetail = ( props ) => {
 	let empty = (props.details.additionalData === false && props.details.orderData === null);
-	let message = Config.message.orders;
+	const message = Config.message.orders;
 	if (empty || props.empty) {
 		return (
 			<div class="container bgrContent borderRadius10 marginTop40px paddingBottom40px">
@@ -35,7 +35,7 @@ const OrderDetail = ( props ) => {
 			</div>
 		);
 	} else {
-		let baseUrl = props.url.shopUrl;
+		let baseUrl = Config.url.shopUrl;
 		let buttons, buttonsSecondLine, customer, data, details, name, reference, shortCut, summary, tableHeaders, title, totalPaid;
 		let contentArray = [];
 		let db = props.details.currentDb === 'new' ? 'nowy panel' : 'stary panel';
@@ -49,21 +49,21 @@ const OrderDetail = ( props ) => {
 			data = props.details.additionalData;
 			customer = data.customer;
 			let curName = customer.firstname + ' ' + customer.lastname;
-			title = props.message.orders.voucherTitle + ' ' + curName;
+			title = message.voucherTitle + ' ' + curName;
 			details = (
 				<div class="container">
 					<div class="col-xs-12 marginTop20px">
-						<Row label={props.message.orders.email} content={customer.email} />
+						<Row label={message.email} content={customer.email} />
 					</div>
 					<div class="col-xs-12 marginTop10px">
-						<Row label={props.message.orders.voucherLast} content={data.lastVoucher} />
+						<Row label={message.voucherLast} content={data.lastVoucher} />
 					</div>
 				</div>
 			);
 			if (data.lastVoucher == 0) {
 				summary = (
 					<div class="colorWarning marginTop10px">
-						<Title title={props.message.orders.noVoucher} />
+						<Title title={message.noVoucher} />
 					</div>
 				);
 			} else {
@@ -84,8 +84,8 @@ const OrderDetail = ( props ) => {
 						<tr key={index} class="textAlignCenter">
 							<td class="col-xs-2"><a href={url}>{el.id}</a></td>
 							<td class="col-xs-2">{el.reference}</td>
-							<td class="col-xs-2">{el.totalProduct}{props.message.currency}</td>
-							<td class="col-xs-2">{el.totalShipping}{props.message.currency}</td>
+							<td class="col-xs-2">{el.totalProduct}{Config.message.currency}</td>
+							<td class="col-xs-2">{el.totalShipping}{Config.message.currency}</td>
 							<td class="col-xs-2">{el.dateAdd}</td>
 							<td class="col-xs-2">{el.voucherNumber}</td>
 						</tr>
@@ -93,20 +93,20 @@ const OrderDetail = ( props ) => {
 				});
 			}
 			let curNumber = props.currentVoucher !== null ? props.currentVoucher : data.lastVoucher;
-			let showMailUrl = props.url.serverPath + 'orders/' + props.details.currentDb + '/' + id +
+			let showMailUrl = Config.url.serverPath + 'orders/' + props.details.currentDb + '/' + id +
 				'/mail?action=voucher&result=display&voucherNumber=' + curNumber;
 			buttons = (
 				<div class="marginTop10px">
 					<div class="col-xs-12 col-md-2 marginTop10px">
-						<label>{props.message.orders.voucherNumber}</label>
+						<label>{message.voucherNumber}</label>
 					</div>
-					<div class="col-xs-12 col-md-1 marginTop15px" data-tip={props.message.orders.voucherPlus}>
+					<div class="col-xs-12 col-md-1 marginTop15px" data-tip={message.voucherPlus}>
 						<i onClick={ () => props.voucherChange('add', curNumber) } class="fa fa-plus cursorPointer"></i>
 					</div>
 					<div class="col-xs-12 col-md-1 marginTop10px">
 						{curNumber}
 					</div>
-					<div class="col-xs-12 col-md-1 marginTop15px" data-tip={props.message.orders.voucherMinus}>
+					<div class="col-xs-12 col-md-1 marginTop15px" data-tip={message.voucherMinus}>
 						<i onClick={ () => props.voucherChange('subtract', curNumber) } class="fa fa-minus cursorPointer"></i>
 					</div>
 					<Href
@@ -122,8 +122,7 @@ const OrderDetail = ( props ) => {
 				</div>
 			);
 		} else if (evenState) {
-			//data = props.details.additionalData;
-			title = props.message.orders.evenTitle + props.details.currentId + ' - ' + db;
+			title = message.evenTitle + props.details.currentId + ' - ' + db;
 			let currentPanel = props.details.currentDb === 'new' ? 'NP' : 'SP';
 			let otherPanel = props.details.currentDb === 'new' ? 'SP' : 'NP';
 			tableHeaders = (
@@ -143,10 +142,10 @@ const OrderDetail = ( props ) => {
 				let backId = "products/history/" + el.id;
 				let curId = "products/edition/" + el.id;
 				let curUrl = baseUrl + el.id + '-' + el.linkRewrite + '.html';
-				let modification = el.modification !== '---' ? el.modification : props.message.orders.sameAmount;
+				let modification = el.modification !== '---' ? el.modification : message.sameAmount;
 				contentArray.push(
 					<tr key={index} class="textAlignCenter">
-						<td class="col-xs-1"><img onMouseOver={displayPhoto.bind(this, el.cover, true)} onMouseOut={displayPhoto.bind(this, null, false)} src={el.cover} style={props.images.imgCssSmall} /></td>
+						<td class="col-xs-1"><img onMouseOver={displayPhoto.bind(this, el.cover, true)} onMouseOut={displayPhoto.bind(this, null, false)} src={el.cover} style={Config.images.imgCssSmall} /></td>
 						<td class="col-xs-1" style={paddingTop3}>{el.id}</td>
 						<td class="col-xs-4" style={paddingTop3}><a href={curUrl} target="blank">{el.name}</a></td>
 						<td class="col-xs-1" style={paddingTop3}>{el.ordered}</td>
@@ -175,9 +174,9 @@ const OrderDetail = ( props ) => {
 			customer = data.customer;
 			shortCut = props.details.orderData ? props.details.orderData : props.details.additionalData;
 			reference = shortCut.reference;
-			title = props.message.orders.details + id	+ ' (' + reference + ') - ' + db;
+			title = message.details + id	+ ' (' + reference + ') - ' + db;
 			name = shortCut.customer.firstname + ' ' + shortCut.customer.lastname;
-			totalPaid =  data.totalPaid + props.message.currency;
+			totalPaid =  data.totalPaid + Config.message.currency;
 			let detailsArray = [];
 			detailsArray.push(
 				<div key="1" class="col-xs-12 marginTop10px">
@@ -216,13 +215,13 @@ const OrderDetail = ( props ) => {
 				let curUrl = baseUrl + el.productId + '-' + el.linkRewrite + '.html';
 				contentArray.push(
 					<tr key={index} class="textAlignCenter">
-						<td class="col-xs-1"><img onMouseOver={displayPhoto.bind(this, el.cover, true)} onMouseOut={displayPhoto.bind(this, null, false)} src={el.cover} style={props.images.imgCssSmall} /></td>
+						<td class="col-xs-1"><img onMouseOver={displayPhoto.bind(this, el.cover, true)} onMouseOut={displayPhoto.bind(this, null, false)} src={el.cover} style={Config.images.imgCssSmall} /></td>
 						<td class="col-xs-1" style={paddingTop30px}>{el.productId}</td>
 						<td class="col-xs-4" style={paddingTop30px}><a href={curUrl} target="blank">{el.productName}</a></td>
 						<td class="col-xs-2" style={paddingTop30px}>{el.quantity.current}</td>
 						<td class="col-xs-2" style={paddingTop30px}>{el.quantity.toUpdate}</td>
 						<td class="col-xs-1" style={paddingTop29px}>{el.productQuantity}</td>
-						<td class="col-xs-1" style={paddingTop022}><ButtonSingle link={curId} className="btn btn-primary" content={props.message.orders.fullEdition} /></td>
+						<td class="col-xs-1" style={paddingTop022}><ButtonSingle link={curId} className="btn btn-primary" content={message.fullEdition} /></td>
 					</tr>
 				);
 			}, this);
@@ -231,21 +230,21 @@ const OrderDetail = ( props ) => {
 					<div class="container marginTop10px">
 						<div class="col-xs-12 col-lg-3 pull-left"></div>
 						<div class="col-xs-12 col-lg-6 pull-left">
-							<label class="col-xs-6">{props.message.orders.total}</label>
-							<p class="col-xs-6">{data.totalPaid}{props.message.currency}</p>
-							<label class="col-xs-6">{props.message.orders.totalDiscount}</label>
-							<p class="col-xs-6 colorWarning">{data.totalPaidDiscount}{props.message.currency}</p>
-							<label class="col-xs-6">{props.message.orders.totalShipping}</label>
-							<p class="col-xs-6">{data.totalProduct}{props.message.currency}</p>
-							<label class="col-xs-6">{props.message.orders.totalShippingDiscount}</label>
-							<p class="col-xs-6 colorWarning">{data.totalProductDiscount}{props.message.currency}</p>
+							<label class="col-xs-6">{message.total}</label>
+							<p class="col-xs-6">{data.totalPaid}{Config.message.currency}</p>
+							<label class="col-xs-6">{message.totalDiscount}</label>
+							<p class="col-xs-6 colorWarning">{data.totalPaidDiscount}{Config.message.currency}</p>
+							<label class="col-xs-6">{message.totalShipping}</label>
+							<p class="col-xs-6">{data.totalProduct}{Config.message.currency}</p>
+							<label class="col-xs-6">{message.totalShippingDiscount}</label>
+							<p class="col-xs-6 colorWarning">{data.totalProductDiscount}{Config.message.currency}</p>
 						</div>
 						<div class="col-xs-12 col-lg-3 pull-left"></div>
 					</div>
 				);
 				summary = (
 					<div class="marginTop20px">
-						<Title title={props.message.orders.summary} />
+						<Title title={message.summary} />
 						{bottomDetails}
 					</div>
 				);
@@ -270,7 +269,7 @@ const OrderDetail = ( props ) => {
 				} else {
 					buttonsArray.push(
 						<div key="3" class="col-xs-12 col-md-3">
-							<input class="form-control btn btn-danger cursorPointer" type="button" value={props.message.goBack} onClick={ () => props.shipmentNumberHandler() } />
+							<input class="form-control btn btn-danger cursorPointer" type="button" value={Config.message.goBack} onClick={ () => props.shipmentNumberHandler() } />
 						</div>
 					);
 					buttonsArray.push(
@@ -293,9 +292,9 @@ const OrderDetail = ( props ) => {
 			} else {
 				let showMailUrl;
 				if (props.details.additionalTask === 'discount') {
-					showMailUrl = props.url.serverPath + 'orders/' + props.details.currentDb + '/' + id + '/mail?action=discount&result=display';
+					showMailUrl = Config.url.serverPath + 'orders/' + props.details.currentDb + '/' + id + '/mail?action=discount&result=display';
 				} else if (props.details.additionalTask === 'mail') {
-					showMailUrl = props.url.serverPath + 'orders/' + props.details.currentDb + '/' + id + '/mail?action=undelivered&result=display';
+					showMailUrl = Config.url.serverPath + 'orders/' + props.details.currentDb + '/' + id + '/mail?action=undelivered&result=display';
 				}
 				buttons = (
 					<div class="marginTop10px">
@@ -315,7 +314,7 @@ const OrderDetail = ( props ) => {
 		}
 		let displayImg = null;
 		if (props.display) {
-			displayImg = <img src={props.display} style={props.images.imgCssFixed} />
+			displayImg = <img src={props.display} style={Config.images.imgCssFixed} />
 		}
 		return(
 			<div class="container bgrContent paddingBottom2 marginTop2 borderRadius10">

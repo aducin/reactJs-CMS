@@ -29,7 +29,7 @@ export default class AccountModel {
     };
     return axios.post(this.path, { params }, Config.ajaxConfig);
   }
-
+/*
   getData(params, token) {
     this.loading.next(true);
     this.path = pathUrl + '/' + token;
@@ -50,7 +50,7 @@ export default class AccountModel {
     this.list.next(result);
     this.loading.next(false);
   }
-
+*/
   rowSave(data) {
     return axios.post(pathUrl, {data}, Config.ajaxConfig);
   }

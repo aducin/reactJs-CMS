@@ -1,7 +1,6 @@
 import React from 'react';
 import { Router, Route, IndexRoute, browserHistory, hashHistory } from 'react-router';
 import { connect } from 'react-redux';
-import { reactLocalStorage } from 'reactjs-localstorage';
 
 import store from '../store';
 import * as order from '../actions/orderActions.jsx';
@@ -29,38 +28,31 @@ export default class OrderContainer extends React.Component {
 		if (this.props.order.error) {
 			this.props.mainModel.setMessage('warning', Config.error);
 			store.dispatch(order.clearError());
-		} else if (this.state.clear) {
-			store.dispatch(order.clearData());
-		} else if (this.state.checkDisabled) {
-			this.checkDisabled();
-		} else if (this.state.urlCheck) {
-			this.checkUrl();
 		}
 	}
 	componentWillUpdate(nextProps, nextState) {
-		if (nextProps.order.customerId && nextProps.params.db && nextProps.params.id) {
+		let params = nextProps.params;
+		if (nextState.urlCheck) {
+			this.checkUrl();
+			this.setState({urlCheck: false});
+		} else if (this.state.checkDisabled) {
+			this.checkDisabled();
+			this.setState({checkDisabled: false});
+		} else if (nextState.clear) {
+			store.dispatch(order.clearData());
+			this.setState({clear: false});
+		} else if (nextProps.order.customerId && params.db && params.id) {
+			let data = { db: params.db, id: nextProps.order.customerId, orderId: params.id, token: nextProps.token };
 			store.dispatch(order.deleteCustomerId());
-			store.dispatch(order.setAction('getCustomer', {
-				db: nextProps.params.db,
-				id: nextProps.order.customerId,
-				orderId: nextProps.params.id,
-				token: nextProps.token
-			}));
+			store.dispatch(order.setAction('getCustomer', data));
 		} else {
-			let newParams = nextProps.params.db !== this.props.params.db || nextProps.params.id !== this.props.params.id;
-			let newAction = nextProps.params.action !== this.props.params.action;
-			//let noData = !nextProps.order.orderData && !this.props.order.orderData;
+			let newParams = params.db !== this.props.params.db || nextProps.params.id !== this.props.params.id;
+			let newAction = params.action !== this.props.params.action;
 			let noData = !nextProps.order.orderData && !nextProps.order.additionalData;
-			let paramsAvailable = nextProps.params.db !== undefined && nextProps.params.id !== undefined;
-			let removedDb = nextProps.params.db === undefined && this.props.params.db !== undefined;
-			let removedId = nextProps.params.id === undefined && this.props.params.id !== undefined;
-			if (nextState.urlCheck) {
-				this.setState({urlCheck: false});
-			} else if (this.state.checkDisabled) {
-				this.setState({checkDisabled: false});
-			} else if (nextState.clear) {
-				this.setState({clear: false});
-			} else if (removedDb && removedId) {
+			let paramsAvailable = params.db !== undefined && params.id !== undefined;
+			let removedDb = params.db === undefined && this.props.params.db !== undefined;
+			let removedId = params.id === undefined && this.props.params.id !== undefined;
+			if (removedDb && removedId) {
 				this.removeDb();
 			} else if (noData && paramsAvailable && !nextProps.order.loading && !this.state.inProgress) {
 				this.setUrlCheck();
@@ -74,20 +66,14 @@ export default class OrderContainer extends React.Component {
 	}
 
 	checkDisabled() {
-		let curDisable = {
-			action: true,
-			panel: true
-		};
+		let curDisable = { action: true, panel: true };
 		let name = this.state.header.name;
 		let shortenName = name.replace('Id', '');
 		let isNaNCheck = Boolean(isNaN(this.state.header[name]) || this.state.header[name] === '');
 		if (this.state.header.selected[shortenName] !== 0 && !this.state.error[name] && !isNaNCheck) {
 			curDisable[shortenName] = false;
 		}
-		this.setState({
-			checkDisabled: false,
-			headerDisable: curDisable
-		});
+		this.setState({ checkDisabled: false, headerDisable: curDisable });
 	}
 	checkUrl() {
 		const action = this.props.params.action;
@@ -145,16 +131,12 @@ export default class OrderContainer extends React.Component {
 					throw new Error(response.data.reason);
 				}
 			})
-			.catch((err) =>{
-				let message = err.message || Config.message.error;
-				this.props.mainModel.setMessage('warning', message);
-			});
+			.catch((err) => this.props.mainModel.setMessage('warning', err.message) );
 	}
 	setHeaderData(data) {
-		let error = data.updateError ? data.error : this.state.error;
 		this.setState({
 			checkDisabled: true,
-			error: error,
+			error: data.updateError ? data.error : this.state.error,
 			header: data.header
 		});
 	}
@@ -171,10 +153,7 @@ export default class OrderContainer extends React.Component {
 		this.setState({ curShipment: e.target.value });
 	}
 	setUrlCheck() {
-		this.setState({
-			disable: true,
-			urlCheck: true
-		});
+		this.setState({ disable: true, urlCheck: true });
 	}
 	shipmentNumberHandler() {
 		let nextState = !this.state.shipmentNumber;
@@ -196,22 +175,8 @@ export default class OrderContainer extends React.Component {
 		let empty = this.props.params.db === undefined && this.props.params.id === undefined;
 		let messageStyle = this.props.success ? Config.alertSuccess : Config.alertError;
 		if (this.props.approved) {
-			header = (
-				<div class="height12">
-					<Header
-						active="orders"
-						buttonHandler={this.props.logoutHandler.bind(this)}
-						disable={this.state.disable}
-						fields={Config.fields}
-					/>
-				</div>
-			);
-			message = (
-				<Message
-					message={this.props.toDisplay}
-					messageStyle={messageStyle}
-				/>
-			);
+			header = <Header active="orders" buttonHandler={this.props.logoutHandler.bind(this)} disable={this.state.disable} />;
+			message = <Message message={this.props.toDisplay} messageStyle={messageStyle}/>;
 			orderHeader = (
 				<OrderHeader
 					disable={this.state.disable}
@@ -234,14 +199,11 @@ export default class OrderContainer extends React.Component {
 						details={this.props.order}
 						display={this.state.display}
 						empty={empty}
-						images={Config.images}
-						message={Config.message}
 						send={this.sendEmail.bind(this)}
 						setDisplay={this.setDisplay.bind(this)}
 						setShipmentNumber={this.setShipmentNumber.bind(this)}
 						shipmentNumber={this.state.shipmentNumber}
 						shipmentNumberHandler={this.shipmentNumberHandler.bind(this)}
-						url={Config.url}
 						voucherChange={this.voucherChange.bind(this)}
 					/>
 				);
