@@ -104,9 +104,9 @@ const ProductHeader = ( props ) => {
 	let productName = data.productName;
 	let message = Config.message;
 	let warning = props.data.warning;
-	if (props.error) {
+	if (props.mainState.error) {
 		return (
-			<Title title={props.message.error} />
+			<Title title={message.error} />
 		);
 	} else {
 		const noData = {
@@ -114,25 +114,26 @@ const ProductHeader = ( props ) => {
 			nameCategory: message.nameCategory,
 			nameManufactorer: message.nameManufactorer,
 		};
-		const chooseFrom = 'Wybierz sposród ';
-		const categoryLength = props.category.length;
-		const titleCategory = chooseFrom + categoryLength + ' kategorii:';
-		var listCategories = props.category.map((el, index) => {
-			return <option key={index + 1} value={props.category[index].id}>{props.category[index].metaTitle}</option>;
+		const categories = props.product ? props.product.categoryList : [];
+		const categoryLength = categories.length;
+		const disabled = props.mainState.disable;
+		const titleCategory = message.chooseFrom + categoryLength + ' kategorii:';
+		let listCategories = categories.map((el, index) => {
+			return <option key={index + 1} value={categories[index].id}>{categories[index].metaTitle}</option>;
 		});
 		if (data.activeCategory === 0) {
-			var check = props.category.findIndex(function(el) { el.id == noData.id; });
+			var check = categories.findIndex(function(el) { el.id == noData.id; });
 			if (check === -1) {
 				listCategories.unshift(<option key="0" value={ noData.id }>{ noData.nameCategory }</option>);
 			}
 		}
-		const manufactorerLength = props.manufactorer.length;
-		const titleManufactorer = chooseFrom + manufactorerLength + ' producentów:';
-		var listManufactorers = props.manufactorer.map((el, index) => {
-			return <option key={index + 1} value={props.manufactorer[index].id}>{props.manufactorer[index].name}</option>;
+		const manufactorer = props.product.manufacturerList;
+		const titleManufactorer = message.chooseFrom + manufactorer.length + ' producentów:';
+		let listManufactorers = manufactorer.map((el, index) => {
+			return <option key={index + 1} value={manufactorer[index].id}>{manufactorer[index].name}</option>;
 		});
 		if (data.activeManufactorer === 0) {
-			var check = props.manufactorer.findIndex(function(el) { el.id == noData.id; });
+			var check = manufactorer.findIndex(function(el) { el.id == noData.id; });
 			if (check === -1) {
 				listManufactorers.unshift(<option key="0" value={ noData.id }>{ noData.nameManufactorer }</option>);
 			}
@@ -153,7 +154,7 @@ const ProductHeader = ( props ) => {
 						<div>
 							<Select
 								curClass="col-xs-12 marginBottom10px"
-								setDisabled={props.disable}
+								setDisabled={disabled}
 								list={ listCategories }
 								name="category"
 								selectChange={ handleSelectChange.bind(this) }
@@ -164,7 +165,7 @@ const ProductHeader = ( props ) => {
 						<div class="marginBottom20px">
 							<Select
 								curClass="col-xs-12 marginBottom10px"
-								setDisabled={props.disable}
+								setDisabled={disabled}
 								list={ listManufactorers }
 								name="manufactorer"
 								selectChange={ handleSelectChange.bind(this) }
@@ -174,7 +175,7 @@ const ProductHeader = ( props ) => {
 						</div>
 						<Label curClass={labelClass} name={data.productLabel} />
 						<div class="col-xs-12 col-lg-6">
-							<input class="form-control" disabled={props.disable} type="text" value={productName} placeholder="Podaj nazwę" onChange={ e => handleNameChange(e.target.value) } style={ inputStyleName } />
+							<input class="form-control" disabled={disabled} type="text" value={productName} placeholder="Podaj nazwę" onChange={ e => handleNameChange(e.target.value) } style={ inputStyleName } />
 						</div>
 					</div>
 					<div class="col-xs-12 col-lg-2 pull-left"></div>
@@ -183,7 +184,7 @@ const ProductHeader = ( props ) => {
 							<h4>{message.products.idSearch}</h4>
 						</div>
 						<div class="marginBottom10px">
-							<input class="centered form-control" disabled={props.disable} type="text" value={productId} placeholder="Podaj ID" onChange={ e => handleIdChange(e.target.value) } style={ inputStyleId } />
+							<input class="centered form-control" disabled={disabled} type="text" value={productId} placeholder="Podaj ID" onChange={ e => handleIdChange(e.target.value) } style={ inputStyleId } />
 						</div>
 						<div>
 							<input class="form-control btn btn-primary" disabled={data.searchDisabled} type="button" value="Wyszukaj" onClick={ handleIdSearch.bind(this) } />

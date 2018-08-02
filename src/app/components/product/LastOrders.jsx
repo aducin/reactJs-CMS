@@ -7,14 +7,14 @@ import Title from '../dumb/Title.jsx';
 
 const LastOrders = ( props ) => {
   let modifyOrder = (current, id) => {
-    props.setLastOrder(current, id);
+    props.setLast(current, id);
   };
   let data = props.data || {};
   let text = Config.message;
   const styles = {
     padding15px: {paddingTop: '15px'}
   };
-  if (props.inSearch) {
+  if (props.search) {
     return (
       <Busy title={text.modifiedSearch} />
     );

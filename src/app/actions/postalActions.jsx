@@ -8,30 +8,48 @@ export function getDataRequested() {
 	};
 }
 
+export function clearError(data) {
+	return {
+		type: 'clearError',
+		payload: null
+	}
+}
+
 export function getAmount(data) {
 	return {
 		type: 'setData',
-		payload: data,
+		payload: data
 	}
+}
+
+export function setAction(name, data) {
+	return { type: name, payload: data };
 }
 
 export function setData(data) {
 	return {
 		type: 'setData',
-		payload: data,
+		payload: data
 	}
 }
 
 export function setError(message) {
 	return {
 		type: 'error',
-		payload: message,
+		payload: null
+	}
+}
+
+export function setLoading() {
+	return {
+		type: 'setLoading',
+		payload: null
 	}
 }
 
 export function setUpdate(data) {
 	return {
 		type: 'update',
-		payload: data,
+		payload: data
 	}
 }

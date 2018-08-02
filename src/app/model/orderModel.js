@@ -8,23 +8,6 @@ const url = Config.url;
 const orderUrl = url.serverPath + url.pathOrder;
 
 const OrderModel = {
-  evenData: (db, id) => {
-    let path = orderUrl + '/' + db + '/' + id + '/even';
-    return axios.put(path, {}, Config.ajaxConfig);
-  },
-  getData: (db, id, token) => {
-    let path = orderUrl + '/' + db + '/' + id + '/' + token;
-    return axios.get(path);
-  },
-  getDiscountOrMail: (action, db, id, token) => {
-    let path = orderUrl + '/' + db + '/' + id + '/' + token + '?action=' + action;
-    return axios.get(path);
-  },
-  getVoucher: (db, id) => {
-    let path = orderUrl + '/' + db + '/' + id;
-    let params = { basic: true };
-    return axios.get(path, { params })
-  },
   sendEmail: (action, db, id, token) => {
     let path = orderUrl + '/' + db + '/' + id + '/mail/' + token;
     let params = {

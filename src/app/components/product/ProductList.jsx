@@ -17,7 +17,7 @@ const ProductList = ( props ) => {
 	var product = props.product;
 	var text = Config.message;
 	var url = Config.url;
-	if (!product.searched || props.searching) {
+	if (!product.searched) {
 		return(
 			<Busy title={text.loading} />
 		)

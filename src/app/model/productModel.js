@@ -13,12 +13,12 @@ const url = Config.url;
 const productUrl = url.serverPath + url.pathProducts;
 
 export default class ProductModel {
-  customSearch = new Subject();
-  historySearch = new Subject();
-  idSearch = new Subject();
+  //customSearch = new Subject();
+  //historySearch = new Subject();
+  //idSearch = new Subject();
   newestOrdersInterval = Observable.interval(Config.intervalOrders);
-  productSave = new Subject();
-  searching = new Subject();
+  //productSave = new Subject();
+  //searching = new Subject();
 
   constructor() {}
 
@@ -64,14 +64,14 @@ export default class ProductModel {
     let path = Config.url.serverPath + 'orders/last/' + base + '/' + id + '/' + token;
     return axios.get( path );
   }
-
+/*
   nameSearch(data) {
     this.searching.next(true);
     let result = axios.get( productUrl, {params: data} );
     this.customSearch.next(result);
     this.searching.next(false);
   }
-
+*/
   saveFile(description, fd, token) {
     let path = setUrl('pathProducts', 'printing');
     path += '/' + token + '?description=' + description;
@@ -79,13 +79,11 @@ export default class ProductModel {
   }
 
   saveProduct(newAttr, oldAttr, config, data) {
-    this.searching.next(true);
     let path = productUrl + '/' + data.id + '/' + newAttr + '/' + oldAttr;
-    let result = axios.put(path, {data}, config);
-    this.productSave.next(result);
-    this.searching.next(false);
+    return axios.put(path, {data}, config);
+    //this.productSave.next(result);
   }
-
+/*
   searchId(editionSearched, simpleSearched) {
     this.searching.next(true);
     let url = productUrl + '/';
@@ -110,4 +108,5 @@ export default class ProductModel {
     this.historySearch.next(result);
     this.searching.next(false);
   }
+*/
 }

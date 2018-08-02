@@ -61,7 +61,7 @@ export default class ProductEdition extends React.Component {
 	}
 
 	equalState(props, state) {
-		let product = props.dataFull;
+		let product = props.productData.dataFull;
 		if (state.id !== product.id) {
 			let curState = {...this.state};
 			this.state.fields.forEach((el) => {
@@ -159,23 +159,22 @@ export default class ProductEdition extends React.Component {
 		const centered = Config.css.centered;
 		const message = Config.message;
 		const labels = message.labels;
+		let product = this.props.productData.dataFull;
 		const url = Config.url;
 		let disabled = Boolean(this.props.disable);
-		if (this.props.dataFull && this.props.dataFull.id !== undefined && this.props.dataFull.id !== 0) {
-			let product = this.props.dataFull;
+		if (product && product.id !== undefined && product.id !== 0) {
 			const curId = product.id;
-		    let idCheck = parseInt(this.props.id) === parseInt(curId);
-		    let buttons, clear, content, goBack, saveButton;
-		    let title = message.fullEdition + curId;
-		    let leftColumn;
-		    let rightColumnClass;
-		    var priceNew = product.price !== undefined ? parseFloat(product.price.new) : null;
-			var priceOld = product.price !== undefined ? parseFloat(product.price.old) : null;
+			let buttons, clear, content, goBack, saveButton;
+			let title = message.fullEdition + curId;
+			let leftColumn;
+			let rightColumnClass;
+			let priceNew = product.price !== undefined ? parseFloat(product.price.new) : null;
+			let priceOld = product.price !== undefined ? parseFloat(product.price.old) : null;
 			let curUrl = 'products/history/' + curId;
-			var discountNew = false;
-			var discountOld = false;
-			var realDiscountNew = false;
-			var realDiscountOld = false;
+			let discountNew = false;
+			let discountOld = false;
+			let realDiscountNew = false;
+			let realDiscountOld = false;
 			if (product.priceReal !== undefined) {
 			   	if (product.priceReal.new && product.priceReal.new !== product.price.new) {
 			    	discountNew = true;

@@ -7,7 +7,7 @@ export const clearUrl = (containerPath) => {
 
 export const createReducedObj = (src, keys) => keys.reduce((obj, key) => {
   obj[key] = src[key];
-return obj;
+  return obj;
 }, {});
 
 export const setUrl = (path, secondPath, token) => {
@@ -17,3 +17,4 @@ export const setUrl = (path, secondPath, token) => {
   }
   return url;
 }
+

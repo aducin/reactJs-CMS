@@ -6,6 +6,7 @@ export function productReducer (state={
 	cleared: false,
 	constant: false,
 	dataReceived: null,
+	error: false,
 	fullDataFirst: {
 		id: 0,
 		active: undefined,
@@ -76,6 +77,7 @@ export function productReducer (state={
 		case "clear": {
 			state = {...state, 
 				cleared: false,
+				error: false,
 				prepare: false,
 				result: false,
 				searched: false,
@@ -105,9 +107,16 @@ export function productReducer (state={
 			};
 			break;
 		}
+		case "clear_error": {
+			state = {...state,
+				error: false
+			};
+			break;
+		}
 		case "set_basic": {
 			state = {...state, 
 				basicData: action.payload,
+				error: false,
 				history: {
 					empty: false,
 					id: false,
@@ -138,8 +147,15 @@ export function productReducer (state={
 			};
 			break;
 		}
+		case "set_error": {
+			state = {...state,
+				error: true
+			};
+			break;
+		}
 		case "set_history": {
-			state = {...state, 
+			state = {...state,
+				error: false,
 				history: {
 					id: action.payload.id,
 					list: action.payload.list,
@@ -161,43 +177,24 @@ export function productReducer (state={
 			break;
 		}
 		case "set_id_result": {
-			if (action.payload.edition === 'full') {
-				state = {...state,
-					history: {
-						empty: false,
-						id: false,
-						list: [],
-					},
-					anotherSearch: false,
-					nameList: [],
-					prepare: false,
-					dataReceived: 'full',
-					fullDataFirst: action.payload.first,
-					shortDataFirst: [],
-					shortDataSecond: [],
-					searched: true,
+			state = {...state,
+				error: false,
+				history: {
 					empty: false,
-					warning: false,
-				};
-			} else if (action.payload.first.edition === 'simple') {
-				state = {...state,
-					history: {
-						empty: false,
-						id: false,
-						list: [],
-					},
-					anotherSearch: false,
-					nameList: [],
-					prepare: false,
-					fullDataFirst: [],
-					dataReceived: 'simple',
-					shortDataFirst: action.payload.first,
-					shortDataSecond: action.payload.second,
-					searched: true,
-					empty: false,
-					warning: false,
-				};
-			}
+					id: false,
+					list: [],
+				},
+				anotherSearch: false,
+				nameList: [],
+				prepare: false,
+				dataReceived: 'full',
+				fullDataFirst: action.payload,
+				shortDataFirst: [],
+				shortDataSecond: [],
+				searched: true,
+				empty: false,
+				warning: false,
+			};
 			break;
 		}
 		case "set_last_orders": {
@@ -219,6 +216,7 @@ export function productReducer (state={
 		}
 		case "set_name_result": {
 			state = {...state,
+				error: false,
 				history: {
 					empty: false,
 					id: false,
@@ -252,7 +250,8 @@ export function productReducer (state={
 		}
 		case "set_empty": {
 			state = {...state, 
-				empty: true, 
+				empty: true,
+				error: false,
 				history: {
 					empty: false,
 					id: false,
@@ -279,6 +278,7 @@ export function productReducer (state={
 			state = {...state,
 				prepare: true,
 				result: false,
+				searched: false
 			};
 			break;
 		}
@@ -294,6 +294,7 @@ export function productReducer (state={
 		}
 		case "set_warning": {
 			state = {...state,
+				error: false,
 				empty: false, 
 				history: {
 					empty: false,

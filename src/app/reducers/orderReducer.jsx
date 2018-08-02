@@ -4,7 +4,9 @@ export function orderReducer (state={
 	additionalData: false,
 	currentDb: undefined,
 	currentId: undefined,
+	customerId: null,
 	error: false,
+	loading: false,
 	orderData: null,
 }, action) {
 
@@ -17,6 +19,7 @@ export function orderReducer (state={
 				currentDb: undefined,
 				currentId: undefined,
 				error: false,
+				loading: false,
 				orderData: null,
 			};
 			break;
@@ -35,10 +38,29 @@ export function orderReducer (state={
 				currentDb: action.payload.db,
 				currentId: action.payload.id,
 				error: false,
-				orderData: null,
+				loading: false,
+				orderData: null
 			};
 			break; 
-		}	
+		}
+		case "clearError": {
+			state = {...state,
+				error: false
+			};
+			break;
+		}
+		case "customerId": {
+			state = {...state,
+				customerId: action.payload
+			};
+			break;
+		}
+		case "deleteCustomerId": {
+			state = {...state,
+				customerId: null
+			};
+			break;
+		}
 		case "orderIdNew": {
 			state = {...state, 
 				additionalFinish: false,
@@ -46,7 +68,8 @@ export function orderReducer (state={
 				currentDb: 'new',
 				currentId: action.payload.id,
 				error: false,
-				orderData: action.payload,
+				loading: false,
+				orderData: action.payload
 			}; 
 			break;
 		}
@@ -57,7 +80,8 @@ export function orderReducer (state={
 				currentDb: 'old',
 				currentId: action.payload.id,
 				error: false,
-				orderData: action.payload,
+				loading: false,
+				orderData: action.payload
 			}; 
 			break;
 		}
@@ -66,8 +90,15 @@ export function orderReducer (state={
 				additionalFinish: false,
 				additionalTask: false, 
 				error: action.payload,
-				orderData: null,
+				loading: false,
+				orderData: null
 			}; 
+			break;
+		}
+		case "orderLoading": {
+			state = {...state,
+				loading: true
+			};
 			break;
 		}
 	}

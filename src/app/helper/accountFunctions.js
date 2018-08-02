@@ -3,18 +3,6 @@ import moment from 'moment';
 
 const conditions = Config.accountConditions;
 const getTime =  time => (new Date(time)).getTime() / 1000;
-//const typeReturn = 'return';
-//const typeTax17 = 'taxRate17';
-
-/*
-const getType = (type) => {
-  let index = Config.accountTypes.findIndex((el) => el.func === type);
-  if (index !== -1) {
-    return Config.accountTypes[index].id;
-  }
-  return false;
-};
-*/
 
 export let appendTime = (list) => list.map((el) => ({
   ...el,
@@ -23,20 +11,29 @@ export let appendTime = (list) => list.map((el) => ({
   receiptTimestamp: getTime(el.receiptTime)
 }));
 
+export let changeDate = (field, data, modalObj) => {
+  let obj = {...modalObj};
+  let momentVar = field + 'Date';
+  let stringVar = field + 'Time';
+  obj[momentVar] = data;
+  obj[stringVar] = data.format("YYYY-MM-DD");
+  return obj;
+}
+
 export let getAmounts = (list) => {
   let amount3 = 0;
   let amount17 = 0;
   list.forEach((el) => {
+    el.floatAmount = parseFloat(el.amount);
     if (el.closed === conditions.CLOSED) {
-      let floatAmount = parseFloat(el.amount);
       //let taxReturn = getType(typeReturn);
       //let tax17 = getType(typeTax17);
       if (el.type === conditions.TAX17) {
-        amount17 += floatAmount;
+        amount17 += el.floatAmount;
       } else if (el.type !== conditions.RETURN){
-        amount3 += floatAmount;
+        amount3 += el.floatAmount;
       } else {
-        amount3 -= floatAmount;
+        amount3 -= el.floatAmount;
       }
     }
   });

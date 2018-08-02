@@ -23,7 +23,8 @@ import Title from '../dumb/Title.jsx';
 
 export default class BasicEdition extends React.Component {
 	constructor(props) {
-		super(props);	    
+		super(props);
+		this.model = new ProductModel();
 		this.state = {
 			borderWarning: 'borderWarning',
 			classWarning: 'colorWarning',
@@ -55,7 +56,7 @@ export default class BasicEdition extends React.Component {
 	componentWillUpdate(nextProps, nextState) {
 		if (nextState.setDisabledSave && !this.state.setDisabledSave) {
 			this.setDisabledSave();
-		} else if (this.state.save) {
+		} else if (nextState.save) {
 			this.setState({ save: false });
 		} else if (nextState.setDisabledSave) {
 			this.setState({ setDisabledSave: false });
@@ -130,7 +131,7 @@ export default class BasicEdition extends React.Component {
 		if (!this.state.discount.new && !this.state.discount.old) {
 			data.price = this.state.price.old;
 		}
-		ProductModel.basicEdition(data, newAttr, oldAttr, this.state.config)
+		this.model.basicEdition(data, newAttr, oldAttr, this.state.config)
 			.then((response) => {
 				let messageType = Boolean(response.data.success) ? 'success' : 'error';
 				this.setMessage(messageType, response.data.reason);
@@ -282,7 +283,7 @@ export default class BasicEdition extends React.Component {
 					{priceMessage}
 				</div>
 			);
-			let priceDisabled = (data.discount.new !== false || data.discount.old !== false);
+			//let priceDisabled = (data.discount.new !== false || data.discount.old !== false);
 			bodyHeight.minHeight = bodyHeight.minHeight + 'px';
 			if (parseInt(cachedId) === parseInt(data.id)) {
 				return (

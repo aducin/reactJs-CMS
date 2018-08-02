@@ -18,7 +18,7 @@ import AccountModal from '../components/modal/AccountModal.jsx';
 import AccountModel from '../model/accountModel';
 import { State } from '../helper/accountState';
 import { createReducedObj } from '../helper/functions';
-import { setModalData } from '../helper/accountFunctions';
+import { changeDate, setModalData } from '../helper/accountFunctions';
 
 @connect((store) => {
 	return { account: store.account };
@@ -35,7 +35,7 @@ export default class AccountContainer extends React.Component {
 	componentDidMount() {
 		this.model.displayModalMessage.subscribe((bool) => this.handleDisplayMessage(bool));
 		this.model.list
-			.switchMap(observable => observable)
+			.switchMap(observable$ => observable$)
 			.subscribe( (list) => this.handleList(list) ),
 			(err) => this.props.mainModel.setMessage('warning', err.message);
 		this.model.loading.subscribe((bool) => this.setState({ inProgress: bool }));
@@ -48,8 +48,12 @@ export default class AccountContainer extends React.Component {
 	}
 	componentWillUpdate(nextProps, nextState) {
 		if (!nextState.ajaxSent && nextProps.token ) {
-			this.model.getData(null, nextProps.token);
+			store.dispatch(account.setLoading());
+			store.dispatch(account.setAction('getData', {params: {}, token: nextProps.token}));
 			this.setState({ ajaxSent: true });
+		} else if (nextProps.account.error) {
+			this.props.mainModel.setMessage('warning', err.message);
+			store.dispatch(account.clearError());
 		} else if (nextState.errorHandler) {
 			this.setState({ errorHandler: null });
 		}
@@ -61,7 +65,8 @@ export default class AccountContainer extends React.Component {
 	closeModal(type) {
 		if (type === 'success') {
 			let params = this.setParams({...this.state.selected});
-			this.model.getData(params, this.props.token);
+			store.dispatch(account.setLoading());
+			store.dispatch(account.setAction('getData', {params, token: this.props.token}));
 		}
 		this.setState({
 			modal: false,
@@ -82,18 +87,11 @@ export default class AccountContainer extends React.Component {
 						throw new Error(response.data.reason);
 					}
 				})
-				.catch((err) =>{
-					let message = err.message || Config.message.error;
-					this.props.mainModel.setMessage('warning', message);
-				});
+				.catch((err) => this.props.mainModel.setMessage('warning', err.message));
 		}
 	}
 	dateChange(field, data) {
-		let obj = {...this.state.modalObj};
-		let momentVar = field + 'Date';
-		let stringVar = field + 'Time';
-		obj[momentVar] = data;
-		obj[stringVar] = data.format("YYYY-MM-DD");
+		let obj = changeDate(field, data, this.state.modalObj);
 		obj.saveDisabled = this.modalDisableHandler(this.state);
 		this.setState({ modalObj: obj });
 	}
@@ -162,11 +160,10 @@ export default class AccountContainer extends React.Component {
 	}
 	selectChange(e) {
 		let name = e.target.name;
-		let value = e.target.value;
 		let selected = {...this.state.selected};
-		selected[name] = value;
-		let params = this.setParams(selected);
-		this.model.getData(params, this.props.token);
+		selected[name] = e.target.value;
+		store.dispatch(account.setLoading());
+		store.dispatch(account.setAction('getData', {params: this.setParams(selected), token: this.props.token}));
 		this.setState({ selected: selected });
 	}
 	selectRow(id) {
@@ -209,8 +206,8 @@ export default class AccountContainer extends React.Component {
 		let selected = {...this.state.selected};
 		selected[name] = value;
 		const createXml = selected.dateFrom !== null && selected.dateTo !== null;
-		let params = this.setParams(selected);
-		this.model.getData(params, this.props.token);
+		store.dispatch(account.setLoading());
+		store.dispatch(account.setAction('getData', {params: this.setParams(selected), token: this.props.token}));
 		this.setState({
 			createXml: createXml,
 			selected: selected
@@ -237,19 +234,15 @@ export default class AccountContainer extends React.Component {
 
 	render() {
 		const addDefaultOption = (obj) => {
-			let message = Config.message.account;
+			const message = Config.message.account;
 			obj.unshift( <option key={ -1 } value={ message.defaultOption.id }>{ message.defaultOption.name }</option> );
 			return obj;
 		};
 		let data = this.props.account;
 		let accountsHeader, accountsDetails, busy, header, message, modal, stateOptions, typeOptions;
 		let messageStyle = this.props.success ? Config.alertSuccess : Config.alertError;
-		stateOptions = Config.accountStates.map((el, index) => {
-			return ( <option key={ index } value={ el.id }>{ el.name }</option> );
-		});
-		typeOptions = Config.accountTypes.map((el, index) => {
-			return ( <option key={ index } value={ el.id }>{ el.name }</option> );
-		});
+		stateOptions = Config.accountStates.map((el, index) => <option key={ index } value={ el.id }>{ el.name }</option>);
+		typeOptions = Config.accountTypes.map((el, index) => <option key={ index } value={ el.id }>{ el.name }</option>);
 		if (this.props.approved) {
 			header = (
 				<div class="height12">
@@ -290,7 +283,7 @@ export default class AccountContainer extends React.Component {
 					xml={this.state.createXml}
 				/>
 			);
-			if (this.state.inProgress) {
+			if (this.props.loading) {
 				busy = <Busy title={Config.message.loading} />;
 			}
 			let empty = !Boolean(data.list);

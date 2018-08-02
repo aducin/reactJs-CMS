@@ -27,7 +27,10 @@ export default class PostalContainer extends React.Component {
 	}
 
 	componentDidUpdate() {
-		if (this.state.action) {
+		if (this.props.postal.error) {
+			this.props.mainModel.setMessage('warning', Config.error);
+			store.dispatch(postal.clearError());
+		} else if (this.state.action) {
 			let action = this.state.action;
 			this[action]();
 		}
@@ -36,8 +39,7 @@ export default class PostalContainer extends React.Component {
 		if (!nextState.ajaxSent) {
 			this.setState({
 				action: 'getPostal',
-				ajaxSent: true,
-				inProgress: true
+				ajaxSent: true
 			});
 		} else if (nextState.action) {
 			this.setState({ action: null });
@@ -70,21 +72,8 @@ export default class PostalContainer extends React.Component {
 		}, Config.timer);
 	}
 	getPostal() {
-		PostalModel.getData(this.props.token)
-			.then((response) => {
-				if (response.data.success) {
-					store.dispatch(postal.getAmount(response.data.list));
-				} else {
-					throw new Error(response.data.reason);
-				}
-			})
-			.catch((err) =>{
-				let message = err.message || Config.message.error;
-				this.props.mainModel.setMessage('warning', message);
-			})
-			.finally(() => {
-				this.setState({ inProgress: false });
-			});
+		store.dispatch(postal.setLoading());
+		store.dispatch(postal.setAction('getPostal', this.props.token));
 	}
 	handleAmountToChange(e) {
 		let error = validateNumber(e.target.value);
@@ -104,10 +93,6 @@ export default class PostalContainer extends React.Component {
 		});
 	}
 	setAmount() {
-		let data = {
-			action: this.state.modal,
-			amount: this.state.amountToChange
-		};
 		PostalModel.setData(this.state.amountToChange, this.state.modal)
 			.then((response) => {
 				if (response.data.success) {
@@ -157,15 +142,15 @@ export default class PostalContainer extends React.Component {
 			postalHeader = (
 				<PostalHeader
 					amount={data.amount}
-					disable={this.state.inProgress}
+					disable={this.props.postal.loading}
 					message={Config.message}
 					openModal={this.openModal.bind(this)}
 				/>
 			);
-			if (this.state.inProgress) {
+			if (this.props.postal.loading) {
 				busy = <Busy title={Config.message.loading} />;
 			}
-			if (data.list && !this.state.inProgress) {
+			if (data.list && !this.props.postal.loading) {
 				postalDetail = (
 					<PostalDetail
 						list={data.list}

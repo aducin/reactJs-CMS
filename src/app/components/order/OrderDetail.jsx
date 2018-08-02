@@ -4,6 +4,8 @@ import { Link } from 'react-router';
 import ReactTooltip from 'react-tooltip';
 import 'font-awesome/css/font-awesome.min.css';
 
+import Config from '../../Config';
+
 import ButtonSingle from '../dumb/ButtonSingle.jsx';
 import Href from '../dumb/Href.jsx';
 import Input from '../dumb/Input.jsx';
@@ -14,12 +16,14 @@ import Title from '../dumb/Title.jsx';
 const labelWidth = 'col-xs-12 col-lg-4';
 const paddingTop022 = {paddingTop: '2.2%'}
 const paddingTop3 = {paddingTop: '3%'}
+const paddingTop29px = {paddingTop: '29px'}
+const paddingTop30px = {paddingTop: '30px'}
 const paragraphWidth = 'col-xs-12 col-lg-8';
 const voucherFields = ['Numer ID', 'Referencja', 'Koszt produktów', 'Koszt transportu', 'Data', 'Number kuponu'];
 
 const OrderDetail = ( props ) => {
 	let empty = (props.details.additionalData === false && props.details.orderData === null);
-	let message = props.message.orders;
+	let message = Config.message.orders;
 	if (empty || props.empty) {
 		return (
 			<div class="container bgrContent borderRadius10 marginTop40px paddingBottom40px">
@@ -32,28 +36,15 @@ const OrderDetail = ( props ) => {
 		);
 	} else {
 		let baseUrl = props.url.shopUrl;
-		let buttons;
-		let buttonsSecondLine;
+		let buttons, buttonsSecondLine, customer, data, details, name, reference, shortCut, summary, tableHeaders, title, totalPaid;
 		let contentArray = [];
-		let customer;
-		let data;
 		let db = props.details.currentDb === 'new' ? 'nowy panel' : 'stary panel';
-		let details;
 		let display = false;
-		let displayDiv;
 		const displayPhoto = function(cover, bool) {
 			props.setDisplay(cover, bool);
 		}
 		let id = props.details.currentId;
-		let name;
-		let path;
-		let reference;
-		let shortCut;
 		let evenState = props.details.additionalTask === 'even';
-		let summary;
-		let tableHeaders;
-		let title;
-		let totalPaid;
 		if (props.details.additionalTask === 'voucher') {
 			data = props.details.additionalData;
 			customer = data.customer;
@@ -131,7 +122,7 @@ const OrderDetail = ( props ) => {
 				</div>
 			);
 		} else if (evenState) {
-			data = props.details.additionalData;
+			//data = props.details.additionalData;
 			title = props.message.orders.evenTitle + props.details.currentId + ' - ' + db;
 			let currentPanel = props.details.currentDb === 'new' ? 'NP' : 'SP';
 			let otherPanel = props.details.currentDb === 'new' ? 'SP' : 'NP';
@@ -147,7 +138,7 @@ const OrderDetail = ( props ) => {
 					<th class="col-xs-2 textAlignCenter">Akcja /<br/>Linki</th>
 				</tr>
 			);
-			let backUrl = 'orders/' + props.details.currentDb + '/' + id;
+			//let backUrl = 'orders/' + props.details.currentDb + '/' + id;
 			props.details.additionalData.forEach((el, index) => {
 				let backId = "products/history/" + el.id;
 				let curId = "products/edition/" + el.id;
@@ -207,9 +198,7 @@ const OrderDetail = ( props ) => {
 				);
 			}
 			details = (
-				<div class="container">
-					{detailsArray}
-				</div>
+				<div class="container">{detailsArray}</div>
 			);
 			tableHeaders = (
 				<tr>
@@ -228,11 +217,11 @@ const OrderDetail = ( props ) => {
 				contentArray.push(
 					<tr key={index} class="textAlignCenter">
 						<td class="col-xs-1"><img onMouseOver={displayPhoto.bind(this, el.cover, true)} onMouseOut={displayPhoto.bind(this, null, false)} src={el.cover} style={props.images.imgCssSmall} /></td>
-						<td class="col-xs-1" style={paddingTop022}>{el.productId}</td>
-						<td class="col-xs-4" style={paddingTop022}><a href={curUrl} target="blank">{el.productName}</a></td>
-						<td class="col-xs-2" style={paddingTop022}>{el.quantity.current}</td>
-						<td class="col-xs-2" style={paddingTop022}>{el.quantity.toUpdate}</td>
-						<td class="col-xs-1" style={paddingTop022}>{el.productQuantity}</td>
+						<td class="col-xs-1" style={paddingTop30px}>{el.productId}</td>
+						<td class="col-xs-4" style={paddingTop30px}><a href={curUrl} target="blank">{el.productName}</a></td>
+						<td class="col-xs-2" style={paddingTop30px}>{el.quantity.current}</td>
+						<td class="col-xs-2" style={paddingTop30px}>{el.quantity.toUpdate}</td>
+						<td class="col-xs-1" style={paddingTop29px}>{el.productQuantity}</td>
 						<td class="col-xs-1" style={paddingTop022}><ButtonSingle link={curId} className="btn btn-primary" content={props.message.orders.fullEdition} /></td>
 					</tr>
 				);
@@ -274,18 +263,18 @@ const OrderDetail = ( props ) => {
 				);
 				if (!props.shipmentNumber) {
 					buttonsArray.push(
-						<div key="3" class="col-xs-12 col-lg-3">
+						<div key="3" class="col-xs-12 col-md-3">
 							<input class="form-control btn btn-primary cursorPointer" type="button" value={message.shipmentNumber} onClick={ () => props.shipmentNumberHandler() } />
 						</div>
 					);
 				} else {
 					buttonsArray.push(
-						<div key="3" class="col-xs-12 col-lg-3">
+						<div key="3" class="col-xs-12 col-md-3">
 							<input class="form-control btn btn-danger cursorPointer" type="button" value={props.message.goBack} onClick={ () => props.shipmentNumberHandler() } />
 						</div>
 					);
 					buttonsArray.push(
-						<div key="4" class="col-xs-12 col-lg-3">
+						<div key="4" class="col-xs-12 col-md-3">
 							<input class="form-control btn btn-primary cursorPointer" disabled={props.curShipment.length < 9} type="button" value={message.send} onClick={ () => props.send(props.curShipment) } />
 						</div>
 					);
@@ -316,11 +305,10 @@ const OrderDetail = ( props ) => {
 							className="form-control btn btn-primary"
 							content={message.showEmail}
 						/>
-						<div class="col-xs-12 col-lg-3">
+						<div class="col-xs-12 col-md-3">
 							<input class="form-control btn btn-primary cursorPointer" type="button" value={message.send} onClick={ () => props.send() } />
 						</div>
-						<ButtonSingle link="orders" classMain="col-xs-12 col-md-3" className="form-control btn btn-danger"
-													content={message.delete}/>
+						<ButtonSingle link="orders" classMain="col-xs-12 col-md-3" className="form-control btn btn-danger" content={message.delete}/>
 					</div>
 				);
 			}

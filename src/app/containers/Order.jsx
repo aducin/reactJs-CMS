@@ -26,7 +26,10 @@ export default class OrderContainer extends React.Component {
 	}
 
 	componentDidUpdate() {
-		if (this.state.clear) {
+		if (this.props.order.error) {
+			this.props.mainModel.setMessage('warning', Config.error);
+			store.dispatch(order.clearError());
+		} else if (this.state.clear) {
 			store.dispatch(order.clearData());
 		} else if (this.state.checkDisabled) {
 			this.checkDisabled();
@@ -35,24 +38,35 @@ export default class OrderContainer extends React.Component {
 		}
 	}
 	componentWillUpdate(nextProps, nextState) {
-		let newParams = nextProps.params.db !== this.props.params.db || nextProps.params.id !== this.props.params.id;
-		let newAction = nextProps.params.action !== this.props.params.action;
-		let noData = !nextProps.order.orderData && !this.props.order.orderData;
-		let paramsAvailable = nextProps.params.db !== undefined && nextProps.params.id !== undefined;
-		let removedDb = nextProps.params.db === undefined && this.props.params.db !== undefined;
-		let removedId = nextProps.params.id === undefined && this.props.params.id !== undefined;
-		if (nextState.urlCheck) {
-			this.setState({urlCheck: false});
-		} else if (this.state.checkDisabled) {
-			this.setState({ checkDisabled: false });
-		} else if (nextState.clear) {
-			this.setState({ clear: false });
-		} else if (removedDb && removedId) {
-			this.removeDb();
-		} else if (noData && paramsAvailable && !this.state.inProgress) {
-			this.setUrlCheck();
-		} else if ((newParams || newAction) && paramsAvailable) {
-			this.setUrlCheck();
+		if (nextProps.order.customerId && nextProps.params.db && nextProps.params.id) {
+			store.dispatch(order.deleteCustomerId());
+			store.dispatch(order.setAction('getCustomer', {
+				db: nextProps.params.db,
+				id: nextProps.order.customerId,
+				orderId: nextProps.params.id,
+				token: nextProps.token
+			}));
+		} else {
+			let newParams = nextProps.params.db !== this.props.params.db || nextProps.params.id !== this.props.params.id;
+			let newAction = nextProps.params.action !== this.props.params.action;
+			//let noData = !nextProps.order.orderData && !this.props.order.orderData;
+			let noData = !nextProps.order.orderData && !nextProps.order.additionalData;
+			let paramsAvailable = nextProps.params.db !== undefined && nextProps.params.id !== undefined;
+			let removedDb = nextProps.params.db === undefined && this.props.params.db !== undefined;
+			let removedId = nextProps.params.id === undefined && this.props.params.id !== undefined;
+			if (nextState.urlCheck) {
+				this.setState({urlCheck: false});
+			} else if (this.state.checkDisabled) {
+				this.setState({checkDisabled: false});
+			} else if (nextState.clear) {
+				this.setState({clear: false});
+			} else if (removedDb && removedId) {
+				this.removeDb();
+			} else if (noData && paramsAvailable && !nextProps.order.loading && !this.state.inProgress) {
+				this.setUrlCheck();
+			} else if ((newParams || newAction) && paramsAvailable) {
+				this.setUrlCheck();
+			}
 		}
 	}
 	shouldComponentUpdate(nextProps, nextState) {
@@ -76,66 +90,24 @@ export default class OrderContainer extends React.Component {
 		});
 	}
 	checkUrl() {
-		let curPromise;
 		const action = this.props.params.action;
 		const db = this.props.params.db;
 		const id = this.props.params.id;
 		const token = this.props.token;
 		if (db && id && token) {
+			store.dispatch(order.setLoading());
 			if (!action || action !== 'voucher') {
 				if (action === 'even') {
-					curPromise = OrderModel.evenData(db, id);
+					store.dispatch(order.setAction('setEven', { db, id }));
 				} else if (action === 'discount' || action === 'mail') {
-					curPromise = OrderModel.getDiscountOrMail(action, db, id, token);
+					store.dispatch(order.setAction('setAdditionalAction', { action, db, id }));
 				} else {
-					curPromise = OrderModel.getData(db, id, token);
+					store.dispatch(order.setAction('setOrder', { db, id, token }));
 				}
-				this.handlePromise(curPromise);
 			} else {
-				OrderModel.getVoucher(db, id).then((response) => {
-					if (response.data.customer) {
-						curPromise = CustomerModel.getCustomerById(db, response.data.customer.id, token);
-						this.handlePromise(curPromise);
-					} else {
-						throw new Error(response.data.reason);
-					}
-				}).catch((err) =>{
-					let message = err.message || Config.message.error;
-					this.props.mainModel.setMessage('warning', message);
-				});
+				store.dispatch(order.setAction('setVoucher', { db, id, token }));
 			}
 		}
-	}
-	handlePromise(promise) {
-		let params = this.props.params;
-		promise
-			.then((response) => {
-				if (response.data.success !== false) {
-					if (!params.action) {
-						let data = {...response.data, id: params.id};
-						store.dispatch(order.setOrderId(data, params.db));
-					} else {
-						let dataObj = {
-							action: params.action,
-							data: response.data,
-							db: params.db,
-							id: params.id
-						};
-						store.dispatch(order.setAdditional(dataObj));
-					}
-				} else {
-					throw new Error(response.data.reason);
-				}
-			}).catch((err) =>{
-				let message = err.message || Config.message.error;
-				this.props.mainModel.setMessage('warning', message);
-				setTimeout(() => {
-					let url = Config.url.path + Config.url.pathSuffix + Config.url.pathOrder;
-					window.location.href = url;
-				}, Config.timer);
-			}).finally(() => {
-				this.setState({ inProgress: false });
-			});
 	}
 	removeDb() {
 		this.setState({
@@ -188,9 +160,7 @@ export default class OrderContainer extends React.Component {
 	}
 	setDisplay(cover, bool) {
     	let curCover = bool !== false ? cover : false;
-    	this.setState({
-    		display: curCover,
-    	});
+    	this.setState({ display: curCover });
 	}
 	setError(data) {
 		let message = data.value + Config.notANumber;
@@ -198,14 +168,11 @@ export default class OrderContainer extends React.Component {
 		this.setState({ error: data });
 	}
 	setShipmentNumber(e) {
-		this.setState({
-			curShipment: e.target.value
-		});
+		this.setState({ curShipment: e.target.value });
 	}
 	setUrlCheck() {
 		this.setState({
 			disable: true,
-			inProgress: true,
 			urlCheck: true
 		});
 	}
@@ -216,9 +183,7 @@ export default class OrderContainer extends React.Component {
 	voucherChange(action, value) {
 		if ((action === 'add' && value < 5) || (action === 'subtract' && value > 1)) {
 			let number = action === 'add' ? value + 1 : value - 1;
-			this.setState({
-				currentVoucher: number
-			});
+			this.setState({ currentVoucher: number });
 		} else if (action === 'add') {
 			this.props.mainModel.setMessage('warning', Config.message.orders.voucherMax);
 		} else if (action === 'subtract') {
@@ -258,10 +223,10 @@ export default class OrderContainer extends React.Component {
 					setError={this.setError.bind(this)}
 				/>
 			);
-			if (this.state.inProgress) {
+			if (this.state.inProgress || this.props.order.loading) {
 				busy = <Busy title={Config.message.loading} />;
 			}
-			if (!this.state.inProgress) {
+			if (!this.state.inProgress && !this.props.order.loading) {
 				details = (
 					<OrderDetail
 						currentVoucher={this.state.currentVoucher}

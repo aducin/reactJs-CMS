@@ -16,6 +16,13 @@ export function clearData(button) {
 	}
 }
 
+export function clearError() {
+	return {
+		type: 'clear_error',
+		payload: null
+	}
+}
+
 export function clearInputs(bool) {
 	return {
 		type: 'clear_inputs',
@@ -31,8 +38,7 @@ export function prepareResult() {
 }
 
 export function setAction(name, data) {
-	let result = { type: name, payload: data };
-	return result;
+	return { type: name, payload: data };
 };
 
 export function setBasicData(data) {
@@ -175,10 +181,10 @@ export function setSaveResult(list) {
 	}
 }
 
-export function setError(error) {
+export function setError() {
 	return {
 		type: 'set_error',
-		payload: error
+		payload: null
 	}
 }
 

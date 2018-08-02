@@ -4,11 +4,12 @@ export function accountReducer (state={
 	automatic: false,
 	empty: undefined,
 	list: null,
+	loading: false,
 	dateFrom: null,
 	dateTo: null,
 	error: false,
 	maxAmount: null,
-	message: false,
+	message: false
 }, action) {
 	switch(action.type) {
 		case "clear_data": {
@@ -21,23 +22,23 @@ export function accountReducer (state={
 				dateFrom: null,
 				dateTo: null,
 				list: null,
+				loading: false,
 				maxAmount: null,
-				message: false,
+				message: false
+			};
+			break;
+		}
+		case "clear_error": {
+			state = {...state,
+				error: false,
+				loading: false
 			};
 			break;
 		}
 		case "set_error": {
-			state = {...state, 
-				amount: null,
-				amounts: {},
-				automatic: false,
-				empty: undefined,
-				error: action.payload,
-				dateFrom: null,
-				dateTo: null,
-				list: null,
-				maxAmount: null,
-				message: false,
+			state = {...state,
+				error: true,
+				loading: false
 			};
 			break;
 		}
@@ -51,8 +52,15 @@ export function accountReducer (state={
 				dateFrom: action.payload.dateFrom,
 				dateTo: action.payload.dateTo,
 				list: action.payload.list,
+				loading: false,
 				maxAmount: action.payload.maxAmount,
-				message: action.payload.message,
+				message: action.payload.message
+			};
+			break;
+		}
+		case "set_loading": {
+			state = {...state,
+				loading: true
 			};
 			break;
 		}

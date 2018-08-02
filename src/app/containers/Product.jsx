@@ -1,7 +1,6 @@
 import React from 'react';
 import { Router, Route, IndexRoute, browserHistory, hashHistory } from 'react-router';
 import { connect } from 'react-redux';
-import { reactLocalStorage } from 'reactjs-localstorage';
 
 import 'rxjs/add/operator/concatMap';
 import 'rxjs/add/operator/switchMap';
@@ -21,38 +20,19 @@ import LastOrders from '../components/product/LastOrders.jsx';
 import Printings from '../components/product/Printings.jsx';
 import MainModel from '../model/mainModel';
 import ProductModel from '../model/productModel';
+import ProductHelper from '../helper/productHelper';
 import { Header as DefaultHeader, State } from '../helper/productState';
 
 @connect((store) => {
-    return {
-    	category: store.product.categoryList,
-	    manufactorer: store.product.manufacturerList,
-    	product: store.product
-    };
-}) 
+    return { product: store.product };
+})
 
 export default class ProductContainer extends React.Component {
 	constructor(props) {
 		super(props);
+		this.helper = new ProductHelper();
 		this.model = new ProductModel();
 		this.state = State;
-		this.subscription;
-	}
-
-	componentDidMount() {
-		this.model.customSearch.switchMap(observable => observable)
-			.subscribe((data) => this.setNameData(data)),
-			(err) => this.props.mainModel.setMessage('warning', err.message);
-		this.model.historySearch.switchMap(observable => observable)
-			.subscribe((data) => this.handleHistory(data)),
-			(err) => this.props.mainModel.setMessage('warning', err.message);
-		this.model.idSearch.switchMap(observable => observable)
-			.subscribe((data) => this.handleSearch(data)),
-			(err) => this.props.mainModel.setMessage('warning', err.message);
-		this.model.productSave.concatMap(observable => observable)
-			.subscribe((data) => this.handleSave(data)),
-			(err) => this.props.mainModel.setMessage('warning', err.message);
-		this.model.searching.subscribe((bool) => this.setState({ searching: bool }));
 		this.subscription = this.model.newestOrdersInterval.subscribe(() => this.checkNewestOrders());
 	}
 
@@ -64,12 +44,14 @@ export default class ProductContainer extends React.Component {
 			this[action]();
 		}
 	}
-	componentWillUnmount() {
-		this.subscription.unsubscribe();
-	}
+	componentWillUnmount() { this.subscription.unsubscribe() }
 	componentWillUpdate(nextProps, nextState) {
 		this.setDisabled(nextProps, nextState);
-		if (nextState.componentChecked) {
+		if (nextProps.product.error) {
+			this.props.mainModel.setMessage('warning', Config.error);
+			store.dispatch(product.clearError());
+			this.setState({ disable: false });
+		} else if (nextState.componentChecked) {
 			this.checkUrl(nextProps, nextState);
 			if (nextState.action) {
 				this.setState({ action: null });
@@ -87,57 +69,43 @@ export default class ProductContainer extends React.Component {
 	}
 	checkUrl(nextProps, nextState) {
 		if (nextProps.params.action !== undefined && nextProps.params.id !== undefined) {
-			let action = nextProps.params.action;
-			let edition = action === 'edition' && nextState.editionSearched !== nextProps.params.id;
-			let history = action === 'history' && nextState.historySearched !== nextProps.params.id;
-			if (edition || history) {
+			let modifiedData = this.helper.checkIfModified(nextProps.params, nextState);
+			if (modifiedData) {
 				store.dispatch(product.clearData());
-				let currentAction = action === 'edition' ? 'searchEdition' : 'searchHistory';
-				let editionSearched = edition ? nextProps.params.id : false;
-				let historySearched = history ? nextProps.params.id : false;
 				this.setState({
-					action: currentAction,
-					editionSearched: editionSearched,
-					historySearched: historySearched,
-					simpleSearched: false
+					action: modifiedData.action,
+					editionSearched: modifiedData.editionSearched,
+					historySearched: modifiedData.historySearched,
+					simpleSearched: false,
 				});
 			}
-		} else {
-			if (nextState.restoreList) {
-				this.setState({
-					action: 'restoreList',
-					editionSearched: false,
-					restoreList: false
-				});
-			} else if (nextState.editionSearched || nextState.historySearched) {
-				this.setState({
-					action: 'clearData',
-					editionSearched: false,
-					historySearched: false,
-				});
-			}
+		} else if (nextState.restoreList) {
+			this.setState({
+				action: 'restoreList',
+				editionSearched: false,
+				restoreList: false
+			});
+		} else if (nextState.editionSearched || nextState.historySearched) {
+			this.setState({
+				action: 'clearData',
+				editionSearched: false,
+				historySearched: false,
+			});
 		}
 	}
 	checkModified() {
+		let data;
 		this.model.getModyfied()
 			.then((response) => {
 				if (response.status === 200 && response.data[0]) {
-					var data = {
-						empty: false,
-						list: response.data
-					};
+					data = { empty: false, list: response.data };
 				} else if (response.status === 200 && !response.data[0]) {
-					var data = {
-						empty: true,
-						list: null
-					};
+					data = { empty: true, list: null };
 				}
 				store.dispatch(product.setModified(data));
 				this.checkNewestOrders();
 			})
-			.catch((err) =>{
-				this.props.mainModel.setMessage('warning', err.message);
-			})
+			.catch((err) => this.props.mainModel.setMessage('warning', err.message))
 			.finally(() => {
 				this.setState({
 					action: 'checkPrintings',
@@ -148,16 +116,28 @@ export default class ProductContainer extends React.Component {
 	}
 	checkNewestOrders() {
 		store.dispatch(product.setOrdersSearch());
-		let url = setUrl('pathOrder', 'last', this.props.token);
-		store.dispatch(product.setAction('setLastOrders', url));
+		store.dispatch(product.setAction('setLastOrders', setUrl('pathOrder', 'last', this.props.token)));
 	}
 	checkPrintings() {
-		this.setPrintings(this.model.getPrintings(this.props.token));
+		this.model.getPrintings(this.props.token)
+			.then((response) => {
+				if (response.status === 200 && response.data.success) {
+					let data = {
+						deliveryList: response.data.deliveryList,
+						list: response.data.list || null,
+						empty: response.data.empty,
+						emptyDelivery: response.data.emptyDelivery || null
+					};
+					store.dispatch(product.setPrintings(data));
+				} else {
+					throw new Error(response.data.reason);
+				}
+			})
+			.catch((err) => this.props.mainModel.setMessage('warning', err.message))
+			.finally(() => this.setState({ printingSearch: false }));
 	}
 	clearData(button = null) {
-		reactLocalStorage.set('categorySearch', null);
-		reactLocalStorage.set('manufactorerSearch', null);
-		reactLocalStorage.set('nameSearch', null);
+		this.helper.clearStorage();
 		store.dispatch(product.clearData());
 		let modified, modifiedSearch;
 		if(!this.state.modified) {
@@ -179,10 +159,7 @@ export default class ProductContainer extends React.Component {
 		});
 	}
 	clearEdition() {
-		this.setState({
-			action: 'clearUrl',
-			restoreList: true
-		});
+		this.setState({ action: 'clearUrl', restoreList: true });
 	}
 	clearUrl() {
 		clearUrl(Config.url.pathProducts);
@@ -190,7 +167,7 @@ export default class ProductContainer extends React.Component {
 	closeModal() {
 		this.setState({ simpleSearched: false });
 	}
-	deleteModified(id) {
+	deleteMods(id) {
 		this.model.deleteModified(id, this.props.token)
 		.then((response) => {
 			if (response.status === 200 && response.data.success) {
@@ -199,75 +176,29 @@ export default class ProductContainer extends React.Component {
 			} else {
 				throw new Error(response.data.reason);
 			}
-		}).catch((err) =>{
-			store.dispatch(product.setError(err));
-		});
+		}).
+		catch((err) =>this.props.mainModel.setMessage('warning', err.message));
 	}
 	getConstant() {
-		let cached = reactLocalStorage.getObject('constant');
-		if (cached !== undefined && cached.category !== undefined && cached.manufactorer !== undefined) {
-			let data = {
-				category: cached.category,
-				manufactorer: cached.manufactorer,
-			};
-			store.dispatch(product.setConstant(data));
+		let cachedLists = this.helper.getCachedLists();
+		if (cachedLists.success) {
+			store.dispatch(product.setConstant(cachedLists));
 			this.setState({ constant: true });
 		} else {
-			const category = this.model.getCategories();
-			const manufactorer = this.model.getManufactorer();
-			reactLocalStorage.setObject('constant', {'category': category, 'manufactorer': manufactorer});
-			Promise.all([category, manufactorer])
+			this.helper.getPromises()
 			.then(response => { 
 				if (response[0].status === 200 && response[1].status === 200) {
-					let data = {
-						category: response[0].data,
-						manufactorer: response[1].data,
-					};
-					reactLocalStorage.setObject('constant', {'category': response[0].data, 'manufactorer': response[1].data});
-					store.dispatch(product.setConstant(data));
+					this.helper.setStorageConstant(response);
+					store.dispatch(product.setConstant({ category: response[0].data, manufactorer: response[1].data }));
 					this.setState({ constant: true });
 				} else {
 					throw new Error(response[0].data.reason);
 				}
 			})   
-			.catch((err) =>{
-			    store.dispatch(product.setError(err));
-			});
+			.catch((err) => this.props.mainModel.setMessage('warning', err.message));
 		}
 	}
-	handleHistory(response) {
-		if (response.status === 200 && response.data) {
-			store.dispatch(product.setHistory(response.data, this.state.historySearched));
-		} else {
-			this.props.mainModel.setMessage('warning', response.data.reason);
-		}
-		this.setState({ disable: true });
-	}
-	handleSave(response) {
-		window.scrollTo(0, 0);
-		let action = response.data.success ? 'setSuccess' : 'setWarning';
-		this.props.mainModel.setMessage(action, response.data.reason);
-		this.checkModified();
-		this.setState({ disabledEdition: false });
-	}
-	handleSearch(response) {
-		if (response.status === 200) {
-			if (this.state.editionSearched) {
-				let respData = {
-					edition: 'full',
-					first: response.data,
-					second: null
-				};
-				store.dispatch(product.setIdResult(respData));
-			} else if (this.state.simpleSearched) {
-				store.dispatch(product.setBasicData(response.data));
-			}
-		} else {
-			this.props.mainModel.setMessage('warning', response.data.reason);
-		}
-		this.setState({ disable: true });
-	}
-	modifyLastOrder(base, id) {
+	modifyLast(base, id) {
 		this.model.modifyLastOrder(base, id, this.props.token)
 			.then((response) => {
 				if (response.data.success) {
@@ -277,31 +208,28 @@ export default class ProductContainer extends React.Component {
 					throw new Error(response.data.reason);
 				}
 			})
-			.catch((err) =>{
-				store.dispatch(product.setError(err));
-			});
-	}
-	nameSearch() {
-		this.model.nameSearch(this.state.nameSearchData);
+			.catch((err) => this.props.mainModel.setMessage('warning', err.message));
 	}
 	redirect(path, id) {
 		window.location = Config.url.path + Config.url.pathSuffix + Config.url.pathProducts + '/' + path + '/' + id;
 	}
 	restoreList() {
-		this.setNameSearch({
-			category: reactLocalStorage.get('categorySearch'),
-			manufactorer: reactLocalStorage.get('manufactorerSearch'),
-			search: reactLocalStorage.get('nameSearch')
-		});
+		this.setNameSearch( this.helper.getStorage() );
 	}
 	searchEdition() {
 		store.dispatch(product.prepareResult());
-		this.model.searchId(this.state.editionSearched, null);
+		store.dispatch(product.setAction('getProductById', {basic: false, id: this.state.editionSearched}));
+		this.setState({ disable: true });
 	}
-	searchHistory(state = null) {
+	searchName(data) {
 		store.dispatch(product.prepareResult());
-		let curState = state ? state : this.state;
-		this.model.searchHistory(curState.historySearched);
+		store.dispatch(product.setAction('getByParams', { params: data, another: this.state.nameSearchData.anotherSearch }));
+		this.helper.setStorage(data);
+		this.setState({ nameSearch: true, nameSearchData: data });
+	}
+	searchHistory() {
+		store.dispatch(product.prepareResult());
+		store.dispatch(product.setAction('getHistory', {basic: false, id: this.state.historySearched}));
 	}
 	setDisabled(props, state) {
 		let disabled = !state.constant || (props.params.action !== undefined && props.params.id !== undefined);
@@ -310,7 +238,7 @@ export default class ProductContainer extends React.Component {
 		}
 	}
 	setError(error) {
-		this.props.setError(error);
+		this.props.mainModel.setMessage('warning', error);
 	}
 	setHeader(data) {
 		if (data.origin === 'idSearch') {
@@ -320,73 +248,23 @@ export default class ProductContainer extends React.Component {
 		}
 		this.setState({ header: data });
 	}
-	setNameData(response) {
-		let data = this.state.nameSearchData;
-		if (response.status === 200 && response.data) {
-			if (response.data.success !== undefined) {
-				var finalData = {empty: true, reason: response.data.reason};
-			} else {
-				reactLocalStorage.set('categorySearch', data.category);
-				reactLocalStorage.set('manufactorerSearch', data.manufactorer);
-				reactLocalStorage.set('nameSearch', data.search);
-				var finalData = {
-					list: response.data,
-					anotherSearch: Boolean(data.anotherSearch),
-				};
-			}
-			store.dispatch(product.setNameResult(finalData));
-		} else {
-			this.props.mainModel.setMessage('warning', response.data.reason);
-		}
-	}
-	setNameSearch(data) {
-		this.model.nameSearch(data);
-		this.setState({
-			nameSearch: true,
-			nameSearchData: data
-		});
-	}
-	setPrintings(promise) {
-		promise
-			.then((response) => {
-				if (response.status === 200 && response.data.success) {
-					let ajaxResponse = response.data;
-					let data = {
-						deliveryList: ajaxResponse.deliveryList,
-						list: ajaxResponse.list || null,
-						empty: ajaxResponse.empty,
-						emptyDelivery: ajaxResponse.emptyDelivery || null
-					};
-					store.dispatch(product.setPrintings(data));
-				} else {
-					throw new Error(response.data.reason);
-				}
-			})
-			.catch((err) =>{
-				this.props.mainModel.setMessage('warning', err.message);
-			})
-			.finally(() => {
-				this.setState({ printingSearch: false });
-			});
-	}
 	setSave(data) {
-		let curQuantity;
-		if (data.quantity.modified !== undefined) {
-			curQuantity = data.quantity.modified;
-		} else if (data.quantity.old !== undefined) {
-			curQuantity = data.quantity.old;
-		} else {
-			curQuantity = data.quantity;
-		}
-		data.quantity = curQuantity;
-		let newAttr = this.props.product.fullDataFirst.attribute.new;
-		let oldAttr = this.props.product.fullDataFirst.attribute.old;
-		this.model.saveProduct(newAttr, oldAttr, this.state.config, data);
-		this.setState({ disabledEdition: true });
+		window.scrollTo(0, 0);
+		data.quantity = this.helper.setQuantity(data.quantity);
+		let attribute = this.props.product.fullDataFirst.attribute;
+		this.model.saveProduct(attribute.new, attribute.old, this.state.config, data)
+			.then((response) => {
+				let action = response.data.success ? 'success' : 'warning';
+				this.props.mainModel.setMessage(action, response.data.reason);
+				this.checkModified();
+			})
+			.catch((err) => this.props.mainModel.setMessage(action, err.message))
+			.finally(() => this.setState({ disabledEdition: false }));
 	}
 	setSimpleId(data) {
+		this.helper.setStorageSimple(data.id);
 		store.dispatch(product.prepareResult());
-		this.model.searchId(null, parseInt(data.id));
+		store.dispatch(product.setAction('getProductById', { basic: true, id: parseInt(data.id) }));
 		this.setState({
 			editionSearched: false,
 			historySearched: false,
@@ -394,87 +272,57 @@ export default class ProductContainer extends React.Component {
 		});
 	}
 	setSuccess(message) {
-		this.props.mainModel.setMessage('success', response.data.reason);
+		this.props.mainModel.setMessage('success', message);
 	}
 	
 	render() {
-		let header, message, lastOrders, printings;
-		let messageStyle = this.props.success ? Config.alertSuccess : Config.alertError;
+		let basic, edition, header, history, lastOrders, message, modified, nameList, printings;
+		const product = this.props.product;
+		const state = this.state;
 		if (this.props.approved) {
-			let linkDisable = this.state.modifiedSearch || this.state.printingSearch;
 			header = (
-				<div class="height12">
-					<Header
-						active="products"
-						buttonHandler={this.props.logoutHandler.bind(this)}
-						disable={this.state.disable}
-						fields={Config.fields}
-						linkDisable={linkDisable}
-					/>
-				</div>
-			);
-			message = (
-				<Message
-					message={this.props.toDisplay}
-					messageStyle={messageStyle}
+				<Header
+					active="products"
+					buttonHandler={this.props.logoutHandler.bind(this)}
+					disable={state.disable}
+					linkDisable={state.modifiedSearch || state.printingSearch}
 				/>
 			);
+			let messageStyle = this.props.success ? Config.alertSuccess : Config.alertError;
+			message = <Message message={this.props.toDisplay} messageStyle={messageStyle} />;
 		}
-		let basic, edition, history, modified, nameList;
 		if (!this.state.editionSearched && !this.state.historySearched && !this.state.nameSearch) {
-			modified = (
-				<Modified
-					list={this.props.product.modifiedList}
-					delete={this.deleteModified.bind(this)}
-					disable={this.state.disable}
-					inSearch={this.state.modifiedSearch}
-				/>
-			);
-			lastOrders = (
-				<LastOrders
-					data={this.props.product.lastOrders}
-					inSearch={this.props.product.ordersSearch}
-					setLastOrder={this.modifyLastOrder.bind(this)}
-				/>
-			);
+			modified = <Modified list={product.modifiedList} delete={this.deleteMods.bind(this)} inSearch={state.modifiedSearch} />;
+			lastOrders = <LastOrders data={product.lastOrders} search={product.ordersSearch} setLast={this.modifyLast.bind(this)} />;
 			printings = (
 				<Printings
-					data={this.props.product.printings}
+					data={product.printings}
 					getPrintings={this.checkPrintings.bind(this)}
-					inSearch={this.state.printingSearch}
+					inSearch={state.printingSearch}
 					setError={this.setError.bind(this)}
 					setSuccess={this.setSuccess.bind(this)}
 					token={this.props.token}
 				/>
 			);
 		} else if (this.state.editionSearched && !this.state.historySearched) {
+			let productData = { dataFull: product.fullDataFirst, empty: product.empty, modified: product.modifiedList };
 			edition = (
 				<ProductEdition
-					dataFull={this.props.product.fullDataFirst}
-					disable={this.state.disabledEdition}
-					id={this.state.editionSearched}
-					imageDisplay={this.state.imageDisplay}
+					disable={state.disabledEdition}
 					goBack={this.clearEdition.bind(this)}
-					list={this.state.nameSearch}
-					modified={this.props.product.modifiedList}
+					list={state.nameSearch}
+					productData={productData}
 					save={this.setSave.bind(this)}
 				/>
 			)
-		} else if (!this.state.editionSearched && this.state.historySearched) {
-			history = (
-				<ProductHistory
-					clear={this.clearData.bind(this)}
-					id={this.state.editionSearched}
-					product={this.props.product}
-				/>
-			)
-		} else if (this.state.nameSearch && !this.state.editionSearched && !this.state.historySearched) {
+		} else if (state.historySearched && !state.editionSearched) {
+			history = <ProductHistory clear={this.clearData.bind(this)} id={state.editionSearched} product={product} />;
+		} else if (state.nameSearch && !state.editionSearched && !state.historySearched && !state.simpleSearched) {
 			nameList = (
 				<ProductList
 					clearList={this.clearData.bind(this)}
-					product={this.props.product}
+					product={product}
 					redirect={this.redirect.bind(this)}
-					searching={this.state.searching}
 					simpleModal={this.setSimpleId.bind(this)}
 				/>
 			)
@@ -482,25 +330,19 @@ export default class ProductContainer extends React.Component {
 		if (this.state.simpleSearched) {
 			basic = (
 				<BasicEdition
-					ajaxConfig={Config.ajaxConfig}
 					close={this.closeModal.bind(this)}
-					dataBasic={this.props.product.basicData}
-					dataReceived={this.props.product.dataReceived}
+					dataBasic={product.basicData}
+					dataReceived={product.dataReceived}
 					token={this.props.token}
 				/>
 			)
 		}
-		let searchedCheck = this.state.editionSearched || this.state.historySearched;
 		let productHeader = (
 			<ProductHeader
-				category={this.props.category}
-				constant={this.state.constant}
-				data={this.state.header}
-				disable={this.state.disable}
-				error={this.state.error}
-				manufactorer={this.props.manufactorer}
-				searched={searchedCheck}
-				searchName={this.setNameSearch.bind(this)}
+				data={state.header}
+				product={product}
+				mainState={state}
+				searchName={this.searchName.bind(this)}
 				setHeader={this.setHeader.bind(this)}
 			/>
 		);

@@ -173,6 +173,7 @@ const Config = {
 		alreadyChecked: 'Podane żądanie zostało już zrealizowane',
 		authorisation: 'Proszę czekać - trwa weryfikacja...',
 		categoryAmount: 'Ilość aktywnych kategorii: ',
+		chooseFrom: 'Wybierz sposród ',
 		close: 'Zamknij',
 		condition: 'Stan:',
 		currency: "zł",
@@ -276,6 +277,7 @@ const Config = {
 		noLastOrder: 'Obecnie brak nowych zamówień',
 		noModified: 'Obecnie brak produktów podmienionych',
 		noNameList: "Brak produktów spełniających podane kryteria",
+		noProduct: "Nie znaleziono produktu o podanym ID",
 		noPrintings: 'Obecnie brak dokumentow do wydruku.',
 		orders: {
 			back: 'Powrót do zamówienia',
