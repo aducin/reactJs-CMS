@@ -13,7 +13,7 @@ import CustomerHeader from '../components/customer/CustomerHeader.jsx';
 import CustomerDelete from '../components/modal/CustomerDelete.jsx';
 import CustomerModel from '../model/customerModel.js';
 import { State } from '../helper/customerState';
-import { validateEmail } from '../helper/validator';
+import { validateEmail } from '../functions/validateEmail';
 
 @connect((store) => {
   return { customer: store.customer };

@@ -19,7 +19,7 @@ import Config from '../Config';
 import Footer from '../components/dumb/Footer.jsx';
 import MainModel from '../model/mainModel';
 import { State } from '../helper/mainState';
-import { setUrl } from '../helper/functions.js';
+import { setUrl } from '../functions/setUrl';
 
 @connect((store) => {
     return {

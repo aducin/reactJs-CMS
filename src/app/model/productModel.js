@@ -7,7 +7,7 @@ import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/observable/interval';
 
 import Config from '../Config';
-import { setUrl } from '../helper/functions';
+import { setUrl } from '../functions/setUrl';
 
 const url = Config.url;
 const productUrl = url.serverPath + url.pathProducts;

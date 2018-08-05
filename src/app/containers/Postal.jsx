@@ -13,7 +13,7 @@ import PostalDetail from '../components/postal/PostalDetail.jsx';
 import PostalHeader from '../components/postal/PostalHeader.jsx';
 import PostalModel from '../model/postalModel.js';
 import { State } from '../helper/postalState';
-import { validateNumber } from '../helper/validator';
+import { validateNumber } from '../functions/validateNumber';
 
 @connect((store) => {
 	return { postal: store.postal };

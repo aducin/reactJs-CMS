@@ -4,7 +4,7 @@ import DatePicker from 'react-datepicker';
 import { Modal } from 'react-bootstrap';
 
 import Config from '../../Config';
-import { createReducedObj } from '../../helper/functions';
+import { createReducedObj } from '../../functions/createReducedObj';
 import Input from '../dumb/Input.jsx';
 import Label from '../dumb/Label.jsx';
 import Select from '../dumb/Select.jsx';

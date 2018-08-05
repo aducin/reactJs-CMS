@@ -14,8 +14,17 @@ import AccountHeader from '../components/account/AccountHeader.jsx';
 import AccountModal from '../components/modal/AccountModal.jsx';
 import AccountModel from '../model/accountModel';
 import { State } from '../helper/accountState';
-import { createReducedObj } from '../helper/functions';
-import { accountPrepare, changeDate, disableHandler, errorHandler, formatDate, handleFieldChange, rowHandle, selectHandle, setModalData, setParams } from '../helper/accountFunctions';
+import { accountPrepare } from '../functions/accountPrepare';
+import { changeDate } from '../functions/changeDate';
+import { createReducedObj } from '../functions/createReducedObj';
+import { disableHandler } from '../functions/disableHandler';
+import { errorHandler } from '../functions/errorHandler';
+import { formatDate } from '../functions/formatDate';
+import { handleFieldChange } from '../functions/handleFieldChange';
+import { rowHandle } from '../functions/rowHandle';
+import { selectHandle } from '../functions/selectHandle';
+import { setModalData } from '../functions/setModalData';
+import { setParams } from '../functions/setParams';
 
 @connect((store) => {
 	return { account: store.account };
@@ -117,7 +126,7 @@ export default class AccountContainer extends React.Component {
 		this.setState({ selectedRow: curSelected });
 	}
 	setAccount() {
-		let data = accountPrepare(this.state.modalObj, token);
+		let data = accountPrepare(this.state, this.state.token);
 		let action = this.state.modal === 'add' ? 'rowSave' : 'rowUpdate';
 		this.model[action](data).then((response) => {
 			let type = response.data.success ? 'success' : 'error';

@@ -4,7 +4,9 @@ import { map, mapTo, mergeMap } from 'rxjs/operators';
 import 'rxjs/add/operator/catch';
 
 import Config from '../Config';
-import { appendTime, getAmounts, getTaxes } from '../helper/accountFunctions';
+import { appendTime } from '../functions/appendTime';
+import { getAmounts } from '../functions/getAmounts';
+import { getTaxes } from '../functions/getTaxes';
 
 const pathUrl = Config.url.serverPath + 'accounts';
 

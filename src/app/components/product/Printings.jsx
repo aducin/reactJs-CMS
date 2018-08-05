@@ -4,8 +4,8 @@ import 'font-awesome/css/font-awesome.min.css';
 
 import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
-import { setUrl } from '../../helper/functions.js';
-import ProductModel from '../../model/productModel';
+import { setUrl } from '../../functions/setUrl';
+import ProducModel from '../../model/productModel';
 import Busy from '../dumb/Busy.jsx';
 import Title from '../dumb/Title.jsx';
 import PrintingAdd from '../modal/PrintingAdd.jsx';

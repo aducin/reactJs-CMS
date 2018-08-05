@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import Config from '../Config';
 import Helper from '../helper/Helper.jsx';
-import { setUrl } from '../helper/functions.js';
+import { setUrl } from '../functions/setUrl';
 
 let path;
 
