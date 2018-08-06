@@ -2,8 +2,6 @@ import React from 'react';
 import { Router, Route, IndexRoute, browserHistory, hashHistory } from 'react-router';
 import { connect } from 'react-redux';
 
-import 'rxjs/add/operator/concatMap';
-import 'rxjs/add/operator/switchMap';
 import store from '../store';
 import * as product from '../actions/productActions.jsx';
 import Config from '../Config';
@@ -21,7 +19,7 @@ import LastOrders from '../components/product/LastOrders.jsx';
 import Printings from '../components/product/Printings.jsx';
 import MainModel from '../model/mainModel';
 import ProductModel from '../model/productModel';
-import { checkIfModified } from '../functions/product/checkIfModified';
+import { checkUrl } from '../functions/product/checkUrl';
 import { clearStorage } from '../functions/product/clearStorage';
 import { getCachedLists } from '../functions/product/getCachedLists';
 import { getPromises } from '../functions/product/getPromises';
@@ -74,28 +72,17 @@ export default class ProductContainer extends React.Component {
 		this.setState({ componentChecked: true });
 	}
 	checkUrl(nextProps, nextState) {
-		if (nextProps.params.action !== undefined && nextProps.params.id !== undefined) {
-			let modifiedData = checkIfModified(nextProps.params, nextState);
-			if (modifiedData) {
-				store.dispatch(product.clearData());
-				this.setState({
-					action: modifiedData.action,
-					editionSearched: modifiedData.editionSearched,
-					historySearched: modifiedData.historySearched,
-					simpleSearched: false,
-				});
+		let act = checkUrl(nextProps, nextState);
+		if (act.modify) {
+			if (act.dispatch) {
+				store.dispatch(product[act.dispatch]());
 			}
-		} else if (nextState.restoreList) {
 			this.setState({
-				action: 'restoreList',
-				editionSearched: false,
-				restoreList: false
-			});
-		} else if (nextState.editionSearched || nextState.historySearched) {
-			this.setState({
-				action: 'clearData',
-				editionSearched: false,
-				historySearched: false,
+				action: act.action,
+				editionSearched: act.editionSearched,
+				historySearched: act.historySearched,
+				restoreList: act.restoreList,
+				simpleSearched: act.simpleSearched
 			});
 		}
 	}
@@ -209,7 +196,7 @@ export default class ProductContainer extends React.Component {
 			.then((response) => {
 				if (response.data.success) {
 					this.props.mainModel.setMessage('success', response.data.reason);
-					this.props.searchOrders();
+					this.searchOrders();
 				} else {
 					throw new Error(response.data.reason);
 				}
