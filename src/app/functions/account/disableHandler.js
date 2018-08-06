@@ -1,4 +1,4 @@
-import Config from '../Config';
+import Config from '../../Config';
 
 export const disableHandler = (state, error) => {
   if (Object.keys(error).length > 0) {

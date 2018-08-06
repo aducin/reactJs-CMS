@@ -5,7 +5,7 @@ import 'font-awesome/css/font-awesome.min.css';
 import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
 import { setUrl } from '../../functions/setUrl';
-import ProducModel from '../../model/productModel';
+import ProductModel from '../../model/productModel';
 import Busy from '../dumb/Busy.jsx';
 import Title from '../dumb/Title.jsx';
 import PrintingAdd from '../modal/PrintingAdd.jsx';
@@ -17,6 +17,7 @@ const styles = {
 export default class Printings extends React.Component {
   constructor(props){
     super(props);
+    this.model = new ProductModel();
     this.state = {
       description: '',
       disabled: false,
@@ -49,7 +50,7 @@ export default class Printings extends React.Component {
     this.setState({ modal: false });
   }
   deleteHandler(id) {
-    ProductModel.deletePrinting(id, this.props.token)
+    this.model.deletePrinting(id, this.props.token)
       .then((response) => {
         let action = response.data.success  ? 'setSuccess' : 'setError';
         this.props[action](response.data.reason);
@@ -75,7 +76,7 @@ export default class Printings extends React.Component {
   saveFile = () => {
     const fd = new FormData();
     fd.append('file[]', this.state.file, this.state.file.name);
-    ProductModel.saveFile(this.state.description, fd, this.props.token)
+    this.model.saveFile(this.state.description, fd, this.props.token)
       .then((response) => {
         let type = response.data.success  ? 'success' : 'warning';
         this.setMessage(type, response.data.reason);

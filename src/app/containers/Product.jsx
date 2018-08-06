@@ -21,7 +21,13 @@ import LastOrders from '../components/product/LastOrders.jsx';
 import Printings from '../components/product/Printings.jsx';
 import MainModel from '../model/mainModel';
 import ProductModel from '../model/productModel';
-import ProductHelper from '../helper/productHelper';
+import { checkIfModified } from '../functions/product/checkIfModified';
+import { clearStorage } from '../functions/product/clearStorage';
+import { getCachedLists } from '../functions/product/getCachedLists';
+import { getPromises } from '../functions/product/getPromises';
+import { getStorage } from '../functions/product/getStorage';
+import { setQuantity } from '../functions/product/setQuantity';
+import { setStorage, setStorageConstant, setStorageSimple } from '../functions/product/setStorage';
 import { Header as DefaultHeader, State } from '../helper/productState';
 
 @connect((store) => {
@@ -31,7 +37,6 @@ import { Header as DefaultHeader, State } from '../helper/productState';
 export default class ProductContainer extends React.Component {
 	constructor(props) {
 		super(props);
-		this.helper = new ProductHelper();
 		this.model = new ProductModel();
 		this.state = State;
 		this.subscription = this.model.newestOrdersInterval.subscribe(() => this.checkNewestOrders());
@@ -70,7 +75,7 @@ export default class ProductContainer extends React.Component {
 	}
 	checkUrl(nextProps, nextState) {
 		if (nextProps.params.action !== undefined && nextProps.params.id !== undefined) {
-			let modifiedData = this.helper.checkIfModified(nextProps.params, nextState);
+			let modifiedData = checkIfModified(nextProps.params, nextState);
 			if (modifiedData) {
 				store.dispatch(product.clearData());
 				this.setState({
@@ -138,7 +143,7 @@ export default class ProductContainer extends React.Component {
 			.finally(() => this.setState({ printingSearch: false }));
 	}
 	clearData(button = null) {
-		this.helper.clearStorage();
+		clearStorage();
 		store.dispatch(product.clearData());
 		let modified, modifiedSearch;
 		if(!this.state.modified) {
@@ -181,21 +186,21 @@ export default class ProductContainer extends React.Component {
 		catch((err) =>this.props.mainModel.setMessage('warning', err.message));
 	}
 	getConstant() {
-		let cachedLists = this.helper.getCachedLists();
+		let cachedLists = getCachedLists();
 		if (cachedLists.success) {
 			store.dispatch(product.setConstant(cachedLists));
 			this.setState({ constant: true });
 		} else {
-			this.helper.getPromises()
-			.then(response => { 
+			getPromises()
+			.then(response => {
 				if (response[0].status === 200 && response[1].status === 200) {
-					this.helper.setStorageConstant(response);
+					setStorageConstant(response);
 					store.dispatch(product.setConstant({ category: response[0].data, manufactorer: response[1].data }));
 					this.setState({ constant: true });
 				} else {
 					throw new Error(response[0].data.reason);
 				}
-			})   
+			})
 			.catch((err) => this.props.mainModel.setMessage('warning', err.message));
 		}
 	}
@@ -215,7 +220,7 @@ export default class ProductContainer extends React.Component {
 		window.location = Config.url.path + Config.url.pathSuffix + Config.url.pathProducts + '/' + path + '/' + id;
 	}
 	restoreList() {
-		this.setNameSearch( this.helper.getStorage() );
+		this.searchName( getStorage() );
 	}
 	searchEdition() {
 		store.dispatch(product.prepareResult());
@@ -225,7 +230,7 @@ export default class ProductContainer extends React.Component {
 	searchName(data) {
 		store.dispatch(product.prepareResult());
 		store.dispatch(product.setAction('getByParams', { params: data, another: this.state.nameSearchData.anotherSearch }));
-		this.helper.setStorage(data);
+		setStorage(data);
 		this.setState({ nameSearch: true, nameSearchData: data });
 	}
 	searchHistory() {
@@ -251,7 +256,7 @@ export default class ProductContainer extends React.Component {
 	}
 	setSave(data) {
 		window.scrollTo(0, 0);
-		data.quantity = this.helper.setQuantity(data.quantity);
+		data.quantity = setQuantity(data.quantity);
 		let attribute = this.props.product.fullDataFirst.attribute;
 		this.model.saveProduct(attribute.new, attribute.old, this.state.config, data)
 			.then((response) => {
@@ -263,7 +268,7 @@ export default class ProductContainer extends React.Component {
 			.finally(() => this.setState({ disabledEdition: false }));
 	}
 	setSimpleId(data) {
-		this.helper.setStorageSimple(data.id);
+		setStorageSimple(data.id);
 		store.dispatch(product.prepareResult());
 		store.dispatch(product.setAction('getProductById', { basic: true, id: parseInt(data.id) }));
 		this.setState({

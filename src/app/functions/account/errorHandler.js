@@ -1,4 +1,4 @@
-import Config from '../Config';
+import Config from '../../Config';
 
 export const errorHandler = (modalObj) => {
   let error = Config.accountNumbers.filter((el) => modalObj[el] && isNaN(modalObj[el]));

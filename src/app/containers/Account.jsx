@@ -14,17 +14,17 @@ import AccountHeader from '../components/account/AccountHeader.jsx';
 import AccountModal from '../components/modal/AccountModal.jsx';
 import AccountModel from '../model/accountModel';
 import { State } from '../helper/accountState';
-import { accountPrepare } from '../functions/accountPrepare';
+import { accountPrepare } from '../functions/account/accountPrepare';
 import { changeDate } from '../functions/changeDate';
 import { createReducedObj } from '../functions/createReducedObj';
-import { disableHandler } from '../functions/disableHandler';
-import { errorHandler } from '../functions/errorHandler';
+import { disableHandler } from '../functions/account/disableHandler';
+import { errorHandler } from '../functions/account/errorHandler';
 import { formatDate } from '../functions/formatDate';
-import { handleFieldChange } from '../functions/handleFieldChange';
-import { rowHandle } from '../functions/rowHandle';
-import { selectHandle } from '../functions/selectHandle';
-import { setModalData } from '../functions/setModalData';
-import { setParams } from '../functions/setParams';
+import { handleFieldChange } from '../functions/account/handleFieldChange';
+import { rowHandle } from '../functions/account/rowHandle';
+import { selectHandle } from '../functions/account/selectHandle';
+import { setModalData } from '../functions/account/setModalData';
+import { setParams } from '../functions/account/setParams';
 
 @connect((store) => {
 	return { account: store.account };

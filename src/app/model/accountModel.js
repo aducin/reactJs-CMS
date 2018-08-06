@@ -8,9 +8,9 @@ import 'rxjs/add/observable/fromPromise';
 import axios from 'axios';
 
 import Config from '../Config';
-import { appendTime } from '../functions/appendTime';
-import { getAmounts } from '../functions/getAmounts';
-import { getTaxes } from '../functions/getTaxes';
+import { appendTime } from '../functions/account/appendTime';
+import { getAmounts } from '../functions/account/getAmounts';
+import { getTaxes } from '../functions/account/getTaxes';
 import { setUrl } from '../functions/setUrl';
 
 let pathUrl = Config.url.serverPath + 'accounts';
