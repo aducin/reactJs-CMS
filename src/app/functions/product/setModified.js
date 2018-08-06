@@ -9,3 +9,13 @@ export const setModified = (currentModified) => {
   }
   return [modified, modifiedSearch];
 }
+
+export const setModifiedData = (response) => {
+  let data;
+  if (response.status === 200 && response.data[0]) {
+    data = { empty: false, list: response.data };
+  } else if (response.status === 200 && !response.data[0]) {
+    data = { empty: true, list: null };
+  }
+  return data;
+}

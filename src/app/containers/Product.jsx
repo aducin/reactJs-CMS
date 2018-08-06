@@ -23,7 +23,7 @@ import { clearStorage } from '../functions/product/clearStorage';
 import { getCachedLists } from '../functions/product/getCachedLists';
 import { getPromises } from '../functions/product/getPromises';
 import { getStorage } from '../functions/product/getStorage';
-import { setModified } from '../functions/product/setModified';
+import { setModified, setModifiedData } from '../functions/product/setModified';
 import { setQuantity } from '../functions/product/setQuantity';
 import { setStorage, setStorageConstant, setStorageSimple } from '../functions/product/setStorage';
 import { Header as DefaultHeader, State } from '../helper/productState';
@@ -86,18 +86,12 @@ export default class ProductContainer extends React.Component {
 		}
 	}
 	checkModified() {
-		let data;
 		this.model.getModyfied()
 			.then((response) => {
-				if (response.status === 200 && response.data[0]) {
-					data = { empty: false, list: response.data };
-				} else if (response.status === 200 && !response.data[0]) {
-					data = { empty: true, list: null };
-				}
-				store.dispatch(product.setModified(data));
+				store.dispatch(product.setModified(setModifiedData(response)));
 				this.checkNewestOrders();
 			})
-			.catch((err) => this.props.mainModel.setMessage('warning', err.message))
+			.catch((err) => this.props.mainModel.setMessage('warning', Config.message))
 			.finally(() => this.setState({ modifiedSearch: false, printingSearch: true }));
 	}
 	checkNewestOrders() {
@@ -122,7 +116,7 @@ export default class ProductContainer extends React.Component {
 	clearUrl() {
 		clearUrl(Config.url.pathProducts);
 	}
-	closeModal() {
+	close() {
 		this.setState({ simpleSearched: false });
 	}
 	deleteMods(id) {
@@ -284,14 +278,7 @@ export default class ProductContainer extends React.Component {
 			)
 		}
 		if (this.state.simpleSearched) {
-			basic = (
-				<BasicEdition
-					close={this.closeModal.bind(this)}
-					dataBasic={product.basicData}
-					dataReceived={product.dataReceived}
-					token={token}
-				/>
-			)
+			basic = <BasicEdition close={()=>this.close()} data={product.basicData} received={product.dataReceived} token={token} />;
 		}
 		let productHeader = (
 			<ProductHeader

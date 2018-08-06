@@ -68,9 +68,9 @@ export default class BasicEdition extends React.Component {
 	}
 
 	equalState(props) {
-		let newId = this.state.id !== props.dataBasic.id;
-		if (props.dataReceived && newId) {
-			let data = {...props.dataBasic};
+		let newId = this.state.id !== props.data.id;
+		if (props.received && newId) {
+			let data = {...props.data};
 			this.setState({
 				id: data.id,
 				discount: data.discount,
@@ -82,9 +82,6 @@ export default class BasicEdition extends React.Component {
 		}
 	}
 	inputChange(e) {
-		const checkFloat = (value) => {
-			return !isNaN(value) && value.toString().indexOf('.') != -1;
-		};
 		let name = e.target.name;
 		let value = e.target.value;
 		let curError = {...this.state.error};
@@ -119,8 +116,8 @@ export default class BasicEdition extends React.Component {
 		this.props.close();
 	};
 	save() {
-		let newAttr = this.props.dataBasic.attribute.new;
-		let oldAttr = this.props.dataBasic.attribute.old;
+		let newAttr = this.props.data.attribute.new;
+		let oldAttr = this.props.data.attribute.old;
 		let data = {
 			db: 'both',
 			id: this.state.id,
@@ -207,13 +204,13 @@ export default class BasicEdition extends React.Component {
 		let bodyHeight = { minHeight: 540};
 		let text = Config.message;
 		let url = Config.url;
-		if (this.props.dataReceived) {
+		if (this.props.received) {
 			let data = {};
 			this.state.fields.forEach((el) => {
 				if (this.state.doNotUpdateProps) {
 					data[el] = this.state[el];
 				} else {
-					data[el] = this.props.dataBasic[el];
+					data[el] = this.props.data[el];
 				}
 			});
 			let disabled = this.state.disabled;
@@ -223,7 +220,7 @@ export default class BasicEdition extends React.Component {
 			let priceNew, priceOld, discountNew, discountOld, priceMessage, priceNet = null;
 			let editionUrl = 'products/edition/' + data.id;
 			let historyUrl = 'products/history/' + data.id;
-			let imageId = this.props.dataBasic.image;
+			let imageId = this.props.data.image;
 			let imagePath = url.path + 'img/p/' + data.id + '-' + imageId + '-thickbox.jpg';
 			let title = this.state.message ? this.state.message : text.simpleEdition + data.id;
 			let titleStyle = this.state.message ? this.state.messageType : null;
@@ -283,7 +280,6 @@ export default class BasicEdition extends React.Component {
 					{priceMessage}
 				</div>
 			);
-			//let priceDisabled = (data.discount.new !== false || data.discount.old !== false);
 			bodyHeight.minHeight = bodyHeight.minHeight + 'px';
 			if (parseInt(cachedId) === parseInt(data.id)) {
 				return (
