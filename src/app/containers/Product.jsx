@@ -5,8 +5,6 @@ import { connect } from 'react-redux';
 import store from '../store';
 import * as product from '../actions/productActions.jsx';
 import Config from '../Config';
-import { clearUrl } from '../functions/clearUrl';
-import { setUrl } from '../functions/setUrl';
 import Header from '../components/dumb/Header.jsx';
 import Message from '../components/dumb/Message.jsx';
 import BasicEdition from '../components/modal/BasicEdition.jsx';
@@ -19,11 +17,14 @@ import LastOrders from '../components/product/LastOrders.jsx';
 import Printings from '../components/product/Printings.jsx';
 import MainModel from '../model/mainModel';
 import ProductModel from '../model/productModel';
+import { clearUrl } from '../functions/clearUrl';
+import { setUrl } from '../functions/setUrl';
 import { checkUrl } from '../functions/product/checkUrl';
 import { clearStorage } from '../functions/product/clearStorage';
 import { getCachedLists } from '../functions/product/getCachedLists';
 import { getPromises } from '../functions/product/getPromises';
 import { getStorage } from '../functions/product/getStorage';
+import { setModified } from '../functions/product/setModified';
 import { setQuantity } from '../functions/product/setQuantity';
 import { setStorage, setStorageConstant, setStorageSimple } from '../functions/product/setStorage';
 import { Header as DefaultHeader, State } from '../helper/productState';
@@ -41,11 +42,10 @@ export default class ProductContainer extends React.Component {
 	}
 
 	componentDidUpdate() {
-		let action = this.state.action;
 		if (!this.state.componentChecked) {
 			this.checkComponent();
-		} else if (action) {
-			this[action]();
+		} else if (this.state.action) {
+			this[this.state.action]();
 		}
 	}
 	componentWillUnmount() { this.subscription.unsubscribe() }
@@ -100,11 +100,7 @@ export default class ProductContainer extends React.Component {
 			})
 			.catch((err) => this.props.mainModel.setMessage('warning', err.message))
 			.finally(() => {
-				this.setState({
-					action: 'checkPrintings',
-					modifiedSearch: false,
-					printingSearch: true
-				});
+				this.setState({ action: 'checkPrintings', modifiedSearch: false, printingSearch: true });
 			});
 	}
 	checkNewestOrders() {
@@ -132,24 +128,14 @@ export default class ProductContainer extends React.Component {
 	clearData(button = null) {
 		clearStorage();
 		store.dispatch(product.clearData());
-		let modified, modifiedSearch;
-		if(!this.state.modified) {
-			this.checkModified();
-			modified = true;
-			modifiedSearch = true;
-		} else {
-			modified = this.state.modified;
-			modifiedSearch = false;
-			if (button) {
-				store.dispatch(product.clearInputs(true));
-			}
+		if (button) {
+			store.dispatch(product.clearInputs(true));
 		}
-		this.setState({
-			header: DefaultHeader,
-			modified: modified,
-			modifiedSearch: modifiedSearch,
-			nameSearch: false
-		});
+		if (!this.state.modified) {
+			this.checkModified();
+		}
+		let mods = setModified(this.state.modified);
+		this.setState({ header: DefaultHeader, modified: mods[0], modifiedSearch: mods[1], nameSearch: false});
 	}
 	clearEdition() {
 		this.setState({ action: 'clearUrl', restoreList: true });
@@ -226,9 +212,7 @@ export default class ProductContainer extends React.Component {
 	}
 	setDisabled(props, state) {
 		let disabled = !state.constant || (props.params.action !== undefined && props.params.id !== undefined);
-		if (disabled !== state.disable) {
-			this.setState({ disable: disabled });
-		}
+		if (disabled !== state.disable) this.setState({ disable: disabled });
 	}
 	setError(error) {
 		this.props.mainModel.setMessage('warning', error);
@@ -258,11 +242,7 @@ export default class ProductContainer extends React.Component {
 		setStorageSimple(data.id);
 		store.dispatch(product.prepareResult());
 		store.dispatch(product.setAction('getProductById', { basic: true, id: parseInt(data.id) }));
-		this.setState({
-			editionSearched: false,
-			historySearched: false,
-			simpleSearched: parseInt(data.id)
-		});
+		this.setState({ editionSearched: false, historySearched: false, simpleSearched: parseInt(data.id) });
 	}
 	setSuccess(message) {
 		this.props.mainModel.setMessage('success', message);
