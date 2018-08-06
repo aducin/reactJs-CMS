@@ -19,9 +19,11 @@ export default class Printings extends React.Component {
     super(props);
     this.model = new ProductModel();
     this.state = {
+      data: null,
       description: '',
       disabled: false,
       file: null,
+      inSearch: false,
       messageContent: null,
       messageType: null,
       modal: false,
@@ -39,11 +41,33 @@ export default class Printings extends React.Component {
     }
   }
   componentWillUpdate(nextProps, nextState) {
-    if (nextState.saveFile) {
+    if (!this.props.token && nextProps.token) {
+      this.checkPrintings(nextProps.token);
+      this.setState({ inSearch: true });
+    } else if (nextState.saveFile) {
       this.setState({ saveFile: false });
     } else if (nextState.setTimeout) {
       this.setState({ setTimeout: false });
     }
+  }
+
+  checkPrintings(token) {
+    this.model.getPrintings(token)
+      .then((response) => {
+        if (response.status === 200 && response.data.success) {
+          let data = {
+            deliveryList: response.data.deliveryList,
+            list: response.data.list || null,
+            empty: response.data.empty,
+            emptyDelivery: response.data.emptyDelivery || null
+          };
+          this.props.handle(data);
+        } else {
+          throw new Error(response.data.reason);
+        }
+      })
+      .catch((err) => this.props.setError(err.message))
+      .finally(() => this.setState({ inSearch: false }));
   }
 
   closeModal() {
@@ -59,7 +83,7 @@ export default class Printings extends React.Component {
         }
       })
       .catch((err) =>{
-        this.setError(err.reason);
+        this.props.setError(err.reason);
       });
   }
   fileSelectedHandler = event => {
@@ -116,7 +140,7 @@ export default class Printings extends React.Component {
   render() {
     let data = this.props.data || {};
     let text = Config.message;
-    if (this.props.inSearch) {
+    if (this.state.inSearch) {
       return (
         <Busy title={text.printingsSearch} />
       );

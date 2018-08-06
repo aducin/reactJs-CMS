@@ -15,7 +15,6 @@ import ProductList from '../components/product/ProductList.jsx';
 import Modified from '../components/product/Modified.jsx';
 import LastOrders from '../components/product/LastOrders.jsx';
 import Printings from '../components/product/Printings.jsx';
-import MainModel from '../model/mainModel';
 import ProductModel from '../model/productModel';
 import { clearUrl } from '../functions/clearUrl';
 import { setUrl } from '../functions/setUrl';
@@ -67,7 +66,7 @@ export default class ProductContainer extends React.Component {
 	}
 
 	checkComponent() {
-		this.clearData();
+		this.clear();
 		this.getConstant();
 		this.setState({ componentChecked: true });
 	}
@@ -99,33 +98,13 @@ export default class ProductContainer extends React.Component {
 				this.checkNewestOrders();
 			})
 			.catch((err) => this.props.mainModel.setMessage('warning', err.message))
-			.finally(() => {
-				this.setState({ action: 'checkPrintings', modifiedSearch: false, printingSearch: true });
-			});
+			.finally(() => this.setState({ modifiedSearch: false, printingSearch: true }));
 	}
 	checkNewestOrders() {
 		store.dispatch(product.setOrdersSearch());
 		store.dispatch(product.setAction('setLastOrders', setUrl('pathOrder', 'last', this.props.token)));
 	}
-	checkPrintings() {
-		this.model.getPrintings(this.props.token)
-			.then((response) => {
-				if (response.status === 200 && response.data.success) {
-					let data = {
-						deliveryList: response.data.deliveryList,
-						list: response.data.list || null,
-						empty: response.data.empty,
-						emptyDelivery: response.data.emptyDelivery || null
-					};
-					store.dispatch(product.setPrintings(data));
-				} else {
-					throw new Error(response.data.reason);
-				}
-			})
-			.catch((err) => this.props.mainModel.setMessage('warning', err.message))
-			.finally(() => this.setState({ printingSearch: false }));
-	}
-	clearData(button = null) {
+	clear(button = null) {
 		clearStorage();
 		store.dispatch(product.clearData());
 		if (button) {
@@ -225,6 +204,10 @@ export default class ProductContainer extends React.Component {
 		}
 		this.setState({ header: data });
 	}
+	setPrintings(data) {
+		store.dispatch(product.setPrintings(data));
+		this.setState({ printingSearch: false });
+	}
 	setSave(data) {
 		window.scrollTo(0, 0);
 		data.quantity = setQuantity(data.quantity);
@@ -252,6 +235,7 @@ export default class ProductContainer extends React.Component {
 		let basic, edition, header, history, lastOrders, message, modified, nameList, printings;
 		const product = this.props.product;
 		const state = this.state;
+		const token = this.props.token;
 		if (this.props.approved) {
 			header = (
 				<Header
@@ -270,11 +254,10 @@ export default class ProductContainer extends React.Component {
 			printings = (
 				<Printings
 					data={product.printings}
-					getPrintings={this.checkPrintings.bind(this)}
-					inSearch={state.printingSearch}
+					handle={this.setPrintings.bind(this)}
 					setError={this.setError.bind(this)}
 					setSuccess={this.setSuccess.bind(this)}
-					token={this.props.token}
+					token={token}
 				/>
 			);
 		} else if (this.state.editionSearched && !this.state.historySearched) {
@@ -289,11 +272,11 @@ export default class ProductContainer extends React.Component {
 				/>
 			)
 		} else if (state.historySearched && !state.editionSearched) {
-			history = <ProductHistory clear={this.clearData.bind(this)} id={state.editionSearched} product={product} />;
+			history = <ProductHistory clear={this.clear.bind(this)} id={state.editionSearched} product={product} />;
 		} else if (state.nameSearch && !state.editionSearched && !state.historySearched && !state.simpleSearched) {
 			nameList = (
 				<ProductList
-					clearList={this.clearData.bind(this)}
+					clearList={this.clear.bind(this)}
 					product={product}
 					redirect={this.redirect.bind(this)}
 					simpleModal={this.setSimpleId.bind(this)}
@@ -306,7 +289,7 @@ export default class ProductContainer extends React.Component {
 					close={this.closeModal.bind(this)}
 					dataBasic={product.basicData}
 					dataReceived={product.dataReceived}
-					token={this.props.token}
+					token={token}
 				/>
 			)
 		}
