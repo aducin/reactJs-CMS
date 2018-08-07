@@ -16,12 +16,11 @@ import Modified from '../components/product/Modified.jsx';
 import LastOrders from '../components/product/LastOrders.jsx';
 import Printings from '../components/product/Printings.jsx';
 import ProductModel from '../model/productModel';
+import Lists from '../classes/lists';
 import { clearUrl } from '../functions/clearUrl';
 import { setUrl } from '../functions/setUrl';
 import { checkUrl } from '../functions/product/checkUrl';
 import { clearStorage } from '../functions/product/clearStorage';
-import { getCachedLists } from '../functions/product/getCachedLists';
-import { getPromises } from '../functions/product/getPromises';
 import { getStorage } from '../functions/product/getStorage';
 import { setModified, setModifiedData } from '../functions/product/setModified';
 import { setQuantity } from '../functions/product/setQuantity';
@@ -35,8 +34,13 @@ import { Header as DefaultHeader, State } from '../helper/productState';
 export default class ProductContainer extends React.Component {
 	constructor(props) {
 		super(props);
-		this.model = new ProductModel();
 		this.state = State;
+		this.model = new ProductModel();
+		this.lists = new Lists(this.model, this.props.mainModel);
+		this.model.lists.subscribe((data) => {
+			store.dispatch(product.setConstant(data));
+			this.setState({ constant: true });
+		});
 		this.subscription = this.model.newestOrdersInterval.subscribe(() => this.checkNewestOrders());
 	}
 
@@ -67,7 +71,7 @@ export default class ProductContainer extends React.Component {
 
 	checkComponent() {
 		this.clear();
-		this.getConstant();
+		this.lists.getLists();
 		this.setState({ componentChecked: true });
 	}
 	checkUrl(nextProps, nextState) {
@@ -130,25 +134,6 @@ export default class ProductContainer extends React.Component {
 			}
 		}).
 		catch((err) =>this.props.mainModel.setMessage('warning', err.message));
-	}
-	getConstant() {
-		let cachedLists = getCachedLists();
-		if (cachedLists.success) {
-			store.dispatch(product.setConstant(cachedLists));
-			this.setState({ constant: true });
-		} else {
-			getPromises()
-			.then(response => {
-				if (response[0].status === 200 && response[1].status === 200) {
-					setStorageConstant(response);
-					store.dispatch(product.setConstant({ category: response[0].data, manufactorer: response[1].data }));
-					this.setState({ constant: true });
-				} else {
-					throw new Error(response[0].data.reason);
-				}
-			})
-			.catch((err) => this.props.mainModel.setMessage('warning', err.message));
-		}
 	}
 	modifyLast(base, id) {
 		this.model.modifyLastOrder(base, id, this.props.token)

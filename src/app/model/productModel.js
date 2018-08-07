@@ -19,6 +19,7 @@ export default class ProductModel {
   newestOrdersInterval = Observable.interval(Config.intervalOrders);
   //productSave = new Subject();
   //searching = new Subject();
+  lists = new Subject();
 
   constructor() {}
 
@@ -108,5 +109,8 @@ export default class ProductModel {
     this.historySearch.next(result);
     this.searching.next(false);
   }
-*/
+ */
+  setLists(data) {
+    this.lists.next(data);
+  }
 }
