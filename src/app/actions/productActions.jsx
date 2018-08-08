@@ -147,6 +147,7 @@ export function setNameResult(data) {
 }
 
 export function setOrders(data) {
+	console.log('data: ', data);
 	if (data.success) {
 		return {
 			type: 'set_last_orders',

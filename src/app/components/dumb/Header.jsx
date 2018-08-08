@@ -8,12 +8,11 @@ const header = ( props ) => {
 		let curClass = props.active === el.link ?
 			"btn btn-primary headerButton rightMargin" :
 			"btn btn-info headerButton rightMargin";
-		let curDisabled = props.active === el.link;
 		return (
 				<Link
 					key={ index }
 					to={ el.link }
-					disabled={ curDisabled || props.linkDisable }
+					disabled={ props.linkDisable || props.active === el.link }
 					class={ curClass }
 				>{ el.name }</Link>
 		);

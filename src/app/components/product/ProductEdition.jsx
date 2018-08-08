@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactTooltip from 'react-tooltip';
 
+import ProductModel from '../../model/productModel';
+import { setQuantity } from '../../functions/product/setQuantity';
+
 import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
 
@@ -29,7 +32,8 @@ const imgCss = {
 
 export default class ProductEdition extends React.Component {
 	constructor(props) {
-		super(props);	    
+		super(props);
+		this.model = new ProductModel();
 		this.state = {
 			id: false,
 			activatedFull: false,
@@ -44,20 +48,12 @@ export default class ProductEdition extends React.Component {
 		}
 	}
 
-	/*
-   componentDidMount() {
-    this.equalState(this.props, this.state);
-   }
-   */
-
 	componentWillUpdate(nextProps, nextState) {
 		this.equalState(nextProps, nextState);
 	}
 
 	descriptionChange(e) {
-		this.setState({
-			description: e.target.value
-		});
+		this.setState({ description: e.target.value });
 	}
 
 	equalState(props, state) {
@@ -77,16 +73,11 @@ export default class ProductEdition extends React.Component {
 
 	handleCheckboxChange(list, origin) {
 		if (origin !== 'checkboxOptions') {
-			this.setState({
-				productCategories: list
-			});
+			this.setState({ productCategories: list });
 		} else {
 			let deletePhoto = list.indexOf(1) !== -1;
 			let updated = list.indexOf(2) !== -1;
-			this.setState({
-				deletePhoto: deletePhoto,
-				productUpdated: updated,
-			});	
+			this.setState({ deletePhoto: deletePhoto, productUpdated: updated });
 		}
 	}
 
@@ -96,25 +87,18 @@ export default class ProductEdition extends React.Component {
 		let active = name === 'active' ? value : this.state.active;
 		let condition = name === 'condition' ? value : this.state.condition;
 		let manufactorer = name === 'manufactorer' ? value : this.state.manufactorer;
-		this.setState({
-			active: active,
-			condition: condition,
-			manufactorer: manufactorer
-		});	
+		this.setState({ active: active, condition: condition, manufactorer: manufactorer });
 	}
 
 	hideOrShow(field) {
 		let categoryDisplay = field === 'category' ? !this.state.categoryDisplay : this.state.categoryDisplay;
 		let imageDisplay = field === 'image' ? !this.state.imageDisplay : this.state.imageDisplay;
-		this.setState({
-			categoryDisplay: categoryDisplay,
-			imageDisplay: imageDisplay
-		});
+		this.setState({ categoryDisplay: categoryDisplay, imageDisplay: imageDisplay });
 	}
 
 	inputModify(data) {
-		var origin = data.target.name;
-		var value = data.target.value;
+		let origin = data.target.name;
+		let value = data.target.value;
 		if (origin !== 'priceNew' && origin !== 'priceOld' && origin !== 'quantity') {
 			let curState = {...this.state};
 			curState[origin] = value;
@@ -128,31 +112,35 @@ export default class ProductEdition extends React.Component {
 			} else if (origin === 'priceOld') {
 				curPrice.old = value;
 			}
-			this.setState({
-				price: curPrice
-			});
+			this.setState({ price: curPrice });
 		}
 	}
 
 	saveFull() {
+		window.scrollTo(0, 0);
 		let curState = {...this.state};
 		let data = this.state.fields.reduce((obj, key) => {
 			obj[key] = curState[key];
 			return obj;
 		}, {});
 		if (typeof(data.productTags) === 'object') {
-			let tags = data.productTags.map((el) => {
-				return el.name;
-			});
+			let tags = data.productTags.map(el => el.name);
 			data.productTags = tags.join(', ');
 		}
 		data.action = 'full';
-		this.props.save(data);
+		data.quantity = setQuantity(data.quantity);
+		let attribute = this.props.productData.dataFull.attribute;
+		this.model.saveProduct(attribute.new, attribute.old, Config.ajaxConfig, data)
+			.then((response) => {
+				let action = response.data.success ? 'success' : 'warning';
+				this.props.mainModel.setMessage(action, response.data.reason);
+				this.props.modify();
+			})
+			.catch((err) => this.props.mainModel.setMessage(action, err.message))
 	}
 
 	render() {
 		function handleSelect(el, id, object) {
-			var curBool = el.id === id;
 			object.push(<option key={ el.id } value={ el.id }>{ el.name }</option>);
 			return object;
 		};
@@ -164,10 +152,8 @@ export default class ProductEdition extends React.Component {
 		let disabled = Boolean(this.props.disable);
 		if (product && product.id !== undefined && product.id !== 0) {
 			const curId = product.id;
-			let buttons, clear, content, goBack, saveButton;
+			let buttons, clear, content, goBack, leftColumn, rightColumnClass, saveButton;
 			let title = message.fullEdition + curId;
-			let leftColumn;
-			let rightColumnClass;
 			let priceNew = product.price !== undefined ? parseFloat(product.price.new) : null;
 			let priceOld = product.price !== undefined ? parseFloat(product.price.old) : null;
 			let curUrl = 'products/history/' + curId;

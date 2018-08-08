@@ -13,13 +13,13 @@ import AccountDetail from '../components/account/AccountDetail.jsx';
 import AccountHeader from '../components/account/AccountHeader.jsx';
 import AccountModal from '../components/modal/AccountModal.jsx';
 import AccountModel from '../model/accountModel';
+import Xml from '../classes/xml';
 import { State } from '../helper/accountState';
 import { accountPrepare } from '../functions/account/accountPrepare';
 import { changeDate } from '../functions/changeDate';
 import { createReducedObj } from '../functions/createReducedObj';
 import { disableHandler } from '../functions/account/disableHandler';
 import { errorHandler } from '../functions/account/errorHandler';
-import { formatDate } from '../functions/formatDate';
 import { handleFieldChange } from '../functions/account/handleFieldChange';
 import { rowHandle } from '../functions/account/rowHandle';
 import { selectHandle } from '../functions/account/selectHandle';
@@ -36,6 +36,8 @@ export default class AccountContainer extends React.Component {
 		super(props);
 		this.model = new AccountModel();
 		this.state = {...State};
+		this.xml = new Xml(this.model, this.props.mainModel);
+		this.model.xml.subscribe(path => this.setState({ link: path }));
 	}
 
 	componentDidMount() {
@@ -63,26 +65,10 @@ export default class AccountContainer extends React.Component {
 			store.dispatch(account.setLoading());
 			store.dispatch(account.setAction('getData', {params, token: this.props.token}));
 		}
-		this.setState({
-			modal: false,
-			modalDisable: false,
-			modalMessage: { text: null, type: null }
-		});
+		this.setState({ modal: false, modalDisable: false, modalMessage: { text: null, type: null } });
 	}
 	createXml() {
-		let selected = this.state.selected;
-		if (selected.dateFrom !== null && selected.dateTo !== null) {
-			this.model.createXml(formatDate(selected.dateFrom), formatDate(selected.dateTo) , this.props.token)
-				.then((response) => {
-					if (response.data.success) {
-						this.props.mainModel.setMessage('success', response.data.reason);
-						this.setState({ link: response.data.path });
-					} else {
-						throw new Error(response.data.reason);
-					}
-				})
-				.catch((err) => this.props.mainModel.setMessage('warning', err.message));
-		}
+		this.xml.create(this.state.selected, this.props.token);
 	}
 	dateChange(field, data) {
 		let obj = changeDate(field, data, this.state.modalObj);
@@ -128,22 +114,21 @@ export default class AccountContainer extends React.Component {
 	setAccount() {
 		let data = accountPrepare(this.state, this.state.token);
 		let action = this.state.modal === 'add' ? 'rowSave' : 'rowUpdate';
-		this.model[action](data).then((response) => {
-			let type = response.data.success ? 'success' : 'error';
-			this.displayMessage(response.data.reason, type);
-		}).catch((err) =>{
-			this.displayMessage(Config.message.error, 'error');
-		});
+		this.model[action](data)
+			.then((response) => {
+				let type = response.data.success ? 'success' : 'error';
+				this.displayMessage(response.data.reason, type);
+			}).catch((err) =>{
+				this.displayMessage(Config.message.error, 'error');
+			});
 	}
 	setDate(name, value) {
 		let selected = {...this.state.selected};
 		selected[name] = value;
 		store.dispatch(account.setLoading());
 		store.dispatch(account.setAction('getData', {params: setParams(selected), token: this.props.token}));
-		this.setState({
-			createXml: selected.dateFrom !== null && selected.dateTo !== null,
-			selected: selected
-		});
+		let createXml = selected.dateFrom !== null && selected.dateTo !== null;
+		this.setState({ createXml, selected });
 	}
 	sortTable(value) {
 		this.setState({
@@ -167,13 +152,11 @@ export default class AccountContainer extends React.Component {
 		if (this.props.approved) {
 			header = <Header active="accounts" buttonHandler={this.props.logoutHandler.bind(this)} disable={state.disable} />;
 			message = <Message message={this.props.toDisplay} messageStyle={messageStyle} />;
-			let curStateOpt = [...stateOptions];
 			if (this.state.selected.state === -1) {
-				addDefaultOption(curStateOpt);
+				addDefaultOption([...stateOptions]);
 			}
-			let curTypeOpt = [...typeOptions];
 			if (this.state.selected.type === -1) {
-				addDefaultOption(curTypeOpt);
+				addDefaultOption([...typeOptions]);
 			}
 			accountsHeader = (
 				<AccountHeader
@@ -185,20 +168,19 @@ export default class AccountContainer extends React.Component {
 					link={state.link}
 					selected={state.selected}
 					selectedRow={state.selectedRow}
-					states={curStateOpt}
-					types={curTypeOpt}
+					states={[...stateOptions]}
+					types={[...typeOptions]}
 					xml={this.state.createXml}
 				/>
 			);
 			if (this.props.loading) {
 				busy = <Busy title={Config.message.loading} />;
 			}
-			let empty = !Boolean(data.list);
 			accountsDetails = (
 				<AccountDetail
 					ascending={state.ascending}
 					data={data}
-					empty={empty}
+					empty={!Boolean(data.list)}
 					selectedRow={state.selectedRow}
 					selectRow={this.selectRow.bind(this)}
 					sortTable={this.sortTable.bind(this)}

@@ -33,6 +33,11 @@ export default class Printings extends React.Component {
     }
   }
 
+  componentDidMount() {
+    this.checkPrintings(this.props.token);
+    this.setState({ inSearch: true });
+  }
+
   componentDidUpdate() {
     if (this.state.saveFile) {
       this.saveFile();
@@ -41,10 +46,7 @@ export default class Printings extends React.Component {
     }
   }
   componentWillUpdate(nextProps, nextState) {
-    if (!this.props.token && nextProps.token) {
-      this.checkPrintings(nextProps.token);
-      this.setState({ inSearch: true });
-    } else if (nextState.saveFile) {
+    if (nextState.saveFile) {
       this.setState({ saveFile: false });
     } else if (nextState.setTimeout) {
       this.setState({ setTimeout: false });
@@ -66,7 +68,7 @@ export default class Printings extends React.Component {
           throw new Error(response.data.reason);
         }
       })
-      .catch((err) => this.props.setError(err.message))
+      .catch((err) => this.props.mainModel.setMessage('warning', err.message))
       .finally(() => this.setState({ inSearch: false }));
   }
 
@@ -76,20 +78,20 @@ export default class Printings extends React.Component {
   deleteHandler(id) {
     this.model.deletePrinting(id, this.props.token)
       .then((response) => {
-        let action = response.data.success  ? 'setSuccess' : 'setError';
-        this.props[action](response.data.reason);
+        let action = response.data.success  ? 'success' : 'warning';
+        this.props.mainModel.setMessage(action, response.data.reason);
         if (response.data.success) {
           this.props.getPrintings();
         }
       })
       .catch((err) =>{
-        this.props.setError(err.reason);
+        this.props.mainModel.setMessage('warning', err.reason);
       });
   }
   fileSelectedHandler = event => {
     let files = event.target.files;
     if (files.length > 1) {
-      this.props.setError(Config.message.products.oneFileOnly);
+      this.props.mainModel.setMessage('warning', Config.message.products.oneFileOnly);
     } else {
       this.setState({
         file: files[0],

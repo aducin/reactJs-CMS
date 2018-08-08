@@ -134,19 +134,15 @@ export default class OrderContainer extends React.Component {
 			.catch((err) => this.props.mainModel.setMessage('warning', err.message) );
 	}
 	setHeaderData(data) {
-		this.setState({
-			checkDisabled: true,
-			error: data.updateError ? data.error : this.state.error,
-			header: data.header
-		});
+		let error = data.updateError ? data.error : this.state.error;
+		this.setState({ checkDisabled: true, error, header: data.header });
 	}
 	setDisplay(cover, bool) {
     	let curCover = bool !== false ? cover : false;
     	this.setState({ display: curCover });
 	}
 	setError(data) {
-		let message = data.value + Config.notANumber;
-		this.props.mainModel.setMessage('warning', message);
+		this.props.mainModel.setMessage('warning', data.value + Config.notANumber);
 		this.setState({ error: data });
 	}
 	setShipmentNumber(e) {
@@ -156,8 +152,7 @@ export default class OrderContainer extends React.Component {
 		this.setState({ disable: true, urlCheck: true });
 	}
 	shipmentNumberHandler() {
-		let nextState = !this.state.shipmentNumber;
-		this.setState({ shipmentNumber: nextState });
+		this.setState({ shipmentNumber: !this.state.shipmentNumber });
 	}
 	voucherChange(action, value) {
 		if ((action === 'add' && value < 5) || (action === 'subtract' && value > 1)) {

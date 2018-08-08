@@ -19,7 +19,6 @@ export const State = {
   action: null,
   category: 0,
   categoryDisplay: false,
-  componentChecked: false,
   constant: false,
   currentId: {
     full: null,
@@ -41,6 +40,7 @@ export const State = {
   printingSearch: false,
   restoreList: false,
   saveData: {},
+  componentSearched: false,
   searching: false,
   simpleSearched: false,
   success: false,

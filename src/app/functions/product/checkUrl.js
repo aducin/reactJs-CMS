@@ -25,7 +25,7 @@ export const checkUrl = (props, state) => {
     restoreList = false;
   } else if (state.editionSearched || state.historySearched) {
     action = true;
-    actionValue = 'clearData';
+    actionValue = 'clear';
     editionSearched = false;
     historySearched = false;
   }

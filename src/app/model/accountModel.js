@@ -20,6 +20,7 @@ export default class AccountModel {
   list = new Subject();
   loading = new Subject();
   path;
+  xml = new Subject();
 
   constructor() {}
 
@@ -31,28 +32,7 @@ export default class AccountModel {
     };
     return axios.post(this.path, { params }, Config.ajaxConfig);
   }
-/*
-  getData(params, token) {
-    this.loading.next(true);
-    this.path = pathUrl + '/' + token;
-    let promise = axios.get(this.path, { params });
-    let result = Observable.fromPromise(promise).map(response => {
-      let finalObj = {...response};
-      if (response.data.success) {
-        if (response.data.list) {
-          let amounts = getAmounts(response.data.list);
-          finalObj.data.amounts = getTaxes(amounts);
-          finalObj.data.list = appendTime(response.data.list);
-        }
-      } else {
-        throw new Error(response.data.reason);
-      }
-      return finalObj;
-    });
-    this.list.next(result);
-    this.loading.next(false);
-  }
-*/
+
   rowSave(data) {
     return axios.post(pathUrl, {data}, Config.ajaxConfig);
   }
@@ -66,5 +46,9 @@ export default class AccountModel {
     setTimeout(function() {
       this.displayModalMessage.next(false);
     }.bind(this), Config.timer);
+  }
+
+  setXml(path) {
+    this.xml.next(path);
   }
 }

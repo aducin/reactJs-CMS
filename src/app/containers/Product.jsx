@@ -24,7 +24,7 @@ import { clearStorage } from '../functions/product/clearStorage';
 import { getStorage } from '../functions/product/getStorage';
 import { setModified, setModifiedData } from '../functions/product/setModified';
 import { setQuantity } from '../functions/product/setQuantity';
-import { setStorage, setStorageConstant, setStorageSimple } from '../functions/product/setStorage';
+import { setStorage, setStorageSimple } from '../functions/product/setStorage';
 import { Header as DefaultHeader, State } from '../helper/productState';
 
 @connect((store) => {
@@ -44,21 +44,22 @@ export default class ProductContainer extends React.Component {
 		this.subscription = this.model.newestOrdersInterval.subscribe(() => this.checkNewestOrders());
 	}
 
+	componentDidMount() { this.checkComponent() }
 	componentDidUpdate() {
-		if (!this.state.componentChecked) {
-			this.checkComponent();
-		} else if (this.state.action) {
+		if (this.state.action) {
 			this[this.state.action]();
 		}
 	}
 	componentWillUnmount() { this.subscription.unsubscribe() }
 	componentWillUpdate(nextProps, nextState) {
 		this.setDisabled(nextProps, nextState);
-		if (nextProps.product.error) {
+		if (!this.state.componentSearched && nextState.componentSearched) {
+			this.clear();
+		} else if (nextProps.product.error) {
 			this.props.mainModel.setMessage('warning', Config.error);
 			store.dispatch(product.clearError());
 			this.setState({ disable: false });
-		} else if (nextState.componentChecked) {
+		} else {
 			this.checkUrl(nextProps, nextState);
 			if (nextState.action) {
 				this.setState({ action: null });
@@ -70,9 +71,8 @@ export default class ProductContainer extends React.Component {
 	}
 
 	checkComponent() {
-		this.clear();
 		this.lists.getLists();
-		this.setState({ componentChecked: true });
+		this.setState({ componentSearched: true });
 	}
 	checkUrl(nextProps, nextState) {
 		let act = checkUrl(nextProps, nextState);
@@ -93,10 +93,9 @@ export default class ProductContainer extends React.Component {
 		this.model.getModyfied()
 			.then((response) => {
 				store.dispatch(product.setModified(setModifiedData(response)));
-				this.checkNewestOrders();
 			})
 			.catch((err) => this.props.mainModel.setMessage('warning', Config.message))
-			.finally(() => this.setState({ modifiedSearch: false, printingSearch: true }));
+			.finally(() => this.setState({ disabledEdition: false, modifiedSearch: false, printingSearch: true }));
 	}
 	checkNewestOrders() {
 		store.dispatch(product.setOrdersSearch());
@@ -110,6 +109,7 @@ export default class ProductContainer extends React.Component {
 		}
 		if (!this.state.modified) {
 			this.checkModified();
+			this.checkNewestOrders();
 		}
 		let mods = setModified(this.state.modified);
 		this.setState({ header: DefaultHeader, modified: mods[0], modifiedSearch: mods[1], nameSearch: false});
@@ -183,22 +183,9 @@ export default class ProductContainer extends React.Component {
 		}
 		this.setState({ header: data });
 	}
-	setPrintings(data) {
+	setPrint(data) {
 		store.dispatch(product.setPrintings(data));
 		this.setState({ printingSearch: false });
-	}
-	setSave(data) {
-		window.scrollTo(0, 0);
-		data.quantity = setQuantity(data.quantity);
-		let attribute = this.props.product.fullDataFirst.attribute;
-		this.model.saveProduct(attribute.new, attribute.old, this.state.config, data)
-			.then((response) => {
-				let action = response.data.success ? 'success' : 'warning';
-				this.props.mainModel.setMessage(action, response.data.reason);
-				this.checkModified();
-			})
-			.catch((err) => this.props.mainModel.setMessage(action, err.message))
-			.finally(() => this.setState({ disabledEdition: false }));
 	}
 	setSimpleId(data) {
 		setStorageSimple(data.id);
@@ -206,15 +193,13 @@ export default class ProductContainer extends React.Component {
 		store.dispatch(product.setAction('getProductById', { basic: true, id: parseInt(data.id) }));
 		this.setState({ editionSearched: false, historySearched: false, simpleSearched: parseInt(data.id) });
 	}
-	setSuccess(message) {
-		this.props.mainModel.setMessage('success', message);
-	}
 	
 	render() {
-		let basic, edition, header, history, lastOrders, message, modified, nameList, printings;
+		let basic, edition, header, history, lastOrders, message, modified, nameList, print;
 		const product = this.props.product;
 		const state = this.state;
 		const token = this.props.token;
+		const mainModel = this.props.mainModel;
 		if (this.props.approved) {
 			header = (
 				<Header
@@ -227,18 +212,10 @@ export default class ProductContainer extends React.Component {
 			let messageStyle = this.props.success ? Config.alertSuccess : Config.alertError;
 			message = <Message message={this.props.toDisplay} messageStyle={messageStyle} />;
 		}
-		if (!this.state.editionSearched && !this.state.historySearched && !this.state.nameSearch) {
+		if (token && !this.state.editionSearched && !this.state.historySearched && !this.state.nameSearch) {
 			modified = <Modified list={product.modifiedList} delete={this.deleteMods.bind(this)} inSearch={state.modifiedSearch} />;
 			lastOrders = <LastOrders data={product.lastOrders} search={product.ordersSearch} setLast={this.modifyLast.bind(this)} />;
-			printings = (
-				<Printings
-					data={product.printings}
-					handle={this.setPrintings.bind(this)}
-					setError={this.setError.bind(this)}
-					setSuccess={this.setSuccess.bind(this)}
-					token={token}
-				/>
-			);
+			print = <Printings data={product.printings} handle={this.setPrint.bind(this)} mainModel={mainModel} token={token} />;
 		} else if (this.state.editionSearched && !this.state.historySearched) {
 			let productData = { dataFull: product.fullDataFirst, empty: product.empty, modified: product.modifiedList };
 			edition = (
@@ -246,8 +223,9 @@ export default class ProductContainer extends React.Component {
 					disable={state.disabledEdition}
 					goBack={this.clearEdition.bind(this)}
 					list={state.nameSearch}
+					mainModel={mainModel}
+					modify={this.checkModified.bind(this)}
 					productData={productData}
-					save={this.setSave.bind(this)}
 				/>
 			)
 		} else if (state.historySearched && !state.editionSearched) {
@@ -263,7 +241,13 @@ export default class ProductContainer extends React.Component {
 			)
 		}
 		if (this.state.simpleSearched) {
-			basic = <BasicEdition close={()=>this.close()} data={product.basicData} received={product.dataReceived} token={token} />;
+			basic = (
+				<BasicEdition
+					close={()=>this.close()}
+					data={product.basicData}
+					received={product.dataReceived}
+					token={token} />
+			);
 		}
 		let productHeader = (
 			<ProductHeader
@@ -286,7 +270,7 @@ export default class ProductContainer extends React.Component {
 					{nameList}
 					{modified}
 					{lastOrders}
-					{printings}
+					{print}
 		    </div>
 	    )
     }
