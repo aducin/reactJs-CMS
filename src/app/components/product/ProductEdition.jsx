@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactTooltip from 'react-tooltip';
 
+import mainModelInstance from '../../model/mainModel';
+import productModelInstance from '../../model/productModel';
 import ProductModel from '../../model/productModel';
 import { setQuantity } from '../../functions/product/setQuantity';
 
@@ -33,7 +35,8 @@ const imgCss = {
 export default class ProductEdition extends React.Component {
 	constructor(props) {
 		super(props);
-		this.model = new ProductModel();
+		this.mainModel = mainModelInstance;
+		this.model = productModelInstance;
 		this.state = {
 			id: false,
 			activatedFull: false,
@@ -44,7 +47,7 @@ export default class ProductEdition extends React.Component {
 			fields: ['active', 'condition', 'deletePhoto', 'description', 'descriptionShort', 'id', 'linkRewrite', 'manufactorer', 'metaDescription',
 			'metaTitle', 'name', 'price', 'productCategories', 'productTags', 'productUpdated', 'quantity'],
 			imageDisplay: false,
-		    productUpdated: false,
+			productUpdated: false
 		}
 	}
 
@@ -133,10 +136,9 @@ export default class ProductEdition extends React.Component {
 		this.model.saveProduct(attribute.new, attribute.old, Config.ajaxConfig, data)
 			.then((response) => {
 				let action = response.data.success ? 'success' : 'warning';
-				this.props.mainModel.setMessage(action, response.data.reason);
-				this.props.modify();
+				this.mainModel.setMessage(action, response.data.reason);
 			})
-			.catch((err) => this.props.mainModel.setMessage(action, err.message))
+			.catch((err) => this.mainModel.setMessage(action, err.message))
 	}
 
 	render() {

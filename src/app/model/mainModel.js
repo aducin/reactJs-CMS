@@ -5,7 +5,7 @@ import { Subject } from 'rxjs/Subject';
 
 import Config from '../Config';
 
-export default class MainModel {
+class MainModel {
   success = new Subject();
   warning = new Subject();
 
@@ -24,3 +24,8 @@ export default class MainModel {
     }
   }
 }
+
+const mainModelInstance = new MainModel();
+Object.freeze(mainModelInstance);
+
+export default mainModelInstance;

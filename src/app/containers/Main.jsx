@@ -17,7 +17,7 @@ import * as product from '../actions/productActions.jsx';
 import './main.css';
 import Config from '../Config';
 import Footer from '../components/dumb/Footer.jsx';
-import MainModel from '../model/mainModel';
+import mainModelInstance from '../model/mainModel';
 import { State } from '../helper/mainState';
 import { setUrl } from '../functions/setUrl';
 
@@ -31,7 +31,7 @@ import { setUrl } from '../functions/setUrl';
 export default class App extends React.Component {
 	constructor(props) {
 		super(props);
-		this.model = new MainModel();
+		this.model = mainModelInstance;
 		this.state = State;
 	}
 

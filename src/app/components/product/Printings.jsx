@@ -4,6 +4,8 @@ import 'font-awesome/css/font-awesome.min.css';
 import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
 import { setUrl } from '../../functions/setUrl';
+import mainModelInstance from '../../model/mainModel';
+import productModelInstance from '../../model/productModel';
 import ProductModel from '../../model/productModel';
 import Busy from '../dumb/Busy.jsx';
 import Title from '../dumb/Title.jsx';
@@ -16,7 +18,8 @@ const styles = {
 export default class Printings extends React.Component {
   constructor(props){
     super(props);
-    this.model = new ProductModel();
+    this.mainModel = mainModelInstance;
+    this.model = productModelInstance;
     this.state = {
       data: null,
       description: '',
@@ -67,7 +70,7 @@ export default class Printings extends React.Component {
           throw new Error(response.data.reason);
         }
       })
-      .catch((err) => this.props.mainModel.setMessage('warning', err.message))
+      .catch((err) => this.mainModel.setMessage('warning', err.message))
       .finally(() => this.setState({ inSearch: false }));
   }
 
@@ -78,19 +81,17 @@ export default class Printings extends React.Component {
     this.model.deletePrinting(id, this.props.token)
       .then((response) => {
         let action = response.data.success  ? 'success' : 'warning';
-        this.props.mainModel.setMessage(action, response.data.reason);
+        this.mainModel.setMessage(action, response.data.reason);
         if (response.data.success) {
           this.props.getPrintings();
         }
       })
-      .catch((err) =>{
-        this.props.mainModel.setMessage('warning', err.reason);
-      });
+      .catch((err) => this.mainModel.setMessage('warning', err.reason));
   }
   fileSelectedHandler = event => {
     let files = event.target.files;
     if (files.length > 1) {
-      this.props.mainModel.setMessage('warning', Config.message.products.oneFileOnly);
+      this.mainModel.setMessage('warning', Config.message.products.oneFileOnly);
     } else {
       this.setState({
         file: files[0],

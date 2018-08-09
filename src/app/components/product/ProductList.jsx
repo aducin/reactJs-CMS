@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import ReactTooltip from 'react-tooltip';
 import 'font-awesome/css/font-awesome.min.css';
 
+import { redirect } from '../../functions/product/redirect';
+
 import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
 import Title from '../dumb/Title.jsx';
@@ -14,9 +16,12 @@ const styles = {
 };
 
 const ProductList = ( props ) => {
-	var product = props.product;
-	var text = Config.message;
-	var url = Config.url;
+	const setUrl = (path, id) => {
+		redirect(path, id);
+	};
+	const product = props.product;
+	const text = Config.message;
+	const url = Config.url;
 	if (!product.searched) {
 		return(
 			<Busy title={text.loading} />
@@ -100,10 +105,10 @@ const ProductList = ( props ) => {
 			    		</td>
 			    		<td>
 								<div class="col-xs-6 pull-left marginTop40px">
-			    				<i onClick={ () => props.simpleModal({id: el.id}) } data-tip="Szybka edycja" class="fa fa-object-ungroup cursorPointer"></i>	
+			    				<i onClick={ () => props.modal({id: el.id}) } data-tip="Szybka edycja" class="fa fa-object-ungroup cursorPointer"></i>
 			    			</div>
 			    			<div class="col-xs-6 pull-right marginTop40px">
-			    				<i onClick={ () => props.redirect('edition', el.id) } data-tip="Pełna edycja" class="fa fa-bars cursorPointer"></i>	
+			    				<i onClick={ () => setUrl('edition', el.id) } data-tip="Pełna edycja" class="fa fa-bars cursorPointer"></i>
 			    			</div>
 			    		</td>
 			        </tr>

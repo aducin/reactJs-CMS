@@ -342,10 +342,11 @@ const Config = {
 			chooseFile: 'Dodaj dokument',
 			description: 'Opis dokumentu',
 			idSearch: 'Wyszukiwanie po ID:',
-			oneFileOnly: 'Proszę dodawać pliki pojedynczo',
+			modifiedList: 'Lista podmienionych produktów',
 			nameSearch: 'Wyszukiwanie po nazwie:',
 			newPrinting: 'Nowy dokument do wydruku',
 			noHistory: 'Brak zapisanych zmian ilości wybranego produktu',
+			oneFileOnly: 'Proszę dodawać pliki pojedynczo',
 			printingsLoading: 'Dokumenty są ładowane - proszę czekać...',
 			saveFile: 'Zapisz dokument'
 		},

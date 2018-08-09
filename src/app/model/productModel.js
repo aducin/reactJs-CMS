@@ -12,11 +12,13 @@ import { setUrl } from '../functions/setUrl';
 const url = Config.url;
 const productUrl = url.serverPath + url.pathProducts;
 
-export default class ProductModel {
+class ProductModel {
   checkModified = new Subject();
   lists = new Subject();
+  modified = new Subject();
   orders = new Subject();
   newestOrdersInterval = Observable.interval(Config.intervalOrders);
+  token;
 
   constructor() {}
 
@@ -80,10 +82,18 @@ export default class ProductModel {
   saveProduct(newAttr, oldAttr, config, data) {
     let path = productUrl + '/' + data.id + '/' + newAttr + '/' + oldAttr;
     return axios.put(path, {data}, config);
-    //this.productSave.next(result);
   }
 
   setLists(data) {
     this.lists.next(data);
   }
+
+  setModified(data) {
+    this.modified.next(data);
+  }
 }
+
+const productModelInstance = new ProductModel();
+Object.freeze(productModelInstance);
+
+export default productModelInstance;

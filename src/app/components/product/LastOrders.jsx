@@ -1,5 +1,7 @@
 import React from 'react';
 
+import mainModelInstance from '../../model/mainModel';
+import productModelInstance from '../../model/productModel';
 import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
 import Busy from '../dumb/Busy.jsx';
@@ -7,16 +9,16 @@ import Title from '../dumb/Title.jsx';
 
 const LastOrders = ( props ) => {
   const modifyOrder = (base, id) => {
-    props.model.modifyLastOrder(base, id, props.token)
+    productModelInstance.modifyLastOrder(base, id, props.token)
       .then((response) => {
         if (response.data.success) {
-          props.mainModel.setMessage('success', response.data.reason);
-          props.model.refreshOrders();
+          mainModelInstance.setMessage('success', response.data.reason);
+          productModelInstance.refreshOrders();
         } else {
           throw new Error(response.data.reason);
         }
       })
-      .catch((err) => props.mainModel.setMessage('warning', err.message));
+      .catch((err) => mainModelInstance.setMessage('warning', err.message));
   };
   let data = props.data || {};
   let text = Config.message;

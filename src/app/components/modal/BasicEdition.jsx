@@ -10,7 +10,7 @@ import store from '../../store';
 import * as product from '../../actions/productActions.jsx';
 import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
-import ProductModel from '../../model/productModel';
+import productModelInstance from '../../model/productModel';
 import Busy from '../dumb/Busy.jsx';
 import ButtonSingle from '../dumb/ButtonSingle.jsx';
 import Input from '../dumb/Input.jsx';
@@ -24,7 +24,7 @@ import Title from '../dumb/Title.jsx';
 export default class BasicEdition extends React.Component {
 	constructor(props) {
 		super(props);
-		this.model = new ProductModel();
+		this.model = productModelInstance;
 		this.state = {
 			borderWarning: 'borderWarning',
 			classWarning: 'colorWarning',
