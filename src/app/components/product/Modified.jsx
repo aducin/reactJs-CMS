@@ -6,11 +6,23 @@ import Busy from '../dumb/Busy.jsx';
 import Title from '../dumb/Title.jsx';
 
 const Modified = ( props ) => {
+	const deleteItem = (id) => {
+		props.model.deleteModified(id, props.token)
+			.then((response) => {
+				if (response.status === 200 && response.data.success) {
+					props.mainModel.setMessage('success', response.data.reason);
+					props.model.refreshModified();
+				} else {
+					throw new Error(response.data.reason);
+				}
+			}).
+		catch((err) => props.mainModel.setMessage('warning', err.message));
+	}
 	const styles = {
 		padding15px: {paddingTop: '15px'}
 	};
 	const text = Config.message;
-	if (props.inSearch) {
+	if (props.search) {
 		return (
 			<Busy title={text.modifiedSearch} />
 		);
@@ -29,7 +41,7 @@ const Modified = ( props ) => {
 						<td style={styles.padding15px}>{el.id}</td>
 						<td style={styles.padding15px}><a href={linkPath} target="blank">{el.name}</a></td>
 						<td style={styles.padding15px}>{el.date}</td>
-						<td><input class="form-control btn btn-primary" type="button" value="Usuń" onClick={ props.delete.bind(this, el.id) } /></td>
+						<td><input class="form-control btn btn-primary" type="button" value="Usuń" onClick={ (id) => deleteItem(el.id) } /></td>
 					</tr>
 				)
 			});

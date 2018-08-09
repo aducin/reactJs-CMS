@@ -37,10 +37,12 @@ export default class ProductContainer extends React.Component {
 		this.state = State;
 		this.model = new ProductModel();
 		this.lists = new Lists(this.model, this.props.mainModel);
+		this.model.checkModified.subscribe(() => this.checkModified());
 		this.model.lists.subscribe((data) => {
 			store.dispatch(product.setConstant(data));
 			this.setState({ constant: true });
 		});
+		this.model.orders.subscribe(() => this.searchOrders());
 		this.subscription = this.model.newestOrdersInterval.subscribe(() => this.checkNewestOrders());
 	}
 
@@ -90,12 +92,12 @@ export default class ProductContainer extends React.Component {
 		}
 	}
 	checkModified() {
-		this.model.getModyfied()
+		this.model.getModified()
 			.then((response) => {
 				store.dispatch(product.setModified(setModifiedData(response)));
 			})
 			.catch((err) => this.props.mainModel.setMessage('warning', Config.message))
-			.finally(() => this.setState({ disabledEdition: false, modifiedSearch: false, printingSearch: true }));
+			.finally(() => this.setState({ disabledEdition: false, modifiedSearch: false }));
 	}
 	checkNewestOrders() {
 		store.dispatch(product.setOrdersSearch());
@@ -122,30 +124,6 @@ export default class ProductContainer extends React.Component {
 	}
 	close() {
 		this.setState({ simpleSearched: false });
-	}
-	deleteMods(id) {
-		this.model.deleteModified(id, this.props.token)
-		.then((response) => {
-			if (response.status === 200 && response.data.success) {
-				this.props.mainModel.setMessage('success', response.data.reason);
-				this.checkModified();
-			} else {
-				throw new Error(response.data.reason);
-			}
-		}).
-		catch((err) =>this.props.mainModel.setMessage('warning', err.message));
-	}
-	modifyLast(base, id) {
-		this.model.modifyLastOrder(base, id, this.props.token)
-			.then((response) => {
-				if (response.data.success) {
-					this.props.mainModel.setMessage('success', response.data.reason);
-					this.searchOrders();
-				} else {
-					throw new Error(response.data.reason);
-				}
-			})
-			.catch((err) => this.props.mainModel.setMessage('warning', err.message));
 	}
 	redirect(path, id) {
 		window.location = Config.url.path + Config.url.pathSuffix + Config.url.pathProducts + '/' + path + '/' + id;
@@ -213,8 +191,17 @@ export default class ProductContainer extends React.Component {
 			message = <Message message={this.props.toDisplay} messageStyle={messageStyle} />;
 		}
 		if (token && !this.state.editionSearched && !this.state.historySearched && !this.state.nameSearch) {
-			modified = <Modified list={product.modifiedList} delete={this.deleteMods.bind(this)} inSearch={state.modifiedSearch} />;
-			lastOrders = <LastOrders data={product.lastOrders} search={product.ordersSearch} setLast={this.modifyLast.bind(this)} />;
+			let list = product.modifiedList;
+			let search = state.modifiedSearch;
+			modified = <Modified list={list} model={this.model} mainModel={mainModel} search={search} token={token} />;
+			lastOrders = (
+				<LastOrders
+					data={product.lastOrders}
+					model={this.model}
+					mainModel={mainModel}
+					search={product.ordersSearch}
+					token={token} />
+			);
 			print = <Printings data={product.printings} handle={this.setPrint.bind(this)} mainModel={mainModel} token={token} />;
 		} else if (this.state.editionSearched && !this.state.historySearched) {
 			let productData = { dataFull: product.fullDataFirst, empty: product.empty, modified: product.modifiedList };

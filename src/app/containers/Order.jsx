@@ -11,7 +11,11 @@ import Message from '../components/dumb/Message.jsx';
 import OrderDetail from '../components/order/OrderDetail.jsx';
 import OrderHeader from '../components/order/OrderHeader.jsx';
 import OrderModel from '../model/orderModel.js';
+import Email from '../classes/email';
 import CustomerModel from '../model/customerModel.js';
+import { checkDisabled } from '../functions/order/checkDisabled';
+import { checkIfUrlChanged } from '../functions/order/checkIfUrlChanged';
+import { setUrl } from '../functions/order/setUrl';
 import { Header as DefaultHeader, State } from '../helper/orderState';
 
 @connect((store) => {
@@ -22,6 +26,7 @@ export default class OrderContainer extends React.Component {
 	constructor(props) {
 		super(props);	 
 		this.state = {...State};
+		this.email = new Email(this.props.mainModel);
 	}
 
 	componentDidUpdate() {
@@ -46,17 +51,12 @@ export default class OrderContainer extends React.Component {
 			store.dispatch(order.deleteCustomerId());
 			store.dispatch(order.setAction('getCustomer', data));
 		} else {
-			let newParams = params.db !== this.props.params.db || nextProps.params.id !== this.props.params.id;
-			let newAction = params.action !== this.props.params.action;
-			let noData = !nextProps.order.orderData && !nextProps.order.additionalData;
-			let paramsAvailable = params.db !== undefined && params.id !== undefined;
 			let removedDb = params.db === undefined && this.props.params.db !== undefined;
 			let removedId = params.id === undefined && this.props.params.id !== undefined;
 			if (removedDb && removedId) {
 				this.removeDb();
-			} else if (noData && paramsAvailable && !nextProps.order.loading && !this.state.inProgress) {
-				this.setUrlCheck();
-			} else if ((newParams || newAction) && paramsAvailable) {
+			}
+			if (checkIfUrlChanged(params, this.props.params, nextProps.order, this.state.inProgress)) {
 				this.setUrlCheck();
 			}
 		}
@@ -66,21 +66,13 @@ export default class OrderContainer extends React.Component {
 	}
 
 	checkDisabled() {
-		let curDisable = { action: true, panel: true };
-		let name = this.state.header.name;
-		let shortenName = name.replace('Id', '');
-		let isNaNCheck = Boolean(isNaN(this.state.header[name]) || this.state.header[name] === '');
-		if (this.state.header.selected[shortenName] !== 0 && !this.state.error[name] && !isNaNCheck) {
-			curDisable[shortenName] = false;
-		}
-		this.setState({ checkDisabled: false, headerDisable: curDisable });
+		this.setState({ checkDisabled: false, headerDisable: checkDisabled(this.state.header, this.state.error) });
 	}
 	checkUrl() {
 		const action = this.props.params.action;
 		const db = this.props.params.db;
 		const id = this.props.params.id;
-		const token = this.props.token;
-		if (db && id && token) {
+		if (db && id && this.props.token) {
 			store.dispatch(order.setLoading());
 			if (!action || action !== 'voucher') {
 				if (action === 'even') {
@@ -88,10 +80,10 @@ export default class OrderContainer extends React.Component {
 				} else if (action === 'discount' || action === 'mail') {
 					store.dispatch(order.setAction('setAdditionalAction', { action, db, id }));
 				} else {
-					store.dispatch(order.setAction('setOrder', { db, id, token }));
+					store.dispatch(order.setAction('setOrder', { db, id, token: this.props.token }));
 				}
 			} else {
-				store.dispatch(order.setAction('setVoucher', { db, id, token }));
+				store.dispatch(order.setAction('setVoucher', { db, id, token: this.props.token }));
 			}
 		}
 	}
@@ -107,31 +99,10 @@ export default class OrderContainer extends React.Component {
 		});
 	}
 	searchOrder(data) {
-		let url;
-		let urlData = Config.url;
-		let action = data.action;
-		if (action === "orderNew" || action === "orderOld" || action === 'remindNew' || action === 'remindOld') {
-			let db = (action === 'orderNew' || action === 'remindNew') ? 'new' : 'old';
-			url = urlData.path + urlData.pathSuffix + urlData.pathOrder + '/' + db + '/' + data.id;
-			if (action === 'remindNew' || action === 'remindOld') {
-				url = url + '/mail';
-			}
-		} else {
-			url = urlData.path + urlData.pathSuffix + urlData.pathOrder + '/old/' + data.id + '/' + action;
-		}
-		window.location.href = url;
+		window.location.href = setUrl(data);
 	}
 	sendEmail() {
-		let action = this.props.params.action ? this.props.params.action : 'deliveryNumber';
-		OrderModel.sendEmail(action, this.props.params.db, this.props.params.id, this.props.token)
-			.then((response) => {
-				if (response.data.success) {
-					this.props.mainModel.setMessage('success', response.data.reason);
-				} else {
-					throw new Error(response.data.reason);
-				}
-			})
-			.catch((err) => this.props.mainModel.setMessage('warning', err.message) );
+		this.email.send(this.props.params, this.props.token);
 	}
 	setHeaderData(data) {
 		let error = data.updateError ? data.error : this.state.error;

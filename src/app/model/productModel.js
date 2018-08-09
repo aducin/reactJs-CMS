@@ -13,13 +13,10 @@ const url = Config.url;
 const productUrl = url.serverPath + url.pathProducts;
 
 export default class ProductModel {
-  //customSearch = new Subject();
-  //historySearch = new Subject();
-  //idSearch = new Subject();
-  newestOrdersInterval = Observable.interval(Config.intervalOrders);
-  //productSave = new Subject();
-  //searching = new Subject();
+  checkModified = new Subject();
   lists = new Subject();
+  orders = new Subject();
+  newestOrdersInterval = Observable.interval(Config.intervalOrders);
 
   constructor() {}
 
@@ -51,7 +48,7 @@ export default class ProductModel {
     return axios.get(path);
   }
 
-  getModyfied() {
+  getModified() {
     let path = setUrl('pathProducts', 'modified');
     return axios.get(path);
   }
@@ -65,14 +62,15 @@ export default class ProductModel {
     let path = Config.url.serverPath + 'orders/last/' + base + '/' + id + '/' + token;
     return axios.get( path );
   }
-/*
-  nameSearch(data) {
-    this.searching.next(true);
-    let result = axios.get( productUrl, {params: data} );
-    this.customSearch.next(result);
-    this.searching.next(false);
+
+  refreshModified() {
+    this.checkModified.next();
   }
-*/
+
+  refreshOrders() {
+    this.orders.next();
+  }
+
   saveFile(description, fd, token) {
     let path = setUrl('pathProducts', 'printing');
     path += '/' + token + '?description=' + description;
@@ -84,32 +82,7 @@ export default class ProductModel {
     return axios.put(path, {data}, config);
     //this.productSave.next(result);
   }
-/*
-  searchId(editionSearched, simpleSearched) {
-    this.searching.next(true);
-    let url = productUrl + '/';
-    let curNumber;
-    if (editionSearched) {
-      url += editionSearched;
-      curNumber = editionSearched;
-    } else if (simpleSearched) {
-      url += simpleSearched + '?basic=true';
-      curNumber = simpleSearched;
-    }
-    reactLocalStorage.set('searchId', curNumber);
-    let result = axios.get(url, {});
-    this.idSearch.next(result);
-    this.searching.next(false);
-  }
 
-  searchHistory(historySearched) {
-    this.searching.next(true);
-    let path = productUrl + '/' + historySearched + '/history';
-    let result = axios.get(path);
-    this.historySearch.next(result);
-    this.searching.next(false);
-  }
- */
   setLists(data) {
     this.lists.next(data);
   }

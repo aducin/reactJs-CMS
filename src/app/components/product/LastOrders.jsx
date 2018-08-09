@@ -6,8 +6,17 @@ import Busy from '../dumb/Busy.jsx';
 import Title from '../dumb/Title.jsx';
 
 const LastOrders = ( props ) => {
-  let modifyOrder = (current, id) => {
-    props.setLast(current, id);
+  const modifyOrder = (base, id) => {
+    props.model.modifyLastOrder(base, id, props.token)
+      .then((response) => {
+        if (response.data.success) {
+          props.mainModel.setMessage('success', response.data.reason);
+          props.model.refreshOrders();
+        } else {
+          throw new Error(response.data.reason);
+        }
+      })
+      .catch((err) => props.mainModel.setMessage('warning', err.message));
   };
   let data = props.data || {};
   let text = Config.message;
@@ -23,7 +32,7 @@ const LastOrders = ( props ) => {
       let title = text.orders.newOrder[current];
       let head = Helper.createTableHead(['ID', 'Data', 'Symbol', 'Kwota', 'Porto', 'Akcja']);
       let list = data.list[current].map((el, index) => {
-        let linkPath = '#/orders/' + current + '/' + data.newest.old;
+        let linkPath = '#/orders/' + current + '/' + data.newest[current];
         return (
           <tr key={ index } class="textCentered">
             <td style={styles.padding15px}><a href={linkPath} target="blank">{el.id}</a></td>
@@ -31,7 +40,7 @@ const LastOrders = ( props ) => {
             <td style={styles.padding15px}>{el.reference}</td>
             <td style={styles.padding15px}>{el.totalProduct}{text.currency}</td>
             <td style={styles.padding15px}>{el.totalShipping}{text.currency}</td>
-            <td><input class="form-control btn btn-primary" type="button" value={text.delete} onClick={ modifyOrder.bind(this, current, el.id) } /></td>
+            <td><input class="form-control btn btn-primary" type="button" value={text.delete} onClick={ () => modifyOrder(current, el.id) } /></td>
           </tr>
         )
       });

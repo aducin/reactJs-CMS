@@ -131,10 +131,9 @@ export default class AccountContainer extends React.Component {
 		this.setState({ createXml, selected });
 	}
 	sortTable(value) {
-		this.setState({
-			ascending: this.state.sortBy === value ? this.state.sortBy : value,
-			sortBy: this.state.sortBy === value ? !this.state.ascending : this.state.ascending
-		});
+		let ascending = this.state.sortBy === value ? this.state.sortBy : value;
+		let sortBy = this.state.sortBy === value ? !this.state.ascending : this.state.ascending;
+		this.setState({ ascending, sortBy });
 	}
 
 	render() {
