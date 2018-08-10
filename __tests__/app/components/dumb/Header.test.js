@@ -35,7 +35,11 @@ describe('Header tests', () => {
   beforeEach(() => {
     wrapper = shallow(component);
   });
+<<<<<<< HEAD
   it('Header contains 5 link tags', () => {
+=======
+  it('Header links have 5 items', () => {
+>>>>>>> e2e4aafc1a4c156f74946b8ff56f87928b142e4f
     expect(wrapper.find(Link)).toHaveLength(5);
   });
   it('Header logout button has correct classes', () => {
