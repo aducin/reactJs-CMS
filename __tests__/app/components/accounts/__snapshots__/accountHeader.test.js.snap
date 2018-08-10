@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AccountHeader renders correctly 1`] = `
+exports[`AccountHeader snapshot AccountHeader renders correctly 1`] = `
 <div
   className="container bgrContent borderRadius10 marginTop40px paddingBottom40px"
 >
@@ -94,7 +94,7 @@ exports[`AccountHeader renders correctly 1`] = `
               disabled={false}
               name="state"
               onChange={[Function]}
-              value={-1}
+              value={2}
             >
               <option
                 value={0}
