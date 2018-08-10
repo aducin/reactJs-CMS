@@ -1,7 +1,7 @@
 import React from 'react';
 import TestRenderer from 'react-test-renderer';
 
-import Config from '../../../../src/app/Config.jsx';
+import Config from '../../../../src/app/Config';
 import CustomerDetails from '../../../../src/app/components/customer/CustomerDetails.jsx';
 
 const address = 'test@test.com';

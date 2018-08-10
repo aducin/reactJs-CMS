@@ -9,11 +9,12 @@ import Title from '../dumb/Title.jsx';
 
 const LastOrders = ( props ) => {
   const modifyOrder = (base, id) => {
-    productModelInstance.modifyLastOrder(base, id, props.token)
+    let model = productModelInstance();
+    model.modifyLastOrder(base, id)
       .then((response) => {
         if (response.data.success) {
           mainModelInstance.setMessage('success', response.data.reason);
-          productModelInstance.refreshOrders();
+          model.orders.next();
         } else {
           throw new Error(response.data.reason);
         }

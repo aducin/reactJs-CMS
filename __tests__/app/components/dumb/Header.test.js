@@ -1,7 +1,7 @@
 import React from 'react';
 import TestRenderer from 'react-test-renderer';
 
-import Config from '../../../../src/app/Config.jsx';
+import Config from '../../../../src/app/Config';
 import Header from '../../../../src/app/components/dumb/Header.jsx';
 
 const disabled = false;

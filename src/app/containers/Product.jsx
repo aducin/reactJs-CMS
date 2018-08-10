@@ -35,7 +35,7 @@ export default class ProductContainer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = State;
-		this.model = productModelInstance;
+		this.model = productModelInstance();
 		this.lists = new Lists(this.model, this.props.mainModel);
 		this.model.lists.subscribe((data) => {
 			store.dispatch(product.setConstant(data));
@@ -55,7 +55,9 @@ export default class ProductContainer extends React.Component {
 	componentWillUnmount() { this.subscription.unsubscribe() }
 	componentWillUpdate(nextProps, nextState) {
 		this.setDisabled(nextProps, nextState);
-		if (!this.state.componentSearched && nextState.componentSearched) {
+		if (!this.props.token && nextProps.token) {
+			this.model.setToken(nextProps.token);
+		} else if (!this.state.componentSearched && nextState.componentSearched) {
 			this.clear();
 		} else if (nextProps.product.error) {
 			this.props.mainModel.setMessage('warning', Config.error);
@@ -119,6 +121,9 @@ export default class ProductContainer extends React.Component {
 	close() {
 		this.setState({ simpleSearched: false });
 	}
+	modsAfter() {
+		this.setState({ disabledEdition: false, modifiedSearch: false });
+	}
 	restoreList() {
 		this.searchName( getStorage() );
 	}
@@ -162,10 +167,6 @@ export default class ProductContainer extends React.Component {
 		store.dispatch(product.setAction('getProductById', { basic: true, id: parseInt(data.id) }));
 		this.setState({ editionSearched: false, historySearched: false, simpleSearched: parseInt(data.id) });
 	}
-
-	modsAfter() {
-		this.setState({ disabledEdition: false, modifiedSearch: false });
-	}
 	
 	render() {
 		let basic, edition, header, history, lastOrders, message, modified, nameList, print;
@@ -187,9 +188,9 @@ export default class ProductContainer extends React.Component {
 		}
 		if (token && !this.state.editionSearched && !this.state.historySearched && !this.state.nameSearch) {
 			let list = product.modifiedList;
-			modified = <Modified after={() => this.modsAfter() } list={list} search={state.modifiedSearch} token={token} />;
-			lastOrders = <LastOrders data={product.lastOrders} search={product.ordersSearch} token={token} />;
-			print = <Printings data={product.printings} handle={this.setPrint.bind(this)} token={token} />;
+			modified = <Modified after={() => this.modsAfter() } list={list} search={state.modifiedSearch} />;
+			lastOrders = <LastOrders data={product.lastOrders} search={product.ordersSearch} />;
+			print = <Printings data={product.printings} handle={this.setPrint.bind(this)} />;
 		} else if (this.state.editionSearched && !this.state.historySearched) {
 			let productData = { dataFull: product.fullDataFirst, empty: product.empty, modified: product.modifiedList };
 			edition = (

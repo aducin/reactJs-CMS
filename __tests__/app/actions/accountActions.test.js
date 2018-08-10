@@ -22,7 +22,7 @@ describe('Account actions', () => {
   it('should set error', () => {
     const expectedAction = {
       type: 'set_error',
-      payload: data
+      payload: null
     }
     expect(accountActions.setError(data)).toEqual(expectedAction)
   });

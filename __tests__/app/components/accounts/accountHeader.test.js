@@ -1,9 +1,9 @@
 import React from 'react';
 import TestRenderer from 'react-test-renderer';
 
-import Config from '../../../../src/app/Config.jsx';
+import Config from '../../../../src/app/Config';
 import AccountHeader from '../../../../src/app/components/account/AccountHeader.jsx';
-import state from '../../../../src/app/components/account/state.jsx';
+import state from '../../../../src/app/helper/accountState';
 
 const mockFunction = () => { return false; };
 

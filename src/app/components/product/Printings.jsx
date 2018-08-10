@@ -19,7 +19,7 @@ export default class Printings extends React.Component {
   constructor(props){
     super(props);
     this.mainModel = mainModelInstance;
-    this.model = productModelInstance;
+    this.model = productModelInstance();
     this.state = {
       data: null,
       description: '',
@@ -36,7 +36,7 @@ export default class Printings extends React.Component {
   }
 
   componentDidMount() {
-    this.checkPrintings(this.props.token);
+    this.checkPrintings();
     this.setState({ inSearch: true });
   }
 
@@ -55,8 +55,8 @@ export default class Printings extends React.Component {
     }
   }
 
-  checkPrintings(token) {
-    this.model.getPrintings(token)
+  checkPrintings() {
+    this.model.getPrintings()
       .then((response) => {
         if (response.status === 200 && response.data.success) {
           let data = {
@@ -78,7 +78,7 @@ export default class Printings extends React.Component {
     this.setState({ modal: false });
   }
   deleteHandler(id) {
-    this.model.deletePrinting(id, this.props.token)
+    this.model.deletePrinting(id)
       .then((response) => {
         let action = response.data.success  ? 'success' : 'warning';
         this.mainModel.setMessage(action, response.data.reason);
@@ -102,7 +102,7 @@ export default class Printings extends React.Component {
   saveFile = () => {
     const fd = new FormData();
     fd.append('file[]', this.state.file, this.state.file.name);
-    this.model.saveFile(this.state.description, fd, this.props.token)
+    this.model.saveFile(this.state.description, fd)
       .then((response) => {
         let type = response.data.success  ? 'success' : 'warning';
         this.setMessage(type, response.data.reason);

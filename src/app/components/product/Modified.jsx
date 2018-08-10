@@ -17,7 +17,7 @@ export default class Modified extends React.Component {
 	constructor(props){
 		super(props);
 		this.mainModel = mainModelInstance;
-		this.model = productModelInstance;
+		this.model = productModelInstance();
 		this.model.checkModified.subscribe(() => this.checkModified());
 	}
 
@@ -28,18 +28,18 @@ export default class Modified extends React.Component {
 	checkModified() {
 		this.model.getModified()
 			.then((response) => {
-				this.model.setModified(setModifiedData(response));
+				this.model.modified.next(setModifiedData(response));
 			})
 			.catch((err) => this.mainModel.setMessage('warning', Config.message))
 			.finally(() => this.props.after());
 	}
 
 	deleteItem = (id) => {
-		this.model.deleteModified(id, this.props.token)
+		this.model.deleteModified(id)
 			.then((response) => {
 				if (response.status === 200 && response.data.success) {
 					this.mainModel.setMessage('success', response.data.reason);
-					this.model.refreshModified();
+					this.model.checkModified.next();
 				} else {
 					throw new Error(response.data.reason);
 				}

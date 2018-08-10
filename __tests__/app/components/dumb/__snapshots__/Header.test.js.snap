@@ -1,15 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Postal snapshot Header renders correctly 1`] = `
-<div>
+<div
+  className="height12"
+>
   <div
     className="headerList"
   >
     <div
-      className="col-xs-11 pull-left"
+      className="col-xs-12 col-md-10 pull-left"
     >
       <a
-        className="btn btn-info rightMargin"
+        className="btn btn-info headerButton rightMargin"
         disabled={false}
         onClick={[Function]}
         style={Object {}}
@@ -17,7 +19,7 @@ exports[`Postal snapshot Header renders correctly 1`] = `
         Produkty
       </a>
       <a
-        className="btn btn-info rightMargin"
+        className="btn btn-info headerButton rightMargin"
         disabled={false}
         onClick={[Function]}
         style={Object {}}
@@ -25,7 +27,7 @@ exports[`Postal snapshot Header renders correctly 1`] = `
         Zamówienia
       </a>
       <a
-        className="btn btn-info rightMargin"
+        className="btn btn-info headerButton rightMargin"
         disabled={false}
         onClick={[Function]}
         style={Object {}}
@@ -33,7 +35,7 @@ exports[`Postal snapshot Header renders correctly 1`] = `
         Wysyłki
       </a>
       <a
-        className="btn btn-info rightMargin"
+        className="btn btn-info headerButton rightMargin"
         disabled={false}
         onClick={[Function]}
         style={Object {}}
@@ -41,7 +43,7 @@ exports[`Postal snapshot Header renders correctly 1`] = `
         Rachunki
       </a>
       <a
-        className="btn btn-info rightMargin"
+        className="btn btn-info headerButton rightMargin"
         disabled={false}
         onClick={[Function]}
         style={Object {}}
@@ -50,10 +52,10 @@ exports[`Postal snapshot Header renders correctly 1`] = `
       </a>
     </div>
     <div
-      className="col-xs-1 pull-right"
+      className="col-xs-12 col-sm-12 col-md-2 logoutMargin pull-right"
     >
       <button
-        className="btn btn-danger btn-block logoutButton"
+        className="btn btn-danger btn-block logoutButton headerButton"
         onClick={[Function]}
         type="button"
       >

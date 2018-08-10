@@ -28,6 +28,7 @@ describe('Postal reducer', () => {
       amount: undefined,
       error: true,
       list: null,
+      loading: false,
       updateSuccess: false
     });
   });
@@ -40,6 +41,7 @@ describe('Postal reducer', () => {
       amount: dataObj.payload[0].current,
       error: false,
       list: dataObj.payload,
+      loading: false,
       updateSuccess: false
     });
   });

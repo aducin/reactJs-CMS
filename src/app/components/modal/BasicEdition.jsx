@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import { Modal } from 'react-bootstrap';
 import { reactLocalStorage } from 'reactjs-localstorage';
 
-import axios from 'axios';
 import store from '../../store';
 import * as product from '../../actions/productActions.jsx';
 import Config from '../../Config';
@@ -133,9 +132,7 @@ export default class BasicEdition extends React.Component {
 				let messageType = Boolean(response.data.success) ? 'success' : 'error';
 				this.setMessage(messageType, response.data.reason);
 			})
-			.catch((err) =>{
-				this.setMessage('error', Config.message.error);
-			});
+			.catch((err) => this.setMessage('error', Config.message.error));
 	}
 	setSave() {
 		this.setState({
@@ -152,18 +149,11 @@ export default class BasicEdition extends React.Component {
 				disabled = true;
 			}
 		});
-		this.setState({
-			disabledSave: disabled,
-			doNotUpdateProps: true
-		});
+		this.setState({ disabledSave: disabled, doNotUpdateProps: true });
 	}
 	setMessage(type, text) {
 		let curClass = type === 'success' ?  'colorSuccess' : 'colorWarning';
-		this.setState({
-			message: text,
-			messageType: curClass,
-			setTimeout: true
-		});
+		this.setState({ message: text, messageType: curClass, setTimeout: true });
 	}
 	setTimeout(state) {
 		let success = state.messageType === 'colorSuccess';
@@ -192,7 +182,7 @@ export default class BasicEdition extends React.Component {
 		};
 		const checkWarning = (field, warning) => {
 			return this.state.error[field] ? this.state[warning] : null;
-		}
+		};
 		const setWarning = (text, data) => {
 			return (
 				<div>

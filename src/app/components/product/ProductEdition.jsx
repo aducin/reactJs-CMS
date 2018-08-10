@@ -36,7 +36,7 @@ export default class ProductEdition extends React.Component {
 	constructor(props) {
 		super(props);
 		this.mainModel = mainModelInstance;
-		this.model = productModelInstance;
+		this.model = productModelInstance();
 		this.state = {
 			id: false,
 			activatedFull: false,

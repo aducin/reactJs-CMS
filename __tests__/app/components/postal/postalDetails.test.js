@@ -1,7 +1,7 @@
 import React from 'react';
 import TestRenderer from 'react-test-renderer';
 
-import Config from '../../../../src/app/Config.jsx';
+import Config from '../../../../src/app/Config';
 import PostalDetail from '../../../../src/app/components/postal/PostalDetail.jsx';
 
 let data = {

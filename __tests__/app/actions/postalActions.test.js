@@ -3,7 +3,7 @@ import React from 'react';
 import * as postalActions from '../../../src/app/actions/postalActions.jsx';
 
 const data = {};
-const message = '';
+const message = null;
 
 describe('Postal actions', () => {
   it('should set data', () => {

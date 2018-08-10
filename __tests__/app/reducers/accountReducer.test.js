@@ -16,7 +16,7 @@ let initialState = {
   maxAmount: null,
   message: false
 };
-let message = '';
+let message = true;
 
 describe('Account reducer', () => {
   it('should clear data', () => {
@@ -26,12 +26,14 @@ describe('Account reducer', () => {
     };
     expect(accountReducer(initialState, dataObj)).toEqual({
       amount: null,
+      amounts: {},
       automatic: false,
       empty: undefined,
       error: false,
       dateFrom: null,
       dateTo: null,
       list: null,
+      loading: false,
       maxAmount: null,
       message: false,
     });
@@ -49,6 +51,7 @@ describe('Account reducer', () => {
       dateFrom: null,
       dateTo: null,
       list: null,
+      loading: false,
       maxAmount: null,
       message: false,
     });
@@ -60,12 +63,14 @@ describe('Account reducer', () => {
     };
     expect(accountReducer(initialState, dataObj)).toEqual({
       amount: dataObj.payload.amount,
+      amounts: undefined,
       automatic: dataObj.payload.automatic,
       empty: dataObj.payload.empty,
       error: false,
       dateFrom: dataObj.payload.dateFrom,
       dateTo: dataObj.payload.dateTo,
       list: dataObj.payload.list,
+      loading: false,
       maxAmount: dataObj.payload.maxAmount,
       message: dataObj.payload.message,
     });

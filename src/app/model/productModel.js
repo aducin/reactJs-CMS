@@ -27,16 +27,16 @@ class ProductModel {
     return axios.put(path, {data}, config);
   }
 
-  deleteModified(id, token) {
+  deleteModified(id) {
     let path = productUrl + '/modified/' + id;
     return axios.delete(path, {
-      params: { token: token }
+      params: { token: this.token }
     });
   }
 
-  deletePrinting(id, token) {
+  deletePrinting(id) {
     let path = setUrl('pathProducts', 'printing');
-    path +=  '/' + id + '/' + token;
+    path +=  '/' + id + '/' + this.token;
     return axios.delete(path);
   }
 
@@ -55,13 +55,13 @@ class ProductModel {
     return axios.get(path);
   }
 
-  getPrintings(token) {
-    let path = setUrl('pathProducts', 'printing', token);
+  getPrintings() {
+    let path = setUrl('pathProducts', 'printing', this.token);
     return axios.get(path);
   }
 
-  modifyLastOrder(base, id, token) {
-    let path = Config.url.serverPath + 'orders/last/' + base + '/' + id + '/' + token;
+  modifyLastOrder(base, id) {
+    let path = Config.url.serverPath + 'orders/last/' + base + '/' + id + '/' + this.token;
     return axios.get( path );
   }
 
@@ -69,13 +69,9 @@ class ProductModel {
     this.checkModified.next();
   }
 
-  refreshOrders() {
-    this.orders.next();
-  }
-
-  saveFile(description, fd, token) {
+  saveFile(description, fd) {
     let path = setUrl('pathProducts', 'printing');
-    path += '/' + token + '?description=' + description;
+    path += '/' + this.token + '?description=' + description;
     return axios.post(path, fd);
   }
 
@@ -88,12 +84,19 @@ class ProductModel {
     this.lists.next(data);
   }
 
-  setModified(data) {
-    this.modified.next(data);
+  setToken(token) {
+    this.token = token;
+    Object.freeze(this);
   }
 }
 
-const productModelInstance = new ProductModel();
-Object.freeze(productModelInstance);
+let instance = null;
+
+const productModelInstance = () => {
+  if (!instance) {
+    instance = new ProductModel();
+  }
+  return instance;
+}
 
 export default productModelInstance;

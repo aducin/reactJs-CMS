@@ -1,11 +1,18 @@
 import React from 'react';
 import TestRenderer from 'react-test-renderer';
 
-import Config from '../../../../src/app/Config.jsx';
+import Config from '../../../../src/app/Config';
 import AccountDetail from '../../../../src/app/components/account/AccountDetail.jsx';
-import state from '../../../../src/app/components/account/state.jsx';
+import state from '../../../../src/app/helper/accountState';
 
+const ascending = true;
 const data = {
+  amounts: {
+    amount3: 10.99,
+    amount17: 0,
+    tax3: 3.88,
+    tax17: 0
+  },
   automatic: true,
   success: true,
   list: [
@@ -29,19 +36,20 @@ const data = {
     }
   ]
 };
+const empty = false;
 const mockFunction = () => { return false; };
+const selectedRow = 1;
+const sortBy = 'id';
 
 const details = TestRenderer.create(
   <AccountDetail
-    ascending={state.ascending}
-    columns={Config.accountColumns}
+    ascending={ascending}
     data={data}
-    message={Config.message}
-    selectedRow={state.selectedRow}
+    empty={empty}
+    selectedRow={selectedRow}
     selectRow={mockFunction}
     sortTable={mockFunction}
-    sortBy={state.sortBy}
-    types={Config.accountTypes}
+    sortBy={sortBy}
   />
 );
 
