@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AccountDetails renders correctly 1`] = `
+exports[`AccountHeader snapshot AccountDetails renders correctly 1`] = `
 <div
   className="col-xs-12 pull-left bgrContent borderRadius10 marginTop40px"
 >
