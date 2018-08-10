@@ -1,5 +1,27 @@
 import Config from '../Config';
 
+export const Basic = {
+  borderWarning: 'borderWarning',
+  classWarning: 'colorWarning',
+  doNotUpdateProps: false,
+  disabled: false,
+  disabledSave: true,
+  discount: {},
+  error: {},
+  errorFields: ['name', 'quantity', 'price'],
+  fields: ['id', 'name', 'quantity', 'price', 'discount'],
+  id :null,
+  message: undefined,
+  messageType: undefined,
+  name: null,
+  price: {},
+  quantity: {},
+  save: false,
+  setDisabledSave: false,
+  setTimeout: false,
+  showModal: false
+};
+
 export const Header = {
   activeCategory: 0,
   activeManufactorer: 0,

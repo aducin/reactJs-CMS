@@ -7,6 +7,7 @@ import { reactLocalStorage } from 'reactjs-localstorage';
 
 import store from '../../store';
 import * as product from '../../actions/productActions.jsx';
+import { Basic } from '../../helper/productState';
 import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
 import productModelInstance from '../../model/productModel';
@@ -23,28 +24,8 @@ import Title from '../dumb/Title.jsx';
 export default class BasicEdition extends React.Component {
 	constructor(props) {
 		super(props);
-		this.model = productModelInstance;
-		this.state = {
-			borderWarning: 'borderWarning',
-			classWarning: 'colorWarning',
-			doNotUpdateProps: false,
-			disabled: false,
-			disabledSave: true,
-			discount: {},
-			error: {},
-			errorFields: ['name', 'quantity', 'price'],
-			fields: ['id', 'name', 'quantity', 'price', 'discount'],
-			id :null,
-			message: undefined,
-			messageType: undefined,
-			name: null,
-			price: {},
-			quantity: {},
-			save: false,
-			setDisabledSave: false,
-			setTimeout: false,
-			showModal: false
-		}
+		this.model = productModelInstance();
+		this.state = Basic;
 	}
 
 	componentDidUpdate() {
@@ -86,29 +67,17 @@ export default class BasicEdition extends React.Component {
 		let curError = {...this.state.error};
 		if (name === 'name') {
 			curError.name = value.length < 3;
-			this.setState({
-				error: curError,
-				name: value,
-				setDisabledSave: true
-			});
+			this.setState({ error: curError, name: value, setDisabledSave: true });
 		} else if (name === 'amount') {
 			let intCheck = isNaN(value) || value.length === 0;
 			curError.quantity = intCheck;
 			let curQuantity = Boolean(intCheck) ? this.state.quantity : { new: parseInt(value), old: parseInt(value) };
-			this.setState({
-				error: curError,
-				quantity: curQuantity,
-				setDisabledSave: true
-			});
+			this.setState({ error: curError, quantity: curQuantity, setDisabledSave: true });
 		} else if (name === 'price') {
 			let priceCheck = isNaN(value.replace(',', '.')) || value.length === 0;
 			curError.price = priceCheck;
 			let curPrice = Boolean(priceCheck) ? this.state.price : { new: value, old: value };
-			this.setState({
-				error: curError,
-				price: curPrice,
-				setDisabledSave: true
-			});
+			this.setState({ error: curError, price: curPrice, setDisabledSave: true });
 		}
 	};
 	modalClose() {
@@ -135,12 +104,7 @@ export default class BasicEdition extends React.Component {
 			.catch((err) => this.setMessage('error', Config.message.error));
 	}
 	setSave() {
-		this.setState({
-			disabled: true,
-			disabledSave: true,
-			doNotUpdateProps: false,
-			save: true
-		});	
+		this.setState({ disabled: true, disabledSave: true, doNotUpdateProps: false, save: true });
 	}
 	setDisabledSave() {
 		let disabled = false;
