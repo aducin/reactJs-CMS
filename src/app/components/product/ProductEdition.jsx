@@ -8,6 +8,7 @@ import ProductModel from '../../model/productModel';
 import { setQuantity } from '../../functions/product/setQuantity';
 
 import Config from '../../Config';
+import { Edition } from '../../helper/productState';
 import Helper from '../../helper/Helper.jsx';
 
 import Busy from '../dumb/Busy.jsx';
@@ -19,36 +20,15 @@ import Select from '../dumb/Select.jsx';
 import Title from '../dumb/Title.jsx';
 import Warning from '../dumb/Warning.jsx';
 
-const cssPadding12 = {
-	paddingBottom: 12, 
-	paddingTop: 12
-};
-
-const imgCss = {
-	height: '100px',
-	width: '100px',
-	color: 'blue',
-	border: '1px solid #ddd',
-	borderRadius: 3,
-};
+const cssPadding12 = { paddingBottom: 12, paddingTop: 12 };
+const imgCss = { height: '100px', width: '100px', color: 'blue', border: '1px solid #ddd', borderRadius: 3};
 
 export default class ProductEdition extends React.Component {
 	constructor(props) {
 		super(props);
 		this.mainModel = mainModelInstance;
 		this.model = productModelInstance();
-		this.state = {
-			id: false,
-			activatedFull: false,
-			activatedSimple: false,
-			categoryDisplay: false,
-			deletePhoto: false,
-			emptyObj: {id: null, name: 'Nie wybrano'},
-			fields: ['active', 'condition', 'deletePhoto', 'description', 'descriptionShort', 'id', 'linkRewrite', 'manufactorer', 'metaDescription',
-			'metaTitle', 'name', 'price', 'productCategories', 'productTags', 'productUpdated', 'quantity'],
-			imageDisplay: false,
-			productUpdated: false
-		}
+		this.state = Edition;
 	}
 
 	componentWillUpdate(nextProps, nextState) {
@@ -153,12 +133,11 @@ export default class ProductEdition extends React.Component {
 		const url = Config.url;
 		let disabled = Boolean(this.props.disable);
 		if (product && product.id !== undefined && product.id !== 0) {
-			const curId = product.id;
-			let buttons, clear, content, goBack, leftColumn, rightColumnClass, saveButton;
-			let title = message.fullEdition + curId;
+			let buttons, clear, content, curQuantity, discountNewWarning, goBack, leftColumn, quantityText, rightColumnClass, saveButton;
+			let title = message.fullEdition + product.id;
 			let priceNew = product.price !== undefined ? parseFloat(product.price.new) : null;
 			let priceOld = product.price !== undefined ? parseFloat(product.price.old) : null;
-			let curUrl = 'products/history/' + curId;
+			let curUrl = 'products/history/' + product.id;
 			let discountNew = false;
 			let discountOld = false;
 			let realDiscountNew = false;
@@ -187,7 +166,7 @@ export default class ProductEdition extends React.Component {
 			    	}	
 			    }
 			}
-			var matched = false;
+			let matched = false;
 			if (this.props.modified !== undefined && this.props.modified !== null && this.props.modified[0]) {
 			    this.props.modified.forEach(function(el) {
 			    	if (parseInt(product.id) === parseInt(el.id)) {
@@ -195,9 +174,7 @@ export default class ProductEdition extends React.Component {
 			    	}
 			   	}, this);
 			}
-			var checkboxOptions = [
-			    {id: 1, name: message.additional.deletePhotos, value: 'photo'}, 
-			];
+			let checkboxOptions = [{id: 1, name: message.additional.deletePhotos, value: 'photo'}];
 			if (!matched) {
 				checkboxOptions.push({id: 2, name: message.additional.modify, value: 'productChanged'});
 			}
@@ -227,8 +204,6 @@ export default class ProductEdition extends React.Component {
 			let manufactorerId = product.manufactorer;
 			let productCategories = product.productCategories;
 			let tempQuantity = product.quantity;
-			let curQuantity;
-			let quantityText;
 			let quantityTextClass = ['col-xs-12', 'col-md-9', 'pull-right', 'textAlignRight'];
 			if (tempQuantity) {
 				curQuantity = tempQuantity.new;
@@ -269,7 +244,7 @@ export default class ProductEdition extends React.Component {
 			}
 			let image = (
 				<div onClick={ this.hideOrShow.bind(this, 'image') }>
-				    <Label heightRow="3" name="Zdjęcia:" cssStyle={ cssPadding12 } />
+					<Label heightRow="3" name="Zdjęcia:" cssStyle={ cssPadding12 } />
 					{imageContent}
 				</div>
 			);
@@ -325,7 +300,6 @@ export default class ProductEdition extends React.Component {
 					<div class={quantityTextClass}>{quantityText}</div>
 				</div>
 			);
-			let discountNewWarning;
 			if (discountNew) {
 				let information = product.priceReal.new + message.currency + message.realPrice.suffix + realDiscountNew;
 				discountNewWarning = <Warning firstRow="marginTop20px" header={message.realPrice.new} message={ information } currentStyle={centered} />;
@@ -358,27 +332,27 @@ export default class ProductEdition extends React.Component {
 			var manufactorer = (
 				<div>
 					<Select selectChange={ this.handleSelectChange.bind(this) } list={ manufactorers } name="manufactorer" title={labels.manufactorer} value={ this.state.manufactorer } disable={disabled}/>
-	      		</div>
-	      	);
-	      	activeArray.forEach((el) => handleSelect(el, activeId, actives));
-	      	let active = (
-	      		<div>
+				</div>
+			);
+			activeArray.forEach((el) => handleSelect(el, activeId, actives));
+			let active = (
+				<div>
 					<Select selectChange={ this.handleSelectChange.bind(this) } list={ actives } name="active" title={labels.active} value={ this.state.active } disable={disabled}/>
-	      		</div>
-	      	);
-	      	conditionArray.forEach((el) => handleSelect(el, conditionId, conditions));
-	      	let condition = (
-	      		<div>
+				</div>
+			);
+			conditionArray.forEach((el) => handleSelect(el, conditionId, conditions));
+			let condition = (
+				<div>
 					<Select selectChange={ this.handleSelectChange.bind(this) } name="condition" list={ conditions } title={labels.condition} value={ this.state.condition } disable={disabled}/>
-	      		</div>
-	      	);
-	      	saveButton = <input class="form-control btn btn-primary" type="button" value={message.actions.save} onClick={ this.saveFull.bind(this) } />;
-		    let urlPath = url.path + String(curId) + '-' + product.linkRewrite + '.html';
-		    let categoryLength = message.categoryAmount + product.productCategories.length;
-		    let categoryContent = (
-		    	<div>
-		    		<Label heightRow="3" name="Kategorie:" cssStyle={ cssPadding12 } />
-		    		<div class="col-xs-12 col-lg-9">
+				</div>
+			);
+			saveButton = <input class="form-control btn btn-primary" type="button" value={message.actions.save} onClick={ this.saveFull.bind(this) } />;
+			let urlPath = url.path + String(product.id) + '-' + product.linkRewrite + '.html';
+			let categoryLength = message.categoryAmount + product.productCategories.length;
+			let categoryContent = (
+				<div>
+					<Label heightRow="3" name="Kategorie:" cssStyle={ cssPadding12 } />
+					<div class="col-xs-12 col-lg-9">
 						<p data-tip={message.actions.showList} style={ cssPadding12 }><i>{categoryLength}</i></p>
 						<ReactTooltip />
 					</div>
@@ -393,36 +367,28 @@ export default class ProductEdition extends React.Component {
 						cssStyle={ cssPadding12 } 
 						name="category"
 						title={labels.categories} 
-		    			toggle={ this.hideOrShow.bind(this) }
+						toggle={ this.hideOrShow.bind(this) }
 
 					/>
 				);
-				var categories = (
-					<div id="category">
-		    			{categoryContent}
-		    		</div>
-		    	)
+				var categories = <div id="category">{categoryContent}</div>;
 			} else {
-		    	var categories = (
-		    		<div id="category" onClick={ this.hideOrShow.bind(this, 'category') }>
-			    		{categoryContent}
-			    	</div>
-			    )
-		    }
-		    let additionalOptions = (
-		    	<Checkbox 
-		    		onHandleChange={ this.handleCheckboxChange.bind(this) } 
-		    		onHandleClick="" 
-		    		active={ activeOptions } 
-		    		categories={ checkboxOptions } 
-		    		cssStyle={ cssPadding12 } 
-		    		name="checkboxOptions" 
-		    		title={message.actions.self} 
-		    	/>
-		    );
-		    content = (
-		    	<div>
-		    		<h2><a href={urlPath} target="blank">{title}</a></h2>
+				var categories = <div id="category" onClick={ this.hideOrShow.bind(this, 'category') }>{categoryContent}</div>;
+			}
+			let additionalOptions = (
+				<Checkbox
+					onHandleChange={ this.handleCheckboxChange.bind(this) }
+					onHandleClick=""
+					active={ activeOptions }
+					categories={ checkboxOptions }
+					cssStyle={ cssPadding12 }
+					name="checkboxOptions"
+					title={message.actions.self}
+				/>
+			);
+			content = (
+				<div>
+					<h2><a href={urlPath} target="blank">{title}</a></h2>
 					{name}
 					{descShort}
 					{description}
@@ -474,9 +440,7 @@ export default class ProductEdition extends React.Component {
 				</div>
 			);
 		} else {
-			return (
-				<Busy title={message.editionSearch} />
-			);
+			return <Busy title={message.editionSearch} />;
 		}
 	}
 }

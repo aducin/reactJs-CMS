@@ -22,6 +22,19 @@ export const Basic = {
   showModal: false
 };
 
+export const Edition = {
+  id: false,
+  activatedFull: false,
+  activatedSimple: false,
+  categoryDisplay: false,
+  deletePhoto: false,
+  emptyObj: {id: null, name: 'Nie wybrano'},
+  fields: ['active', 'condition', 'deletePhoto', 'description', 'descriptionShort', 'id', 'linkRewrite', 'manufactorer', 'metaDescription',
+    'metaTitle', 'name', 'price', 'productCategories', 'productTags', 'productUpdated', 'quantity'],
+  imageDisplay: false,
+  productUpdated: false
+}
+
 export const Header = {
   activeCategory: 0,
   activeManufactorer: 0,

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Postal snapshot PostalHeader renders correctly 1`] = `
+exports[`Postal header snapshot PostalHeader renders correctly 1`] = `
 <div
   className="container bgrContent borderRadius10 marginTop40px paddingBottom40px"
 >

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Postal snapshot Header renders correctly 1`] = `
+exports[`Header snapshot Header renders correctly 1`] = `
 <div
   className="height12"
 >
@@ -11,8 +11,8 @@ exports[`Postal snapshot Header renders correctly 1`] = `
       className="col-xs-12 col-md-10 pull-left"
     >
       <a
-        className="btn btn-info headerButton rightMargin"
-        disabled={false}
+        className="btn btn-primary headerButton rightMargin"
+        disabled={true}
         onClick={[Function]}
         style={Object {}}
       >
