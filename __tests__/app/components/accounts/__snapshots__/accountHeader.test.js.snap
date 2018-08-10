@@ -1,0 +1,239 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccountHeader renders correctly 1`] = `
+<div
+  className="container bgrContent borderRadius10 marginTop40px paddingBottom40px"
+>
+  <div
+    className="col-xs-12"
+  >
+    <div
+      className="container"
+    >
+      <div
+        className="col-xs-12"
+        style={null}
+      >
+        <h3>
+          Manager rachunków Ad9BIS
+        </h3>
+      </div>
+    </div>
+  </div>
+  <div
+    className="col-xs-12"
+  >
+    <div
+      className="col-xs-12"
+    >
+      <div
+        className="col-xs-12 col-md-8 pull-left"
+      >
+        <h4>
+          Wyszukiwanie zaawansowane
+        </h4>
+        <div
+          className="col-xs-12 marginTop10px"
+        >
+          <label
+            className="col-xs-12 col-md-6"
+          >
+            Typ rachunku
+          </label>
+          <div
+            className="col-xs-12 col-md-6"
+          >
+            <select
+              className="form-control"
+              disabled={false}
+              name="type"
+              onChange={[Function]}
+              value={-1}
+            >
+              <option
+                value={1}
+              >
+                Przelew
+              </option>
+              <option
+                value={2}
+              >
+                Pobranie
+              </option>
+              <option
+                value={3}
+              >
+                Usł. inf.
+              </option>
+              <option
+                value={4}
+              >
+                Sprzedaż bezp.
+              </option>
+              <option
+                value={5}
+              >
+                Zwrot
+              </option>
+            </select>
+          </div>
+        </div>
+        <div
+          className="col-xs-12 marginTop10px"
+        >
+          <label
+            className="col-xs-12 col-md-6"
+          >
+            Stan rachunku
+          </label>
+          <div
+            className="col-xs-12 col-md-6"
+          >
+            <select
+              className="form-control"
+              disabled={false}
+              name="state"
+              onChange={[Function]}
+              value={-1}
+            >
+              <option
+                value={0}
+              >
+                Otwarty
+              </option>
+              <option
+                value={1}
+              >
+                Zamknięty
+              </option>
+              <option
+                value={2}
+              >
+                Nieodebrany
+              </option>
+            </select>
+          </div>
+        </div>
+        <div
+          className="col-xs-12 marginTop10px"
+        />
+        <div
+          className="col-xs-12 col-md-6"
+        >
+          <label
+            className="col-xs-12"
+            style={null}
+          >
+            Data początkowa
+          </label>
+        </div>
+        <div
+          className="col-xs-12 col-lg-6"
+        >
+          <div>
+            <div
+              className="react-datepicker-wrapper"
+            >
+              <div
+                className="react-datepicker__input-container"
+              >
+                <input
+                  className="centered form-control"
+                  disabled={false}
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  onKeyDown={[Function]}
+                  readOnly={false}
+                  type="text"
+                  value=""
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="col-xs-12 marginTop10px"
+        />
+        <div
+          className="col-xs-12 col-md-6"
+        >
+          <label
+            className="col-xs-12"
+            style={null}
+          >
+            Data końcowa
+          </label>
+        </div>
+        <div
+          className="col-xs-12 col-lg-6"
+        >
+          <div>
+            <div
+              className="react-datepicker-wrapper"
+            >
+              <div
+                className="react-datepicker__input-container"
+              >
+                <input
+                  className="centered form-control"
+                  disabled={false}
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  onKeyDown={[Function]}
+                  readOnly={false}
+                  type="text"
+                  value=""
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="col-xs-12 col-md-4 pull-left"
+      >
+        <h4>
+          Zarządzanie rachunkami
+        </h4>
+        <div
+          className="col-xs-12 col-sm-4 col-md-12 marginTop10px"
+        >
+          <input
+            className="form-control btn btn-primary maxWidth160"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+            value="Dodaj rachunek"
+          />
+        </div>
+        <div
+          className="col-xs-12 col-sm-4 col-md-12 marginTop10px"
+        >
+          <input
+            className="form-control btn btn-primary maxWidth160"
+            disabled={true}
+            onClick={[Function]}
+            type="button"
+            value="Edytuj rachunek"
+          />
+        </div>
+        <div
+          className="col-xs-12 col-sm-4 col-md-12 marginTop10px"
+        >
+          <input
+            className="form-control btn btn-primary maxWidth160"
+            disabled={true}
+            onClick={[Function]}
+            type="button"
+            value="Wygeneruj plik"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

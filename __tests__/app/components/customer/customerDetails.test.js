@@ -26,17 +26,20 @@ const data = {
     }
   },
   address: {
-    id_address: 5,
-    alias: 'test address',
-    company: '',
-    firstname: "Albert",
-    lastname: "Ducin",
-    address1: 'Test1',
-    address2: 'Test2',
-    postcode: "20-000",
-    city: 'Lublin',
-    phone: '',
-    phone_mobile: '111-222-333'
+    new: null,
+    old: {
+      id_address: 5,
+      alias: 'test address',
+      company: '',
+      firstname: "Albert",
+      lastname: "Ducin",
+      address1: 'Test1',
+      address2: 'Test2',
+      postcode: "20-000",
+      city: 'Lublin',
+      phone: '',
+      phone_mobile: '111-222-333'
+    }
   },
   id: {
     new: null,
