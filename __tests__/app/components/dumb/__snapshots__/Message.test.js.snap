@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Message snapshot Message renders correctly 1`] = `
+<div
+  className="col-xs-12 marginTop50px"
+>
+  <div
+    className="col-xs-3 pull-left"
+  />
+  <div
+    className="col-xs-6 pull-left"
+  >
+    <div
+      className="alert alert-danger alertHeight textAlignCenter"
+    >
+      <p>
+        Just a test
+      </p>
+    </div>
+  </div>
+</div>
+`;

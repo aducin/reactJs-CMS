@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Title snapshot Title renders correctly 1`] = `
+<div
+  className="container"
+>
+  <div
+    className="col-xs-12"
+    style={
+      Object {
+        "backgroundColor": "red",
+      }
+    }
+  >
+    <h3>
+      Just a test
+    </h3>
+  </div>
+</div>
+`;
