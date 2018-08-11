@@ -94,7 +94,7 @@ describe('AccountHeader tests', () => {
     expect(data[0]).toHaveLength(2);
     expect(data[1]).toEqual(["Edytuj rachunek", "Wygeneruj plik"]);
   });
-  it('there is no disabled input buttons anymore', () => {
+  it('there is no disabled input button anymore', () => {
     wrapper.setProps({ link: 'www.test.bebebe', selectedRow: 1 });
     let data = checkDisabled(wrapper);
     expect(data[0]).toHaveLength(0);

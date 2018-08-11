@@ -42,6 +42,7 @@ exports[`Customer snapshot CustomerHeader renders correctly 1`] = `
           onChange={[Function]}
           placeholder="Podaj adres email"
           type="text"
+          value="test@test.com"
         />
       </div>
       <div
@@ -49,7 +50,7 @@ exports[`Customer snapshot CustomerHeader renders correctly 1`] = `
       >
         <input
           className="form-control btn btn-primary cursorPointer"
-          disabled={true}
+          disabled={false}
           onClick={[Function]}
           type="button"
           value="Wyszukaj"

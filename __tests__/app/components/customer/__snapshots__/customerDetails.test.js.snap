@@ -58,6 +58,141 @@ exports[`Customer details\` snapshot CustomerDetails renders correctly 1`] = `
                 className="paddingBottom1"
               >
                 <h3>
+                  Zarejestrowane adresy:
+                </h3>
+              </div>
+              <table
+                className="table table-striped table-bordered"
+              >
+                <thead>
+                  <tr>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Alias
+                    </th>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Odbiorca
+                    </th>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Miasto
+                    </th>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Kod
+                    </th>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Adres
+                    </th>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Adres (cd.)
+                    </th>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Firma
+                    </th>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Telefon
+                    </th>
+                    <th
+                      style={
+                        Object {
+                          "textAlign": "center",
+                        }
+                      }
+                    >
+                      Tel. kom.
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    className="textAlignCenter"
+                  >
+                    <td>
+                      test address
+                    </td>
+                    <td>
+                      Albert
+                       
+                      Ducin
+                    </td>
+                    <td>
+                      Lublin
+                    </td>
+                    <td>
+                      20-000
+                    </td>
+                    <td>
+                      Test1
+                    </td>
+                    <td>
+                      Test2
+                    </td>
+                    <td>
+                      
+                    </td>
+                    <td>
+                      
+                    </td>
+                    <td>
+                      111-222-333
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div
+              className="col-xs-12"
+            >
+              <div
+                className="paddingBottom1"
+              >
+                <h3>
                   Złożone zamówienia: 
                 </h3>
               </div>
@@ -132,6 +267,27 @@ exports[`Customer details\` snapshot CustomerDetails renders correctly 1`] = `
                     </td>
                     <td>
                       9.50
+                      zł
+                    </td>
+                  </tr>
+                  <tr
+                    className="textAlignCenter"
+                  >
+                    <td>
+                      55
+                    </td>
+                    <td>
+                      0000000055,
+                    </td>
+                    <td>
+                      2010-06-15 21:46:56
+                    </td>
+                    <td>
+                      100.00
+                      zł
+                    </td>
+                    <td>
+                      12.50
                       zł
                     </td>
                   </tr>

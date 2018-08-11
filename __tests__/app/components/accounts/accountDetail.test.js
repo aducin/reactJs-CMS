@@ -71,10 +71,30 @@ describe('AccountDetails tests', () => {
   beforeEach(() => {
     wrapper = shallow(component);
   });
+  let newAmounts = {
+    ...data.amounts,
+    amount17: 1000,
+    tax17: 170
+  };
+  let newData = {
+    ...data,
+    amounts: newAmounts
+  };
   it('there are 4 table rows', () => {
     expect(wrapper.find('tr')).toHaveLength(4);
   });
+  it('there are 5 table rows now', () => {
+    wrapper.setProps({ data: newData });
+    expect(wrapper.find('tr')).toHaveLength(5);
+  });
+  it('first row has 15 columns', () => {
+    expect(wrapper.find('tr').first().children()).toHaveLength(15);
+  });
   it('last row in the second column contains the following values', () => {
     expect(wrapper.find('tr').last().childAt(1).props().children).toEqual(["10.99", "zł"]);
+  });
+  it('last row in the second column contains now another values', () => {
+    wrapper.setProps({ data: newData });
+    expect(wrapper.find('tr').last().childAt(1).props().children).toEqual(["1000.00", "zł"]);
   });
 });
