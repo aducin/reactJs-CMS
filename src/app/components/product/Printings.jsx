@@ -1,8 +1,10 @@
 import React from 'react';
 import 'font-awesome/css/font-awesome.min.css';
 
+import { PrintingState } from '../../helper/productState';
+import { setContent, setEmpty, setTable } from '../../functions/jsx/printing';
+
 import Config from '../../Config';
-import Helper from '../../helper/Helper.jsx';
 import { setUrl } from '../../functions/setUrl';
 import mainModelInstance from '../../model/mainModel';
 import productModelInstance from '../../model/productModel';
@@ -11,28 +13,12 @@ import Busy from '../dumb/Busy.jsx';
 import Title from '../dumb/Title.jsx';
 import PrintingAdd from '../modal/PrintingAdd.jsx';
 
-const styles = {
-  padding15px: {paddingTop: '15px'}
-};
-
 export default class Printings extends React.Component {
   constructor(props){
     super(props);
     this.mainModel = mainModelInstance;
     this.model = productModelInstance();
-    this.state = {
-      data: null,
-      description: '',
-      disabled: false,
-      file: null,
-      inSearch: false,
-      messageContent: null,
-      messageType: null,
-      modal: false,
-      saveDisable: true,
-      saveFile: false,
-      setTimeout: false
-    }
+    this.state = PrintingState;
   }
 
   componentDidMount() {
@@ -47,7 +33,7 @@ export default class Printings extends React.Component {
       this.setTimeout();
     }
   }
-  componentWillUpdate(nextProps, nextState) {
+  componentWillUsetEmptypdate(nextProps, nextState) {
     if (nextState.saveFile) {
       this.setState({ saveFile: false });
     } else if (nextState.setTimeout) {
@@ -93,10 +79,7 @@ export default class Printings extends React.Component {
     if (files.length > 1) {
       this.mainModel.setMessage('warning', Config.message.products.oneFileOnly);
     } else {
-      this.setState({
-        file: files[0],
-        modal: true
-      });
+      this.setState({ file: files[0], modal: true });
     }
   }
   saveFile = () => {
@@ -107,30 +90,17 @@ export default class Printings extends React.Component {
         let type = response.data.success  ? 'success' : 'warning';
         this.setMessage(type, response.data.reason);
       })
-      .catch((err) =>{
-        this.setMessage('warning', err.reason);
-      });
-  }
+      .catch((err) =>this.setMessage('warning', err.reason));
+  };
   setDescription = event => {
-    let value = event.target.value;
     let saveDisable = value.length < 4;
-    this.setState({
-      description: value,
-      saveDisable: saveDisable
-    });
+    this.setState({ description: event.target.value, saveDisable: saveDisable });
   }
   setMessage(type, message) {
-    this.setState({
-      messageContent: message,
-      messageType: type,
-      setTimeout: true
-    });
+    this.setState({ messageContent: message, messageType: type, setTimeout: true });
   }
   setSaveFile = () => {
-    this.setState({
-      disabled: true,
-      saveFile: true
-    });
+    this.setState({ disabled: true, saveFile: true });
   }
   setTimeout() {
     setTimeout(() => {
@@ -141,11 +111,8 @@ export default class Printings extends React.Component {
 
   render() {
     let data = this.props.data || {};
-    let text = Config.message;
     if (this.state.inSearch) {
-      return (
-        <Busy title={text.printingsSearch} />
-      );
+      return <Busy title={Config.message.printingsSearch} />;
     } else {
       let modal;
       let inputs = (
@@ -159,7 +126,7 @@ export default class Printings extends React.Component {
           <input
             class="form-control btn btn-primary"
             type="button"
-            value={text.products.chooseFile}
+            value={Config.message.products.chooseFile}
             onClick={() => this.fileInput.click()}
           />
         </div>
@@ -172,7 +139,7 @@ export default class Printings extends React.Component {
             descriptionChangeHandler={this.setDescription.bind(this)}
             disabled={this.state.disabled}
             file={this.state.file.name}
-            message={text}
+            message={Config.message}
             messageContent={this.state.messageContent}
             messageType={this.state.messageType}
             save={this.setSaveFile.bind(this)}
@@ -182,53 +149,11 @@ export default class Printings extends React.Component {
         );
       }
       if (data.empty) {
-        return (
-          <div class="container">
-            <div class="col-xs-12 col-md-10">
-              <h3>{text.noPrintings}</h3>
-            </div>
-            <div class="col-xs-12 col-md-2 marginTop15px paddingBottomResp">
-              {inputs}
-              {modal}
-            </div>
-          </div>
-        )
+        return setEmpty(Config.message, inputs, modal);
       } else if (data.list) {
-        let title = text.labels.printings;
-        let head = Helper.createTableHead(['Lp.', 'Nazwa', 'Opis', 'Data', 'Akcja']);
-        let list = data.list.map((el, index) => {
-          let linkPath = Config.url.filePath + 'printing/' + el.id + '/' + el.name;
-          return (
-            <tr key={ index } class="textCentered">
-              <td style={styles.padding15px}>{index + 1}</td>
-              <td style={styles.padding15px}><a href={linkPath} target="blank">{el.name}</a></td>
-              <td style={styles.padding15px}>{el.description}</td>
-              <td style={styles.padding15px}>{el.createdTime}</td>
-              <td>
-                <div class="col-xs-6 pull-left marginTop7px">
-                  <a href={linkPath} download><i class="fa fa-download" aria-hidden="true"></i></a>
-                </div>
-                <div class="col-xs-6 pull-left marginTop7px">
-                  <i onClick={ this.deleteHandler.bind(this, el.id) } class="fa fa-trash cursorPointer" aria-hidden="true"></i>
-                </div>
-              </td>
-            </tr>
-          )
-        });
-        let table = Helper.setTable(title, head, list);
-        return (
-          <div class="container bgrContent paddingBottom2 marginTop2 borderRadius10">
-            <div class="col-xs-12 col-md-2 marginTop15px">
-              {inputs}
-              {modal}
-            </div>
-            {table}
-          </div>
-        )
+        return setTable(data.list, this.deleteHandler, this, inputs, modal);
       } else {
-        return (
-          <Title title={text.products.printingsLoading} />
-        )
+        return <Title title={Config.message.products.printingsLoading} />;
       }
     }
   }

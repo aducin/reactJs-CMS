@@ -120,6 +120,7 @@ const Config = {
 		},
 	},
 	intervalOrders: 300000,
+	leftMargin: {marginLeft: '20px'},
 	message: {
 		account: {
 			accessories: 'Części zamienne',
@@ -405,6 +406,7 @@ const Config = {
 			name: 'Stary panel'
 		}
 	],
+	padding15px: {paddingTop: '15px'},
 	queueTime: 1000,
 	timer: 3000,
 	url: {

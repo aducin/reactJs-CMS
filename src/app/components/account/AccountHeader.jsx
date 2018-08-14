@@ -6,24 +6,11 @@ import Label from '../dumb/Label.jsx';
 import Select from '../dumb/Select.jsx';
 import Title from '../dumb/Title.jsx';
 
+import { setXml } from '../../functions/jsx/account.jsx';
+
 const accountHeader = ( props ) => {
   let message = Config.message;
-  let stateOptions = props.states;
-  let typeOptions = props.types;
-  let xml;
-  if (props.link) {
-    xml = (
-      <div class="col-xs-12 col-sm-4 col-md-12 marginTop10px">
-        <a href={props.link} download>{message.account.downloadXml}</a>
-      </div>
-    );
-  } else {
-    xml = (
-      <div class="col-xs-12 col-sm-4 col-md-12 marginTop10px">
-        <input class="form-control btn btn-primary maxWidth160" disabled={!props.xml} onClick={ () => props.createXml() } type="button" value={ message.account.createXml } />
-      </div>
-    );
-  }
+  let xml = setXml(props.link, props.xml, props.createXml);
   return(
     <div class="container bgrContent borderRadius10 marginTop40px paddingBottom40px">
       <div class="col-xs-12">
@@ -36,7 +23,7 @@ const accountHeader = ( props ) => {
             <Select
               curClass="col-xs-12 marginTop10px"
               setDisabled={props.disable}
-              list={ typeOptions }
+              list={ props.types }
               name="type"
               selectChange={ props.handleSelectChange.bind(this) }
               title={ message.account.type }
@@ -45,7 +32,7 @@ const accountHeader = ( props ) => {
             <Select
               curClass="col-xs-12 marginTop10px"
               setDisabled={props.disable}
-              list={ stateOptions }
+              list={ props.states }
               name="state"
               selectChange={ props.handleSelectChange.bind(this) }
               title={ message.account.state }
@@ -90,6 +77,6 @@ const accountHeader = ( props ) => {
       </div>
     </div>
   );
-}
+};
 
 export default accountHeader;

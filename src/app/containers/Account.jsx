@@ -25,6 +25,7 @@ import { rowHandle } from '../functions/account/rowHandle';
 import { selectHandle } from '../functions/account/selectHandle';
 import { setModalData } from '../functions/account/setModalData';
 import { setParams } from '../functions/account/setParams';
+import { renderComponent, setList } from '../functions/jsx/account.jsx';
 
 @connect((store) => {
 	return { account: store.account };
@@ -131,32 +132,20 @@ export default class AccountContainer extends React.Component {
 		this.setState({ createXml, selected });
 	}
 	sortTable(value) {
-		let ascending = this.state.sortBy === value ? this.state.sortBy : value;
-		let sortBy = this.state.sortBy === value ? !this.state.ascending : this.state.ascending;
+		let ascending = this.state.sortBy === value ? !this.state.ascending : this.state.ascending;
+		let sortBy = this.state.sortBy === value ? this.state.sortBy : value;
 		this.setState({ ascending, sortBy });
 	}
 
 	render() {
-		const addDefaultOption = (obj) => {
-			const message = Config.message.account;
-			obj.unshift( <option key={ -1 } value={ message.defaultOption.id }>{ message.defaultOption.name }</option> );
-			return obj;
-		};
 		const state = this.state;
-		const data = this.props.account;
 		let accountsHeader, accountsDetails, busy, header, message, modal, stateOptions, typeOptions;
 		let messageStyle = this.props.success ? Config.alertSuccess : Config.alertError;
-		stateOptions = Config.accountStates.map((el, index) => <option key={ index } value={ el.id }>{ el.name }</option>);
-		typeOptions = Config.accountTypes.map((el, index) => <option key={ index } value={ el.id }>{ el.name }</option>);
+		stateOptions = setList('accountStates', this.state.selected.state);
+		typeOptions = setList('accountTypes', this.state.selected.type);
 		if (this.props.approved) {
 			header = <Header active="accounts" buttonHandler={this.props.logoutHandler.bind(this)} disable={state.disable} />;
 			message = <Message message={this.props.toDisplay} messageStyle={messageStyle} />;
-			if (this.state.selected.state === -1) {
-				addDefaultOption([...stateOptions]);
-			}
-			if (this.state.selected.type === -1) {
-				addDefaultOption([...typeOptions]);
-			}
 			accountsHeader = (
 				<AccountHeader
 					accountModal={this.openModal.bind(this)}
@@ -178,8 +167,8 @@ export default class AccountContainer extends React.Component {
 			accountsDetails = (
 				<AccountDetail
 					ascending={state.ascending}
-					data={data}
-					empty={!Boolean(data.list)}
+					data={this.props.account}
+					empty={!Boolean(this.props.account.list)}
 					selectedRow={state.selectedRow}
 					selectRow={this.selectRow.bind(this)}
 					sortTable={this.sortTable.bind(this)}
@@ -189,8 +178,8 @@ export default class AccountContainer extends React.Component {
 			if (this.state.modal) {
 				let title = state.modal === 'add' ? Config.message.account.addTitle : Config.message.account.modifyTitle;
 				if (state.modal === 'add') {
-					addDefaultOption(stateOptions);
-					addDefaultOption(typeOptions);
+					stateOptions = setList('accountStates', -1);
+					typeOptions = setList('accountTypes', -1);
 				}
 				modal = (
 					<AccountModal
@@ -210,16 +199,6 @@ export default class AccountContainer extends React.Component {
 				);
 			}
 		}
-		return (
-			<div>
-				{header}
-				{message}
-				{accountsHeader}
-				{busy}
-				{accountsDetails}
-				{modal}
-				<div class="col-xs-4 pull-left marginBottom40"></div>
-			</div>
-		)
+		return renderComponent(header, message, accountsHeader, busy, accountsDetails, modal);
 	}
 }

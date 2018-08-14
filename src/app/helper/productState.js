@@ -50,6 +50,20 @@ export const Header = {
   }
 };
 
+export const PrintingState = {
+  data: null,
+  description: '',
+  disabled: false,
+  file: null,
+  inSearch: false,
+  messageContent: null,
+  messageType: null,
+  modal: false,
+  saveDisable: true,
+  saveFile: false,
+  setTimeout: false
+};
+
 export const State = {
   action: null,
   category: 0,

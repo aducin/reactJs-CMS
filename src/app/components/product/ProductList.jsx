@@ -16,16 +16,12 @@ const styles = {
 };
 
 const ProductList = ( props ) => {
-	const setUrl = (path, id) => {
-		redirect(path, id);
-	};
+	const setUrl = (path, id) => redirect(path, id);
 	const product = props.product;
 	const text = Config.message;
 	const url = Config.url;
 	if (!product.searched) {
-		return(
-			<Busy title={text.loading} />
-		)
+		return <Busy title={text.loading} />;
 	} else {
 		if (product.nameList === undefined || product.nameList.length === 0) {
 			return (
@@ -48,7 +44,7 @@ const ProductList = ( props ) => {
 				if (!discount.new) {
 					priceNew = (
 						<div>
-							<p class="textCentered marginTop40px">{price.new}zł</p>;
+							<p class="textCentered marginTop40px">{price.new}zł</p>
 						</div>
 					);
 				} else {
