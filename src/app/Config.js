@@ -175,6 +175,7 @@ const Config = {
 		authorisation: 'Proszę czekać - trwa weryfikacja...',
 		categoryAmount: 'Ilość aktywnych kategorii: ',
 		chooseFrom: 'Wybierz sposród ',
+		clear: 'Wyczyść',
 		close: 'Zamknij',
 		condition: 'Stan:',
 		currency: "zł",
