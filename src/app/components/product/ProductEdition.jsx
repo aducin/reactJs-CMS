@@ -1,117 +1,72 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ReactTooltip from 'react-tooltip';
 
 import mainModelInstance from '../../model/mainModel';
 import productModelInstance from '../../model/productModel';
 import ProductModel from '../../model/productModel';
-import { setQuantity } from '../../functions/product/setQuantity';
+import { activeOptions } from '../../functions/product/edition/activeOptions';
+import { checkBoxChange } from '../../functions/product/edition/checkBoxChange';
+import { checkBoxOptions } from '../../functions/product/edition/checkBoxOptions';
+import { equalState as prepareEqual } from '../../functions/product/edition/equalState';
+import { inputModify as modify } from '../../functions/product/edition/inputModify';
+import { prepareOptions } from '../../functions/product/edition/prepareOptions';
+import { prepareSave } from '../../functions/product/edition/prepareSave';
+import { selectChange } from '../../functions/product/edition/selectChange';
+import { setTags } from '../../functions/product/edition/setTags';
+import { updateCategoryList } from '../../functions/product/edition/updateCategoryList';
+import { handleSelectOpts, setContent } from '../../functions/jsx/productEdition.jsx';
 
 import Config from '../../Config';
-import { Edition } from '../../helper/productState';
-import Helper from '../../helper/Helper.jsx';
+import { Edition as EditionState } from '../../helper/productState';
 
 import Busy from '../dumb/Busy.jsx';
-import ButtonSingle from '../dumb/ButtonSingle.jsx';
+import Buttons from './edition/Buttons.jsx';
+import Categories from './edition/Categories.jsx';
 import Checkbox from '../dumb/Checkbox.jsx';
-import Input from '../dumb/Input.jsx';
-import Label from '../dumb/Label.jsx';
+import Description from './edition/Description.jsx';
+import Edition from './edition/Edition.jsx';
+import Images from './edition/Images.jsx';
+import Price from './edition/Price.jsx';
+import Quantity from './edition/Quantity.jsx';
 import Select from '../dumb/Select.jsx';
-import Title from '../dumb/Title.jsx';
-import Warning from '../dumb/Warning.jsx';
-
-const cssPadding12 = { paddingBottom: 12, paddingTop: 12 };
-const imgCss = { height: '100px', width: '100px', color: 'blue', border: '1px solid #ddd', borderRadius: 3};
 
 export default class ProductEdition extends React.Component {
 	constructor(props) {
 		super(props);
 		this.mainModel = mainModelInstance;
 		this.model = productModelInstance();
-		this.state = Edition;
+		this.state = EditionState;
 	}
 
 	componentWillUpdate(nextProps, nextState) {
 		this.equalState(nextProps, nextState);
 	}
 
-	descriptionChange(e) {
+	descriptionChange = (e) => {
 		this.setState({ description: e.target.value });
-	}
-
+	};
 	equalState(props, state) {
-		let product = props.productData.dataFull;
-		if (state.id !== product.id) {
-			let curState = {...this.state};
-			this.state.fields.forEach((el) => {
-				if (el !== 'deletePhoto' && el !== 'productUpdated') {
-					curState[el] = product[el];
-				} else {
-					curState[el] = false;
-				}
-			});
-			this.setState(curState);
+		if (state.id !== props.productData.dataFull.id) {
+			this.setState(prepareEqual(this.state, props.productData.dataFull));
 		}
 	}
-
-	handleCheckboxChange(list, origin) {
-		if (origin !== 'checkboxOptions') {
-			this.setState({ productCategories: list });
-		} else {
-			let deletePhoto = list.indexOf(1) !== -1;
-			let updated = list.indexOf(2) !== -1;
-			this.setState({ deletePhoto: deletePhoto, productUpdated: updated });
-		}
-	}
-
+	handleCheckboxChange = (list, origin) => {
+		this.setState(checkBoxChange(this.state, list, origin));
+	};
 	handleSelectChange(e) {
-		let value = e.target.value;
-		let name = e.target.name;
-		let active = name === 'active' ? value : this.state.active;
-		let condition = name === 'condition' ? value : this.state.condition;
-		let manufactorer = name === 'manufactorer' ? value : this.state.manufactorer;
-		this.setState({ active: active, condition: condition, manufactorer: manufactorer });
-	}
-
-	hideOrShow(field) {
+		this.setState(selectChange(this.state, e));
+	};
+	hideOrShow = (field) => {
 		let categoryDisplay = field === 'category' ? !this.state.categoryDisplay : this.state.categoryDisplay;
 		let imageDisplay = field === 'image' ? !this.state.imageDisplay : this.state.imageDisplay;
-		this.setState({ categoryDisplay: categoryDisplay, imageDisplay: imageDisplay });
-	}
-
-	inputModify(data) {
-		let origin = data.target.name;
-		let value = data.target.value;
-		if (origin !== 'priceNew' && origin !== 'priceOld' && origin !== 'quantity') {
-			let curState = {...this.state};
-			curState[origin] = value;
-			this.setState( curState );
-		} else if (origin === 'quantity') {
-			this.state.quantity.modified = parseInt(value);
-		} else {
-			let curPrice = {...this.state.price};
-			if (origin === 'priceNew') {
-				curPrice.new = value;
-			} else if (origin === 'priceOld') {
-				curPrice.old = value;
-			}
-			this.setState({ price: curPrice });
-		}
-	}
-
-	saveFull() {
+		this.setState({ categoryDisplay, imageDisplay });
+	};
+	inputModify = (data) => {
+		this.setState( modify(this.state, data) );
+	};
+	saveFull = () => {
 		window.scrollTo(0, 0);
-		let curState = {...this.state};
-		let data = this.state.fields.reduce((obj, key) => {
-			obj[key] = curState[key];
-			return obj;
-		}, {});
-		if (typeof(data.productTags) === 'object') {
-			let tags = data.productTags.map(el => el.name);
-			data.productTags = tags.join(', ');
-		}
-		data.action = 'full';
-		data.quantity = setQuantity(data.quantity);
+		let data = prepareSave(this.state);
 		let attribute = this.props.productData.dataFull.attribute;
 		this.model.saveProduct(attribute.new, attribute.old, Config.ajaxConfig, data)
 			.then((response) => {
@@ -119,326 +74,60 @@ export default class ProductEdition extends React.Component {
 				this.mainModel.setMessage(action, response.data.reason);
 			})
 			.catch((err) => this.mainModel.setMessage(action, err.message))
-	}
+	};
 
 	render() {
-		function handleSelect(el, id, object) {
-			object.push(<option key={ el.id } value={ el.id }>{ el.name }</option>);
-			return object;
-		};
-		const centered = Config.css.centered;
 		const message = Config.message;
-		const labels = message.labels;
-		let product = this.props.productData.dataFull;
-		const url = Config.url;
+		const product = this.props.productData.dataFull;
 		let disabled = Boolean(this.props.disable);
 		if (product && product.id !== undefined && product.id !== 0) {
-			let buttons, clear, content, curQuantity, discountNewWarning, goBack, leftColumn, quantityText, rightColumnClass, saveButton;
-			let title = message.fullEdition + product.id;
-			let priceNew = product.price !== undefined ? parseFloat(product.price.new) : null;
-			let priceOld = product.price !== undefined ? parseFloat(product.price.old) : null;
-			let curUrl = 'products/history/' + product.id;
-			let discountNew = false;
-			let discountOld = false;
-			let realDiscountNew = false;
-			let realDiscountOld = false;
-			if (product.priceReal !== undefined) {
-			   	if (product.priceReal.new && product.priceReal.new !== product.price.new) {
-			    	discountNew = true;
-			    	var currentDiscount = product.discount.new;
-			    	let discountType = currentDiscount.reductionType;
-			    	if (discountType === "percentage") {
-			    		let currentAmount = currentDiscount.reduction * 100;
-			    		realDiscountNew = currentAmount + '%';
-			    	} else if (discountType === "amount") {
-			    		realDiscountNew = currentDiscount.reduction + message.currency;
-			    	}
-			    }
-			    if (product.priceReal.old && product.priceReal.old !== product.price.old) {
-			    	discountOld = true;
-			    	var currentDiscount = product.discount.old;
-			    	let discountType = currentDiscount.reductionType;
-			    	if (discountType === "percentage") {
-			    		let currentAmount = currentDiscount.reduction * 100;
-			    		realDiscountOld = currentAmount + '%';
-			    	} else if (discountType === "amount") {
-			    		realDiscountOld = currentDiscount.reduction + ' zł';
-			    	}	
-			    }
-			}
-			let matched = false;
-			if (this.props.modified !== undefined && this.props.modified !== null && this.props.modified[0]) {
-			    this.props.modified.forEach(function(el) {
-			    	if (parseInt(product.id) === parseInt(el.id)) {
-			    		matched = true;
-			    	}
-			   	}, this);
-			}
-			let checkboxOptions = [{id: 1, name: message.additional.deletePhotos, value: 'photo'}];
-			if (!matched) {
-				checkboxOptions.push({id: 2, name: message.additional.modify, value: 'productChanged'});
-			}
-			let activeOptions = [];
-			if (this.state.deletePhoto) {
-				activeOptions.push(1);
-			}
-			if (this.state.productUpdated) {
-				activeOptions.push(2);
-			}
-			const activeArray = Config.active;
-			const conditionArray = Config.condition;  		
-			let tagString = '';
-			if (Array.isArray(product.productTags)) {
-				product.productTags.forEach((el) => {
-				   	tagString = tagString + el.name + ', ';
-				});
-				if (tagString.length > 2) {
-				    tagString = tagString.slice(0, -2);
-				}
-			}
-			let actives = [];
-			let activeId = product.active;
-			let conditions = [];
-			let conditionId = product.condition;
-			let manufactorers = [];
-			let manufactorerId = product.manufactorer;
-			let productCategories = product.productCategories;
-			let tempQuantity = product.quantity;
-			let quantityTextClass = ['col-xs-12', 'col-md-9', 'pull-right', 'textAlignRight'];
-			if (tempQuantity) {
-				curQuantity = tempQuantity.new;
-				if (tempQuantity.new === tempQuantity.old) {
-					quantityText = message.quantity.equal;
-					quantityTextClass.push('colorSuccess');
-				} else {
-					quantityText = message.quantity.notEqual + tempQuantity.old;
-					quantityTextClass.push('colorWarning');
-				}
-				quantityTextClass = quantityTextClass.join(' ');
-			}
-			if (Array.isArray(product.categoryList)) {
-				product.categoryList = product.categoryList.map((el) => {
-				    el.name = el.metaTitle;
-				    return el;
-				});
-			}
-			if (Array.isArray(product.images)) {
-				var imageLength = 'Ilość zdjęć: ' + product.images.length;
-				var imageList = product.images.map((el) => {
-					return <img key={ el } src={ el } style={ imgCss } />
-				});
-			}
-			if (this.state.imageDisplay) {
-				var imageContent = (
-					<div class="col-xs-12 col-lg-9" style={ cssPadding12 }>
-						{imageList}
-					</div>
-				)
-			} else {
-				var imageContent = (
-					<div class="col-xs-12 col-lg-9">
-						<p data-tip={message.actions.showMiniatures} style={ cssPadding12 }><i>{imageLength}</i></p>
-						<ReactTooltip />
-					</div>
-				)
-			}
-			let image = (
-				<div onClick={ this.hideOrShow.bind(this, 'image') }>
-					<Label heightRow="3" name="Zdjęcia:" cssStyle={ cssPadding12 } />
-					{imageContent}
-				</div>
-			);
-			let name = (
-				<div>
-					<Label heightRow="3" name={labels.name.name} />
-					<Input heightRow="9" placeholder={labels.name.placeholder} changeHandler={this.inputModify.bind(this)} name="name" noCenter="true" disable={disabled} value={product.name} />
-				</div>
-			);
-			let descShort = (
-				<div>
-					<Label heightRow="3" name={labels.description.nameShort} />
-					<Input heightRow="9" placeholder={labels.description.placeholder} changeHandler={this.inputModify.bind(this)} name="descriptionShort" noCenter="true" disable={disabled} value={product.descriptionShort} />
-				</div>
-			);
-			let description = (
-				<div>
-					<Label heightRow="3" name={labels.description.nameFull} />
-					<div class="col-xs-12 col-md-9">
-						<textarea class="form-control" rows="6" onKeyUp={ this.descriptionChange.bind(this) } defaultValue={product.description} disabled={disabled} placeholder={labels.description.placeholder}></textarea>
-					</div>
-				</div>
-			);
-			let linkRewrite = (
-				<div>
-				    <Label heightRow="3" name={labels.linkRewrite.name} />
-					<Input heightRow="9" placeholder={labels.linkRewrite.placeholder} changeHandler={this.inputModify.bind(this)} name="linkRewrite" noCenter="true" disable={disabled} value={product.linkRewrite} />
-				</div>
-			);
-			let metaTitle = (
-				<div>
-				    <Label heightRow="3" name={labels.metaTitle.name} />
-					<Input heightRow="9" placeholder={labels.metaTitle.placeholder} changeHandler={this.inputModify.bind(this)} name="metaTitle" noCenter="true" disable={disabled} value={product.metaTitle} />
-				</div>
-			);
-			let metaDescription = (
-				<div>
-				   	<Label heightRow="3" name={labels.metaDescription.name} />
-					<Input heightRow="9" placeholder={labels.metaDescription.placeholder} changeHandler={this.inputModify.bind(this)} name="metaDescription" noCenter="true" disable={disabled} value={product.metaDescription} />
-				</div>
-			);
-			let tags = (
-				<div>
-				    <Label heightRow="3" name={labels.tags.name} />
-					<Input heightRow="9" placeholder={labels.tags.placeholder} changeHandler={this.inputModify.bind(this)} name="productTags" noCenter="true" disable={disabled} value={tagString} />
-				</div>	
-			);
-			let quantity = (
-				<div>
-				    <Label name={labels.quantity.name} />
-					<Input placeholder={labels.quantity.placeholder} changeHandler={this.inputModify.bind(this)} name="quantity" disable={disabled} value={curQuantity} />
-					<div class="col-xs-12 col-md-3 pull-left"></div>
-					<div class={quantityTextClass}>{quantityText}</div>
-				</div>
-			);
-			if (discountNew) {
-				let information = product.priceReal.new + message.currency + message.realPrice.suffix + realDiscountNew;
-				discountNewWarning = <Warning firstRow="marginTop20px" header={message.realPrice.new} message={ information } currentStyle={centered} />;
-			}
-			let newPrice = (
-				<div>
-			    	<Label name={labels.price.nameNew} />
-					<Input placeholder={labels.price.placeholder} changeHandler={this.inputModify.bind(this)} name="priceNew" disable={disabled} value={priceNew.toFixed(2)} />
-				    {discountNewWarning}
-				</div>
-			);
-			let discountOldWarning;
-			if (discountOld) {
-				let information = product.priceReal.old + message.currency + message.realPrice.suffix + realDiscountOld;
-				discountOldWarning = <Warning firstRow="marginTop20px" header={message.realPrice.old} message={ information } currentStyle={centered} />;
-			}
-			let oldPrice = (
-				<div>
-			    	<Label name={labels.price.nameOld} />
-					<Input placeholder={labels.price.placeholder} changeHandler={this.inputModify.bind(this)} name="priceOld" disable={disabled} value={priceOld.toFixed(2)} />
-			    	{discountOldWarning}
-			    </div>
-			);
-			let noManufactorer = product.manufactorers.findIndex(el => { return el.id === 0 });
-			let manufactorersList = [...product.manufactorers];
-			if (noManufactorer) {
-				manufactorersList.unshift(message.otherManufactorer);
-			}
-			manufactorersList.forEach((el) => handleSelect(el, manufactorerId, manufactorers));
-			var manufactorer = (
-				<div>
-					<Select selectChange={ this.handleSelectChange.bind(this) } list={ manufactorers } name="manufactorer" title={labels.manufactorer} value={ this.state.manufactorer } disable={disabled}/>
-				</div>
-			);
-			activeArray.forEach((el) => handleSelect(el, activeId, actives));
-			let active = (
-				<div>
-					<Select selectChange={ this.handleSelectChange.bind(this) } list={ actives } name="active" title={labels.active} value={ this.state.active } disable={disabled}/>
-				</div>
-			);
-			conditionArray.forEach((el) => handleSelect(el, conditionId, conditions));
-			let condition = (
-				<div>
-					<Select selectChange={ this.handleSelectChange.bind(this) } name="condition" list={ conditions } title={labels.condition} value={ this.state.condition } disable={disabled}/>
-				</div>
-			);
-			saveButton = <input class="form-control btn btn-primary" type="button" value={message.actions.save} onClick={ this.saveFull.bind(this) } />;
-			let urlPath = url.path + String(product.id) + '-' + product.linkRewrite + '.html';
-			let categoryLength = message.categoryAmount + product.productCategories.length;
-			let categoryContent = (
-				<div>
-					<Label heightRow="3" name="Kategorie:" cssStyle={ cssPadding12 } />
-					<div class="col-xs-12 col-lg-9">
-						<p data-tip={message.actions.showList} style={ cssPadding12 }><i>{categoryLength}</i></p>
-						<ReactTooltip />
-					</div>
-				</div>
-			);
-			if (this.state.categoryDisplay) {
-				var categoryContent = (
-					<Checkbox 
-						onHandleChange={ this.handleCheckboxChange.bind(this) } 
-						active={ productCategories } 
-						categories={ product.categories } 
-						cssStyle={ cssPadding12 } 
-						name="category"
-						title={labels.categories} 
-						toggle={ this.hideOrShow.bind(this) }
-
-					/>
-				);
-				var categories = <div id="category">{categoryContent}</div>;
-			} else {
-				var categories = <div id="category" onClick={ this.hideOrShow.bind(this, 'category') }>{categoryContent}</div>;
-			}
-			let additionalOptions = (
-				<Checkbox
-					onHandleChange={ this.handleCheckboxChange.bind(this) }
-					onHandleClick=""
-					active={ activeOptions }
-					categories={ checkboxOptions }
-					cssStyle={ cssPadding12 }
-					name="checkboxOptions"
-					title={message.actions.self}
+			product.categoryList = updateCategoryList(product.categoryList);
+			let image = <Images images={product.images} display={this.state.imageDisplay} action={this.hideOrShow}/>;
+			let name = <Edition type="name" action={this.inputModify} disabled={disabled} value={product}/>;
+			let descShort = <Edition type="descriptionShort" action={this.inputModify} disabled={disabled} value={product}/>;
+			let description = <Description product={product} action={this.descriptionChange} disabled={disabled} />;
+			let linkRewrite = <Edition type="linkRewrite" action={this.inputModify} disabled={disabled} value={product}/>;
+			let metaTitle = <Edition type="metaTitle" action={this.inputModify} disabled={disabled} value={product}/>;
+			let metaDesc = <Edition type="metaDescription" action={this.inputModify} disabled={disabled} value={product}/>;
+			let tags = <Edition type="tags" action={this.inputModify} disabled={disabled} value={setTags(product.productTags)}/>;
+			let quantity = <Quantity product={product} disabled={disabled} action={this.inputModify} />;
+			let newPrice = <Price type="new" product={product} action={this.inputModify} disabled={disabled} />;
+			let oldPrice = <Price type="old" product={product} action={this.inputModify} disabled={disabled} />;
+			let manufactorer = (
+				<Select
+					selectChange={ this.handleSelectChange.bind(this) }
+					list={ handleSelectOpts(prepareOptions(product.manufactorers)) }
+					name="manufactorer" title={message.labels.manufactorer} value={ this.state.manufactorer } disable={disabled} curClass=""
 				/>
 			);
-			content = (
-				<div>
-					<h2><a href={urlPath} target="blank">{title}</a></h2>
-					{name}
-					{descShort}
-					{description}
-					{linkRewrite}
-					{metaTitle}
-					{metaDescription}
-					{tags}
-					{quantity}
-					{newPrice}
-					{oldPrice}
-					{manufactorer}
-					{active}
-					{condition}
-					{categories}
-					{image}
-					{additionalOptions}
-				</div>
+			let active = (
+				<Select
+					selectChange={ this.handleSelectChange.bind(this) }
+					list={ handleSelectOpts(Config.active) }
+					name="active" title={message.labels.active} value={ this.state.active } disable={disabled} curClass=""
+				/>
 			);
-			clear = (
-				<div>
-					<ButtonSingle link="products" classMain="col-xs-12 col-md-3" className="form-control btn btn-info" content={message.actions.clear} />
-				</div>
+			let condition = (
+				<Select
+					selectChange={ this.handleSelectChange.bind(this) }
+					list={ handleSelectOpts(Config.condition) }
+					name="condition"  title={message.labels.condition} value={ this.state.condition } disable={disabled} curClass=""
+				/>
 			);
-			if (this.props.list) {
-				goBack = (
-					<div class="col-xs-12 col-md-3 pull-left">
-						<input class="form-control btn btn-info pull-right" type="button" value={message.actions.goBackToList} onClick={ () => this.props.goBack() } />
-					</div>
-				);
-			}
-			buttons = (
-				<div>
-					<div class="col-xs-12 col-md-3">
-						{saveButton}
-					</div>
-					<ButtonSingle link={curUrl} classMain="col-xs-12 col-md-3" className="form-control btn btn-info" content={message.actions.history} />
-					{clear}
-					{goBack}
-				</div>
+			let display = this.state.categoryDisplay;
+			let checkAct = this.handleCheckboxChange;
+			let categories = <Categories product={product} display={display} action={this.hideOrShow} checkAct={checkAct} />;
+			let options = checkBoxOptions(this.props.modified, product.id);
+			let additional = (
+				<Checkbox
+					onHandleChange={ this.handleCheckboxChange.bind(this) }
+					active={ activeOptions(this.state.deletePhoto, this.state.productUpdated) }
+					categories={ options } cssStyle={ Config.css.padding12 } name="checkboxOptions" title={message.actions.self}
+				/>
 			);
-			rightColumnClass = 'col-xs-12 col-lg-9';
-			return (
-				<div class="container bgrContent paddingBottom2 paddingTop2 marginTop2 borderRadius10">
-					{leftColumn}
-					<div class={rightColumnClass}>
-						{content} 
-						{buttons}
-					</div>
-				</div>
-			);
+			let buttons = <Buttons product={product} list={this.props.list} save={this.saveFull} back={this.props.goBack} />;
+			return setContent(product, name, descShort, description, linkRewrite, metaTitle, metaDesc, tags, quantity,
+				newPrice, oldPrice, manufactorer, active, condition, categories, image, additional, buttons);
 		} else {
 			return <Busy title={message.editionSearch} />;
 		}

@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Modal } from 'react-bootstrap';
 
+import Config from '../../Config';
 import Input from '../dumb/Input.jsx';
 import Label from '../dumb/Label.jsx';
 
@@ -15,7 +16,7 @@ const marginTop = {
 
 const printingAdd = ( props ) => {
   let bodyHeight = { height: '200px'};
-  let text = props.message;
+  let text = Config.message;
   let title = text.products.newPrinting;
   let titleClass;
   if (props.messageType) {
@@ -60,6 +61,6 @@ const printingAdd = ( props ) => {
       </Modal.Body>
     </Modal>
   );
-}
+};
 
 export default printingAdd;

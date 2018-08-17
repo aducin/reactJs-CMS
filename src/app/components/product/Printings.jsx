@@ -2,9 +2,10 @@ import React from 'react';
 import 'font-awesome/css/font-awesome.min.css';
 
 import { PrintingState } from '../../helper/productState';
-import { setContent, setEmpty, setTable } from '../../functions/jsx/printing';
+import setTable from '../../functions/jsx/printing';
 
 import Config from '../../Config';
+import Empty from './printing/Empty.jsx';
 import { setUrl } from '../../functions/setUrl';
 import mainModelInstance from '../../model/mainModel';
 import productModelInstance from '../../model/productModel';
@@ -33,7 +34,7 @@ export default class Printings extends React.Component {
       this.setTimeout();
     }
   }
-  componentWillUsetEmptypdate(nextProps, nextState) {
+  componentWillUpdate(nextProps, nextState) {
     if (nextState.saveFile) {
       this.setState({ saveFile: false });
     } else if (nextState.setTimeout) {
@@ -60,16 +61,15 @@ export default class Printings extends React.Component {
       .finally(() => this.setState({ inSearch: false }));
   }
 
-  closeModal() {
-    this.setState({ modal: false });
-  }
-  deleteHandler(id) {
+  closeModal = () => this.setState({ modal: false });
+
+  deleteHandler = (id) => {
     this.model.deletePrinting(id)
       .then((response) => {
         let action = response.data.success  ? 'success' : 'warning';
         this.mainModel.setMessage(action, response.data.reason);
         if (response.data.success) {
-          this.props.getPrintings();
+          this.checkPrintings();
         }
       })
       .catch((err) => this.mainModel.setMessage('warning', err.reason));
@@ -91,21 +91,20 @@ export default class Printings extends React.Component {
         this.setMessage(type, response.data.reason);
       })
       .catch((err) =>this.setMessage('warning', err.reason));
-  };
+  }
   setDescription = event => {
-    let saveDisable = value.length < 4;
-    this.setState({ description: event.target.value, saveDisable: saveDisable });
+    let saveDisable = event.target.value.length < 4;
+    this.setState({ description: event.target.value, saveDisable });
   }
-  setMessage(type, message) {
-    this.setState({ messageContent: message, messageType: type, setTimeout: true });
-  }
-  setSaveFile = () => {
-    this.setState({ disabled: true, saveFile: true });
-  }
+
+  setMessage = (type, message) => this.setState({ messageContent: message, messageType: type, setTimeout: true });
+
+  setSaveFile = () => this.setState({ disabled: true, saveFile: true });
+
   setTimeout() {
     setTimeout(() => {
       this.closeModal();
-      this.props.getPrintings();
+      this.checkPrintings();
     }, Config.timer);
   }
 
@@ -115,20 +114,13 @@ export default class Printings extends React.Component {
       return <Busy title={Config.message.printingsSearch} />;
     } else {
       let modal;
+      let curAction = this.fileSelectedHandler;
+      let curClass = 'form-control btn btn-primary';
+      let curMessage = Config.message.products.chooseFile;
       let inputs = (
         <div>
-          <input
-            type="file"
-            style={{display: 'none'}}
-            onChange={ this.fileSelectedHandler }
-            ref={fileInput => this.fileInput = fileInput}
-          />
-          <input
-            class="form-control btn btn-primary"
-            type="button"
-            value={Config.message.products.chooseFile}
-            onClick={() => this.fileInput.click()}
-          />
+          <input type="file" style={{display: 'none'}} onChange={ curAction } ref={fileInput => this.fileInput = fileInput} />
+          <input class={curClass} type="button" value={curMessage} onClick={() => this.fileInput.click()} />
         </div>
       );
       if (this.state.modal) {
@@ -139,7 +131,6 @@ export default class Printings extends React.Component {
             descriptionChangeHandler={this.setDescription.bind(this)}
             disabled={this.state.disabled}
             file={this.state.file.name}
-            message={Config.message}
             messageContent={this.state.messageContent}
             messageType={this.state.messageType}
             save={this.setSaveFile.bind(this)}
@@ -149,9 +140,9 @@ export default class Printings extends React.Component {
         );
       }
       if (data.empty) {
-        return setEmpty(Config.message, inputs, modal);
+        return <Empty inputs={inputs} modal={modal} />
       } else if (data.list) {
-        return setTable(data.list, this.deleteHandler, this, inputs, modal);
+        return setTable(data.list, this.deleteHandler, inputs, modal);
       } else {
         return <Title title={Config.message.products.printingsLoading} />;
       }

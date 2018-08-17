@@ -19,12 +19,13 @@ import productModelInstance from '../model/productModel';
 import Lists from '../classes/lists';
 import { clearUrl } from '../functions/clearUrl';
 import { setUrl } from '../functions/setUrl';
+import { setContent } from '../functions/jsx/container.jsx';
 import { checkUrl } from '../functions/product/checkUrl';
 import { clearStorage } from '../functions/product/clearStorage';
 import { getStorage } from '../functions/product/getStorage';
 import { setModified, setModifiedData } from '../functions/product/setModified';
-import { setQuantity } from '../functions/product/setQuantity';
 import { setStorage, setStorageSimple } from '../functions/product/setStorage';
+import { stateAfterUrlCheck } from '../functions/stateAfterUrlCheck';
 import { Header as DefaultHeader, State } from '../helper/productState';
 
 @connect((store) => {
@@ -39,14 +40,18 @@ export default class ProductContainer extends React.Component {
 		this.lists = new Lists(this.model, this.props.mainModel);
 		this.model.lists.subscribe((data) => {
 			store.dispatch(product.setConstant(data));
-			this.setState({ constant: true });
+			if (!this.state.constant) {
+				this.setState({ constant: true });
+			}
 		});
 		this.model.modified.subscribe((data) => store.dispatch(product.setModified(data)));
 		this.model.orders.subscribe(() => this.searchOrders());
 		this.subscription = this.model.newestOrdersInterval.subscribe(() => this.checkNewestOrders());
 	}
 
-	componentDidMount() { this.checkComponent() }
+	componentDidMount() {
+		this.checkComponent();
+	}
 	componentDidUpdate() {
 		if (this.state.action) {
 			this[this.state.action]();
@@ -57,7 +62,8 @@ export default class ProductContainer extends React.Component {
 		this.setDisabled(nextProps, nextState);
 		if (!this.props.token && nextProps.token) {
 			this.model.setToken(nextProps.token);
-		} else if (!this.state.componentSearched && nextState.componentSearched) {
+		}
+		if (!this.state.componentSearched && nextState.componentSearched && !nextProps.params.id) {
 			this.clear();
 		} else if (nextProps.product.error) {
 			this.props.mainModel.setMessage('warning', Config.error);
@@ -84,13 +90,7 @@ export default class ProductContainer extends React.Component {
 			if (act.dispatch) {
 				store.dispatch(product[act.dispatch]());
 			}
-			this.setState({
-				action: act.action,
-				editionSearched: act.editionSearched,
-				historySearched: act.historySearched,
-				restoreList: act.restoreList,
-				simpleSearched: act.simpleSearched
-			});
+			this.setState( stateAfterUrlCheck(this.state, act) );
 		}
 	}
 	checkNewestOrders() {
@@ -112,21 +112,17 @@ export default class ProductContainer extends React.Component {
 		let mods = setModified(this.state.modified);
 		this.setState({ header: DefaultHeader, modified: mods[0], modifiedSearch: mods[1], nameSearch: false});
 	}
-	clearEdition() {
-		this.setState({ action: 'clearUrl', restoreList: true });
-	}
-	clearUrl() {
-		clearUrl(Config.url.pathProducts);
-	}
-	close() {
-		this.setState({ simpleSearched: false });
-	}
-	modsAfter() {
-		this.setState({ disabledEdition: false, modifiedSearch: false });
-	}
-	restoreList() {
-		this.searchName( getStorage() );
-	}
+
+	clearEdition = () => this.setState({ action: 'clearUrl', restoreList: true });
+
+	clearUrl = () => clearUrl(Config.url.pathProducts);
+
+	close = () => this.setState({ simpleSearched: false });
+
+	modsAfter = () => this.setState({ disabledEdition: false, modifiedSearch: false });
+
+	restoreList = () => this.searchName( getStorage() );
+
 	searchEdition() {
 		store.dispatch(product.prepareResult());
 		store.dispatch(product.setAction('getProductById', {basic: false, id: this.state.editionSearched}));
@@ -146,9 +142,9 @@ export default class ProductContainer extends React.Component {
 		let disabled = !state.constant || (props.params.action !== undefined && props.params.id !== undefined);
 		if (disabled !== state.disable) this.setState({ disable: disabled });
 	}
-	setError(error) {
-		this.props.mainModel.setMessage('warning', error);
-	}
+
+	setError = (error) => this.props.mainModel.setMessage('warning', error);
+
 	setHeader(data) {
 		if (data.origin === 'idSearch') {
 			this.setSimpleId({ id: data.productId });
@@ -173,7 +169,6 @@ export default class ProductContainer extends React.Component {
 		const product = this.props.product;
 		const state = this.state;
 		const token = this.props.token;
-		const mainModel = this.props.mainModel;
 		if (this.props.approved) {
 			header = (
 				<Header
@@ -186,7 +181,7 @@ export default class ProductContainer extends React.Component {
 			let messageStyle = this.props.success ? Config.alertSuccess : Config.alertError;
 			message = <Message message={this.props.toDisplay} messageStyle={messageStyle} />;
 		}
-		if (token && !this.state.editionSearched && !this.state.historySearched && !this.state.nameSearch) {
+		if (token && !this.props.params.action && !this.props.params.id && !this.state.nameSearch) {
 			let list = product.modifiedList;
 			modified = <Modified after={() => this.modsAfter() } list={list} search={state.modifiedSearch} />;
 			lastOrders = <LastOrders data={product.lastOrders} search={product.ordersSearch} />;
@@ -195,10 +190,8 @@ export default class ProductContainer extends React.Component {
 			let productData = { dataFull: product.fullDataFirst, empty: product.empty, modified: product.modifiedList };
 			edition = (
 				<ProductEdition
-					disable={state.disabledEdition}
-					goBack={this.clearEdition.bind(this)}
-					list={state.nameSearch}
-					productData={productData}
+					disable={state.disabledEdition} goBack={this.clearEdition.bind(this)}
+					list={state.nameSearch} productData={productData}
 				/>
 			)
 		} else if (state.historySearched && !state.editionSearched) {
@@ -212,27 +205,10 @@ export default class ProductContainer extends React.Component {
 		}
 		let productHeader = (
 			<ProductHeader
-				data={state.header}
-				product={product}
-				mainState={state}
-				searchName={this.searchName.bind(this)}
-				setHeader={this.setHeader.bind(this)}
+				data={state.header} product={product} mainState={state}
+				searchName={this.searchName.bind(this)} setHeader={this.setHeader.bind(this)}
 			/>
 		);
-		let padding = 'paddingBottom2';
-			return (
-				<div class={padding}>
-					{header}
-					{message}
-					{productHeader}
-					{basic}
-					{edition}
-					{history}
-					{nameList}
-					{modified}
-					{lastOrders}
-					{print}
-		    </div>
-	    )
-    }
+		return setContent(header, message, productHeader, basic, edition, history, nameList, modified, lastOrders, print);
+	}
 }

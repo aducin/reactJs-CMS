@@ -5,87 +5,26 @@ import Label from '../dumb/Label.jsx';
 import Select from '../dumb/Select.jsx';
 import Title from '../dumb/Title.jsx';
 
+import setCurrentId from '../../functions/order/setId';
+import setSearch from '../../functions/order/setSearch';
+import setSelectData from '../../functions/order/setData';
+
 const orderHeader = ( props ) => {
-	const handleSelectChange = (e) => {
-		let header = props.header;
-		let name = e.target.name;
-		let curSelected = {
-			action: 0,
-			panel: 0
-		};
-		curSelected[e.target.name] = e.target.value;
-		let curActionId = name === 'action' ? header.actionId : '';
-		let curPanelId = name === 'panel' ? header.panelId : '';
-		let data = {
-			header: {
-				actionId: curActionId,
-				currentSelect: name,
-				name: name + 'Id',
-				panelId: curPanelId,
-				selected: curSelected
-			},
-			updateError: false
-		};
-		props.setData(data);
-	};
+	const handleSelectChange = (e) => props.setData(setSelectData(e, props.header));
 	const setId = (e) => {
-		let header = props.header;
-		let name = e.target.name;
-		let value = e.target.value;
-		let check = isNaN(value);
-		let curAction = name === 'actionId' ? header.selected.action : 0;
-		let curPanel = name === 'panelId' ? header.selected.panel : 0;
-		let selected = {
-			action: curAction,
-			panel: curPanel
-		};
+		let check = isNaN(e.target.value);
 		if (!check) {
-			let curError = {...props.error};
-			curError[name] = false;
-			let actionName = name.replace('Id', '');
-			let curActionId = name === 'actionId' ? value : '';
-			let curPanelId = name === 'panelId' ? value : '';
-			let data = {
-				error: curError,
-				header: {
-					actionId: curActionId,
-					currentSelect: actionName,
-					name: name,
-					panelId: curPanelId,
-					selected: selected
-				},
-				updateError: true
-			};
-			props.setData(data);
+			props.setData(setCurrentId(e, props.header, props.error));
 		} else {
-			let curError = {...props.error};
-			curError[name] = true;
-			curError.value = value;
+			let curError = {...props.error, value: e.target.value};
+			curError[e.target.name] = true;
 			props.setError(curError);
 		}
 	};
-	const setIdSearch = () => {
-		let header = props.header;
-		let id = header.currentSelect === 'action' ? header.actionId : header.panelId;
-		let selectedId = header.currentSelect === 'action' ? header.selected.action : header.selected.panel;
-		let actions = [...Config.orderActions];
-		let panels = [...Config.orderPanels];
-		let concated = actions.concat(panels);
-		let action;
-		let idCheck = concated.findIndex((el) => { return parseInt(el.id) === parseInt(selectedId); });
-		if (idCheck !== -1) {
-			action = concated[idCheck].action;
-		}
-		let data = {
-			action: action,
-			id: id,
-			selected: selectedId
-		};
-		props.search(data);
-	};
+	const setIdSearch = () => props.search(setSearch(props.header));
+
 	let actionId = props.header.actionId;
 	let currentSelect = props.header.currentSelect;
-	let error = props.error;
 	let headerDisable = props.headerDisable;
 	let panelId = props.header.panelId;
 	let selected = props.header.selected;
@@ -110,8 +49,8 @@ const orderHeader = ( props ) => {
 			panelOptions.unshift(<option key="0" value={ message.pleaseChoose.id }>{ message.pleaseChoose.name }</option>);
 		}
 	}
-	let classAction = error.actionId ? 'form-control borderWarning textAlignCenter' : 'form-control textAlignCenter';
-	let classPanel = error.panelId ? 'form-control borderWarning textAlignCenter' : 'form-control textAlignCenter';
+	let classAction = props.error.actionId ? 'form-control borderWarning textAlignCenter' : 'form-control textAlignCenter';
+	let classPanel = props.error.panelId ? 'form-control borderWarning textAlignCenter' : 'form-control textAlignCenter';
 	return(
 		<div class="container bgrContent borderRadius10 marginTop40px paddingBottom40px">
 			<div class="col-xs-12">
@@ -159,7 +98,6 @@ const orderHeader = ( props ) => {
 			</div>
 		</div>
 	);
-}
+};
 
 export default orderHeader;
-

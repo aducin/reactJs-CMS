@@ -8,7 +8,7 @@ export const setModified = (currentModified) => {
     modifiedSearch = false;
   }
   return [modified, modifiedSearch];
-}
+};
 
 export const setModifiedData = (response) => {
   let data;
@@ -18,4 +18,4 @@ export const setModifiedData = (response) => {
     data = { empty: true, list: null };
   }
   return data;
-}
+};

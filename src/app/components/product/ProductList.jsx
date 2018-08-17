@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom';
 import ReactTooltip from 'react-tooltip';
 import 'font-awesome/css/font-awesome.min.css';
 
-import { setContent, setEmpty } from '../../functions/jsx/productList.jsx';
+import setContent from '../../functions/jsx/productList.jsx';
+import Empty from './list/Empty.jsx';
 
 import Config from '../../Config';
 import Helper from '../../helper/Helper.jsx';
@@ -17,7 +18,9 @@ const ProductList = ( props ) => {
 		return <Busy title={text.loading} />;
 	} else {
 		if (product.nameList === undefined || product.nameList.length === 0) {
-			return setEmpty(props.clearList);
+			return (
+				<Empty clear={props.clearList} />
+			);
 		} else {
 			let list = product.nameList;
 			let title = product.anotherSearch ? <span>{text.lastSearchList} ({list.length} szt.)</span> : <span>{text.listOfProducts} ({list.length} szt.)</span>;

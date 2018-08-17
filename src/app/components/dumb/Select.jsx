@@ -1,5 +1,7 @@
 import React from 'react';
 
+import Label from '../../components/dumb/Label.jsx';
+
 import WithClass from '../hoc/withClass.jsx';
 
 const select = ( props ) => {
@@ -20,7 +22,7 @@ const select = ( props ) => {
   }
 	return (
 		<WithClass curClass={curClass}>
-			 <label class={widthLabel}>{props.title}</label>
+       <Label name={props.title} />
 			 <div class={widthSelect}>
 			    <select class="form-control" disabled={props.setDisabled} name={ props.name } onChange={ (e) => props.selectChange(e) } value={ props.value }>{props.list}</select>
 			 </div>

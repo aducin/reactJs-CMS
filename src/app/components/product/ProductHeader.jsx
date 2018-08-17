@@ -57,17 +57,12 @@ const ProductHeader = ( props ) => {
 			data = {...props.data, productName: nameValue};
 		}
 		if (data.productName !== '' && data.productName.length > 3) {
-			let searchData = {
-				search: data.productName,
-				category: data.activeCategory,
-				manufactorer: data.activeManufactorer
-			};
+			let searchData = {search: data.productName, category: data.activeCategory, manufactorer: data.activeManufactorer};
 			props.searchName(searchData);
 		}
 	};
 	let data = props.data;
 	let productId = data.productId !== 0 ? data.productId : '';
-	let productName = data.productName;
 	let message = Config.message;
 	let warning = props.data.warning;
 	if (props.mainState.error) {
@@ -96,40 +91,41 @@ const ProductHeader = ( props ) => {
 						</div>
 						<div>
 							<Select
-								curClass="col-xs-12 marginBottom10px"
-								setDisabled={disabled}
-								list={ listCategories }
+								curClass="marginBottom10px" list={ listCategories }
 								name="category"
 								selectChange={ handleSelectChange.bind(this) }
+								setDisabled={disabled}
 								title={ titleCategory }
 								value={ data.activeCategory }
 							/>
 						</div>
 						<div class="marginBottom20px">
 							<Select
-								curClass="col-xs-12 marginBottom10px"
-								setDisabled={disabled}
+								curClass="marginBottom10px"
 								list={ listManufactorers }
 								name="manufactorer"
 								selectChange={ handleSelectChange.bind(this) }
+								setDisabled={disabled}
 								title={titleManufactorer}
 								value={ data.activeManufactorer }
 							/>
 						</div>
 						<Label curClass={labelClass} name={data.productLabel} />
-						<div class="col-xs-12 col-lg-6">
-							<input class="form-control" disabled={disabled} type="text" value={productName} placeholder="Podaj nazwę" onChange={ e => handleNameChange(e.target.value) } style={ inputStyleName } />
+						<div class="col-xs-12 col-md-6">
+							<input class="form-control" disabled={disabled} type="text" value={data.productName} placeholder="Podaj nazwę" onChange={ e => handleNameChange(e.target.value) } style={ inputStyleName } />
 						</div>
 					</div>
-					<div class="col-xs-12 col-lg-2 pull-left"></div>
-					<div class="col-xs-12 col-lg-3 pull-left">
-						<div class="paddingBottom10px">
+					<div class="col-xs-12 col-lg-1 pull-left"></div>
+					<div class="col-xs-12 col-lg-4 pull-left">
+						<div class="col-xs-12 paddingBottom10px">
 							<h4>{message.products.idSearch}</h4>
 						</div>
-						<div class="marginBottom10px">
-							<input class="centered form-control" disabled={disabled} type="text" value={productId} placeholder="Podaj ID" onChange={ e => handleIdChange(e.target.value) } style={ inputStyleId } />
+						<div class="col-xs-12 col-md-6 col-lg-12">
+							<div class="marginBottom10px">
+								<input class="centered form-control" disabled={disabled} type="text" value={productId} placeholder="Podaj ID" onChange={ e => handleIdChange(e.target.value) } style={ inputStyleId } />
+							</div>
 						</div>
-						<div>
+						<div class="col-xs-12 col-md-6 col-lg-12">
 							<input class="form-control btn btn-primary" disabled={data.searchDisabled} type="button" value="Wyszukaj" onClick={ handleIdSearch.bind(this) } />
 						</div>
 					</div>

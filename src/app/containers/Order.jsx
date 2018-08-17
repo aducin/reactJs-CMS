@@ -15,6 +15,8 @@ import Email from '../classes/email';
 import CustomerModel from '../model/customerModel.js';
 import { checkDisabled } from '../functions/order/checkDisabled';
 import { checkIfUrlChanged } from '../functions/order/checkIfUrlChanged';
+import { removeUrl } from '../functions/order/removeUrl';
+import { setContainer } from '../functions/jsx/order.jsx';
 import { setUrl } from '../functions/order/setUrl';
 import { Header as DefaultHeader, State } from '../helper/orderState';
 
@@ -24,7 +26,7 @@ import { Header as DefaultHeader, State } from '../helper/orderState';
 
 export default class OrderContainer extends React.Component {
 	constructor(props) {
-		super(props);	 
+		super(props);
 		this.state = {...State};
 		this.email = new Email(this.props.mainModel);
 	}
@@ -87,23 +89,13 @@ export default class OrderContainer extends React.Component {
 			}
 		}
 	}
-	removeDb() {
-		this.setState({
-			clear: true,
-			curShipment: Config.message.orders.defaultShipmentNumber,
-			db: undefined,
-			disable: false,
-			header: DefaultHeader,
-			id: undefined,
-			shipmentNumber: false
-		});
-	}
-	searchOrder(data) {
-		window.location.href = setUrl(data);
-	}
-	sendEmail() {
-		this.email.send(this.props.params, this.props.token);
-	}
+
+	removeDb = () => this.setState(removeUrl(this.state, DefaultHeader));
+
+	searchOrder = (data) => window.location.href = setUrl(data);
+
+	sendEmail = () => this.email.send(this.props.params, this.props.token);
+
 	setHeaderData(data) {
 		let error = data.updateError ? data.error : this.state.error;
 		this.setState({ checkDisabled: true, error, header: data.header });
@@ -116,15 +108,12 @@ export default class OrderContainer extends React.Component {
 		this.props.mainModel.setMessage('warning', data.value + Config.notANumber);
 		this.setState({ error: data });
 	}
-	setShipmentNumber(e) {
-		this.setState({ curShipment: e.target.value });
-	}
-	setUrlCheck() {
-		this.setState({ disable: true, urlCheck: true });
-	}
-	shipmentNumberHandler() {
-		this.setState({ shipmentNumber: !this.state.shipmentNumber });
-	}
+	setShipmentNumber = (e) => this.setState({ curShipment: e.target.value });
+
+	setUrlCheck = () => this.setState({ disable: true, urlCheck: true });
+
+	shipmentNumberHandler = () => this.setState({ shipmentNumber: !this.state.shipmentNumber });
+
 	voucherChange(action, value) {
 		if ((action === 'add' && value < 5) || (action === 'subtract' && value > 1)) {
 			let number = action === 'add' ? value + 1 : value - 1;
@@ -175,14 +164,6 @@ export default class OrderContainer extends React.Component {
 				);
 			}
 		}
-		return (
-			<div>
-				{header}
-				{message}
-				{orderHeader}
-				{busy}
-				{details}
-			</div>
-		)
+		return setContainer(header, message, orderHeader, busy, details);
 	}
 }

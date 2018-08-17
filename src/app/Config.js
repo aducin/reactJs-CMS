@@ -70,6 +70,10 @@ const Config = {
 		centered: {
 			textAlign: 'center'
 		},
+		padding12: {
+			paddingBottom: 12,
+			paddingTop: 12
+		}
 	},
 	defaultPage: 'products',
 	fields: [
@@ -173,6 +177,7 @@ const Config = {
 		},
 		alreadyChecked: 'Podane żądanie zostało już zrealizowane',
 		authorisation: 'Proszę czekać - trwa weryfikacja...',
+		categories: 'Kategorie:',
 		categoryAmount: 'Ilość aktywnych kategorii: ',
 		chooseFrom: 'Wybierz sposród ',
 		clear: 'Wyczyść',
@@ -216,6 +221,7 @@ const Config = {
 		fullEdition: "Pełna edycja produktu ID: ",
 		goBack: 'Powrót',
 		historyTitle: "Historia zmian produktu ID: ",
+		imageLength: 'Ilość zdjęć: ',
 		labels: {
 			active: 'Aktywność:',
 			amount: 'Kwota rachunku',
@@ -224,8 +230,11 @@ const Config = {
 			date: 'Podaj datę',
 			description: {
 				nameFull: 'Pełny opis:',
-				nameShort: 'Krótki opis:',
 				placeholder: 'Podaj opis'
+			},
+			descriptionShort: {
+				name: 'Krótki opis:',
+				placeholder: 'Podaj krótki opis'
 			},
 			email: 'Podaj adres email',
 			filename: 'Nazwa pliku',
