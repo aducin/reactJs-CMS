@@ -51,9 +51,7 @@ export default class LoginComponent extends React.Component {
 	checkData() {
     	let login = this.state.login !== undefined && this.state.login.length > 3;
     	let password = this.state.password !== undefined && this.state.password.length > 3;
-    	this.setState({
-			disabled: !(login && password)
-		});
+    	this.setState({ disabled: !(login && password) });
 	};
 	checkToken(token) {
 		LoginModel.checkToken(token)
@@ -70,33 +68,20 @@ export default class LoginComponent extends React.Component {
 		let tokenCheck = reactLocalStorage.get('token');
 		if (tokenCheck !== undefined || curCookie !== undefined) {
 			let token = tokenCheck !== undefined ? tokenCheck : curCookie;
-			this.setState({
-				checking: true,
-				curToken: token
-			});
+			this.setState({ checking: true, curToken: token });
 		}
 	}
 	handleCheckox(e) {
-		this.setState({
-			remember: e.target.checked,
-		});
+		this.setState({ remember: e.target.checked });
 	};
 	handleError(message) {
-		this.setState({
-			failure: true,
-			success: false,
-			message: message
-		});
+		this.setState({ failure: true, success: false, message: message });
 	};
 	login() {
 		var userLogin = this.state.login;
 		var password = this.state.password;
 		if (userLogin.length > 3 && password.length > 3) {
-			let params = {
-				email: userLogin,
-				password: password,
-				remember: this.state.remember,
-			};
+			let params = { email: userLogin, password: password, remember: this.state.remember };
 			LoginModel.login(params, this.state.config)
     		.then((response) => {
     			if (response.data.success) {
@@ -128,18 +113,11 @@ export default class LoginComponent extends React.Component {
 		window.location.href = this.state.defaultLocation;
 	};
 	setData(e) {
-		this.setState({
-			checkData: true,
-			[e.target.name]: e.target.value
-		});
+		this.setState({ checkData: true, [e.target.name]: e.target.value });
 	};
 	setTimeout() {
 		setTimeout(function() {
-			this.setState({
-				failure: false,
-				message: null,
-				success: false,
-			});
+			this.setState({ failure: false, message: null, success: false });
 		}.bind(this), Config.timer);
 	}
 

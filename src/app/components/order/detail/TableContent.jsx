@@ -35,7 +35,6 @@ const tableContent = (props) => {
     let backId = "products/history/" + el.id;
     let curId = "products/edition/" + el.id;
     let curUrl = Config.url.shopUrl + el.id + '-' + el.linkRewrite + '.html';
-    let modification = el.modification === '---' ? el.modification : Config.message.sameAmount;
     result = (
       <tr key={props.index} class="textAlignCenter">
         <td class="col-xs-1">
@@ -54,7 +53,7 @@ const tableContent = (props) => {
         <td class="col-xs-1" style={paddingTop3}>{el.quantityAfterChange}</td>
         <td class="col-xs-2" style={paddingTop2}>
           <div>
-            <span>{modification}</span><br/>
+            <span>{el.modification}</span><br/>
             <Link to={curId}>Edycja</Link><br/>
             <Link to={backId}>Historia</Link>
           </div>

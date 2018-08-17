@@ -12,6 +12,7 @@ import PostalChange from '../components/modal/PostalChange.jsx';
 import PostalDetail from '../components/postal/PostalDetail.jsx';
 import PostalHeader from '../components/postal/PostalHeader.jsx';
 import PostalModel from '../model/postalModel.js';
+import { setContent } from '../functions/jsx/postal.jsx';
 import { State } from '../helper/postalState';
 import { validateNumber } from '../functions/validateNumber';
 
@@ -25,23 +26,21 @@ export default class PostalContainer extends React.Component {
 		this.state = {...State};
 	}
 
+	componentDidMount() {
+		this.setAction();
+	}
 	componentDidUpdate() {
 		if (this.props.postal.error) {
 			this.props.mainModel.setMessage('warning', Config.error);
 			store.dispatch(postal.clearError());
-		} else if (this.state.action) {
-			let action = this.state.action;
-			this[action]();
+		} else {
+			this.setAction();
 		}
 	}
-	componentWillUpdate(nextProps, nextState) {
-		if (!nextState.ajaxSent) {
-			this.setState({ action: 'getPostal', ajaxSent: true });
-		} else if (nextState.action) {
-			this.setState({ action: null });
-		}
+	static getDerivedStateFromProps(nextProps, previousState) {
+		return !previousState.ajaxSent ? { action: 'getPostal', ajaxSent: true } : null;
 	}
-	shouldComponentUpdate(nextProps, extState) {
+	shouldComponentUpdate(nextProps, nextState) {
 		return (nextProps.approved && nextProps.token);
 	}
 
@@ -53,38 +52,39 @@ export default class PostalContainer extends React.Component {
 		setTimeout(() => {
 			this.setState({
 				action: 'closeModal',
-				actionMessage: {
-					text: undefined,
-					type: undefined
-				},
+				actionMessage: { text: undefined, type: undefined },
 				amountToChange: 0
 			});
 		}, Config.timer);
 	}
 	getPostal() {
-		store.dispatch(postal.setLoading());
-		store.dispatch(postal.setAction('getPostal', this.props.token));
+		if (this.props.token) {
+			store.dispatch(postal.setLoading());
+			store.dispatch(postal.setAction('getPostal', this.props.token));
+			this.setState({ action: null });
+		}
 	}
 	handleAmountToChange(e) {
 		let error = validateNumber(e.target.value);
 		let curAmount = error ? this.state.amountToChange : e.target.value;
 		this.setState({ amountToChange: curAmount, error: error });
 	}
-	openModal(type) {
-		this.setState({ modal: type });
-	}
-	saveNewAmount() {
-		this.setState({ action: 'setAmount', modalInProgress: true });
+
+	open = (type) => this.setState({ modal: type });
+
+	saveNewAmount = () => this.setState({ action: 'setAmount', modalInProgress: true });
+
+	setAction() {
+		if (this.state.action) {
+			this[this.state.action]();
+		}
 	}
 	setAmount() {
 		PostalModel.setData(this.state.amountToChange, this.state.modal)
 			.then((response) => {
 				if (response.data.success) {
-					this.setState({
-						action: 'displayMessage',
-						actionMessage: { text: response.data.reason, type: 'success' },
-						refresh: true
-					});
+					let actionMessage = { text: response.data.reason, type: 'success' };
+					this.setState({ action: 'displayMessage', actionMessage, refresh: true });
 				} else {
 					throw new Error(response.data.reason);
 				}
@@ -93,7 +93,7 @@ export default class PostalContainer extends React.Component {
 				this.closeModal();
 				this.props.mainModel.setMessage('warning', err.message);
 			})
-			.finally( () => this.setState({ modalInProgress: false }) );
+			.finally( () => this.setState({ action: null, modalInProgress: false }) );
 	}
 
 	render() {
@@ -103,13 +103,9 @@ export default class PostalContainer extends React.Component {
 		if (this.props.approved) {
 			header = <Header active="postal" buttonHandler={this.props.logoutHandler.bind(this)} disable={this.state.disable} />;
 			message = <Message message={this.props.toDisplay} messageStyle={messageStyle} />;
+			let loading = this.props.postal.loading;
 			postalHeader = (
-				<PostalHeader
-					amount={data.amount}
-					disable={this.props.postal.loading}
-					message={Config.message}
-					openModal={this.openModal.bind(this)}
-				/>
+				<PostalHeader amount={data.amount} disable={loading} message={Config.message} openModal={this.open.bind(this)} />
 			);
 			if (this.props.postal.loading) {
 				busy = <Busy title={Config.message.loading} />;
@@ -136,15 +132,6 @@ export default class PostalContainer extends React.Component {
 				);
 			}
 		}
-		return (
-			<div>
-				{header}
-				{message}
-				{postalHeader}
-				{busy}
-				{postalDetail}
-				{modal}
-			</div>
-		)
+		return setContent(header, message, postalHeader, busy, postalDetail, modal);
 	}
 }

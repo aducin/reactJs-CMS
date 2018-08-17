@@ -48,12 +48,13 @@ const accountModal = ( props ) => {
         />
         <div class="col-xs-12 marginTop10px">
           <Label cssStyle={marginLeft} heightRow="4" name={ message.account.order } />
-          <Input heightRow="8"
-                 placeholder={ message.labels.order }
-                 changeHandler={ props.handleChange.bind(this) }
-                 name="recipient"
-                 disable={ props.disable }
-                 value={ props.data.recipient }
+          <Input
+            heightRow="8"
+            placeholder={ message.labels.order }
+            changeHandler={ props.handleChange.bind(this) }
+            name="recipient"
+            disable={ props.disable }
+            value={ props.data.recipient }
           />
         </div>
         <div class="col-xs-12 marginTop10px">
@@ -209,6 +210,6 @@ const accountModal = ( props ) => {
       </Modal.Footer>
     </Modal>
   );
-}
+};
 
 export default accountModal;

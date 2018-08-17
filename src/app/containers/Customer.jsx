@@ -12,6 +12,7 @@ import CustomerDetails from '../components/customer/CustomerDetails.jsx';
 import CustomerHeader from '../components/customer/CustomerHeader.jsx';
 import CustomerDelete from '../components/modal/CustomerDelete.jsx';
 import CustomerModel from '../model/customerModel.js';
+import { setContent } from '../functions/jsx/customer.jsx';
 import { State } from '../helper/customerState';
 import { validateEmail } from '../functions/validateEmail';
 
@@ -31,25 +32,14 @@ export default class CustomerContainer extends React.Component {
       this[action]();
     }
   }
-  componentWillUpdate(nextProps, nextState) {
-    if (nextProps.params.email && nextProps.params.email !== nextState.paramAddress) {
-      //let address = {...nextState.address, text: nextProps.params.email};
-      this.setState({
-        action: 'searchCustomer',
-        //address: address,
-        inProgress: true,
-        paramAddress: nextProps.params.email
-      });
-    } else if (!nextProps.params.email && this.state.paramAddress) {
-      let address = {...nextState.address, text: ''};
-      this.setState({
-        action: 'clearData',
-        address: address,
-        paramAddress: undefined
-      });
-    } else if (nextState.action) {
-      this.setState({ action: null });
+  static getDerivedStateFromProps(nextProps, previousState) {
+    if (nextProps.params.email && nextProps.params.email !== previousState.paramAddress) {
+      return { action: 'searchCustomer', inProgress: true, paramAddress: nextProps.params.email };
+    } else if (!nextProps.params.email && previousState.paramAddress) {
+      let address = {...previousState.address, text: ''};
+      return { action: 'clearData', address, paramAddress: undefined };
     }
+    return null;
   }
   shouldComponentUpdate(nextProps, nextState) {
     return (nextProps.approved && nextProps.token);
@@ -57,15 +47,11 @@ export default class CustomerContainer extends React.Component {
 
   clearData() {
     store.dispatch(customer.clearData());
-    clearData()
+    this.setState({ action: null });
   }
-  emailAction(action) {
-    this.setState({
-      action: 'sendEmail',
-      emailAction: action,
-      inProgress: true
-    });
-  }
+
+  emailAction = (action) => this.setState({ action: 'sendEmail', emailAction: action, inProgress: true });
+
   searchCustomer() {
     CustomerModel.getCustomerByEmail(this.state.paramAddress, this.props.token)
       .then((response) => {
@@ -79,9 +65,7 @@ export default class CustomerContainer extends React.Component {
         let message = err.message || Config.message.error;
         this.props.mainModel.setMessage('warning', message);
       })
-      .finally(() => {
-        this.setState({ inProgress: false });
-      });
+      .finally(() => this.setState({ action: null, inProgress: false }));
   }
   sendEmail() {
     CustomerModel.sendCustomerEmail(this.state.emailAction, this.props.params.email, this.props.token)
@@ -96,25 +80,15 @@ export default class CustomerContainer extends React.Component {
         let message = err.message || Config.message.error;
         this.props.mainModel.setMessage('warning', message);
       })
-      .finally(() =>{
-        this.setState({
-          emailAction: null,
-          inProgress: false
-        });
-      });
+      .finally(() =>this.setState({ action: null, emailAction: null, inProgress: false }));
   }
   setAddress(e) {
-    let value = e.target.value;
-    let emailCheck = validateEmail(value);
-    let address = {
-      text: value,
-      valid: emailCheck
-    };
-    this.setState({ address: address });
+    let emailCheck = validateEmail(e.target.value);
+    this.setState({ address: { text: e.target.value, valid: emailCheck } });
   }
-  setModal(bool) {
-    this.setState({ showModal: bool });
-  }
+
+  setModal = (bool) => this.setState({ showModal: bool });
+
   setUrl() {
     let url = Config.url.path + Config.url.pathSuffix + Config.url.pathCustomers + '/' + this.state.address.text;
     window.location.href = url;
@@ -125,27 +99,18 @@ export default class CustomerContainer extends React.Component {
     let busy, customerDetails, customerHeader, header, message, modal;
     let messageStyle = this.props.success ? Config.alertSuccess : Config.alertError;
     if (this.props.approved) {
+      let action = this.props.logoutHandler;
+      let disable = this.state.disable;
       header = (
         <div class="height12">
-          <Header
-            active="customers"
-            buttonHandler={this.props.logoutHandler.bind(this)}
-            disable={this.state.disable}
-            fields={Config.fields}
-          />
+          <Header active="customers" buttonHandler={action.bind(this)} disable={disable} fields={Config.fields} />
         </div>
       );
-      message = (
-        <Message
-          message={this.props.toDisplay}
-          messageStyle={messageStyle}
-        />
-      );
+      message = <Message message={this.props.toDisplay} messageStyle={messageStyle} />;
       customerHeader = (
         <CustomerHeader
           address={this.state.address}
           disable={this.state.inProgress}
-          message={Config.message}
           searchCustomer={this.setUrl.bind(this)}
           setAddress={this.setAddress.bind(this)}
         />
@@ -161,30 +126,14 @@ export default class CustomerContainer extends React.Component {
             delete={this.setModal.bind(this, true)}
             disable={this.state.inProgress}
             empty={empty}
-            message={Config.message}
             send={this.emailAction.bind(this)}
             token={this.props.token}
-            url={Config.url}
           />
         );
       }if (this.state.showModal) {
-        modal = (
-          <CustomerDelete
-            close={this.setModal.bind(this, false)}
-            message={Config.message}
-          />
-        );
+        modal = <CustomerDelete close={this.setModal.bind(this, false)} message={Config.message} />;
       }
     }
-    return(
-      <div>
-        {header}
-        {message}
-        {customerHeader}
-        {busy}
-        {customerDetails}
-        {modal}
-      </div>
-    );
+    return setContent(header, message, customerHeader, busy, customerDetails, modal);
   }
 }

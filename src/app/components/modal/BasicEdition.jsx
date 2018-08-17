@@ -13,8 +13,11 @@ import Helper from '../../helper/Helper.jsx';
 import productModelInstance from '../../model/productModel';
 import Busy from '../dumb/Busy.jsx';
 import ButtonSingle from '../dumb/ButtonSingle.jsx';
+import { changeInput } from '../../functions/product/basicModal/changeInput';
 import Input from '../dumb/Input.jsx';
 import Label from '../dumb/Label.jsx';
+import { setEqualState } from '../../functions/product/basicModal/setEqualState';
+import { setTimeoutData } from '../../functions/product/basicModal/setTimeoutData';
 import Title from '../dumb/Title.jsx';
 
 @connect((store) => {
@@ -48,51 +51,20 @@ export default class BasicEdition extends React.Component {
 	}
 
 	equalState(props) {
-		let newId = this.state.id !== props.data.id;
-		if (props.received && newId) {
-			let data = {...props.data};
-			this.setState({
-				id: data.id,
-				discount: data.discount,
-				name: data.name,
-				quantity: data.quantity,
-				price: {...data.price},
-				showModal: true
-			});
+		if (props.received && this.state.id !== props.data.id) {
+			this.setState( setEqualState(props.data) );
 		}
 	}
-	inputChange(e) {
-		let name = e.target.name;
-		let value = e.target.value;
-		let curError = {...this.state.error};
-		if (name === 'name') {
-			curError.name = value.length < 3;
-			this.setState({ error: curError, name: value, setDisabledSave: true });
-		} else if (name === 'amount') {
-			let intCheck = isNaN(value) || value.length === 0;
-			curError.quantity = intCheck;
-			let curQuantity = Boolean(intCheck) ? this.state.quantity : { new: parseInt(value), old: parseInt(value) };
-			this.setState({ error: curError, quantity: curQuantity, setDisabledSave: true });
-		} else if (name === 'price') {
-			let priceCheck = isNaN(value.replace(',', '.')) || value.length === 0;
-			curError.price = priceCheck;
-			let curPrice = Boolean(priceCheck) ? this.state.price : { new: value, old: value };
-			this.setState({ error: curError, price: curPrice, setDisabledSave: true });
-		}
-	};
-	modalClose() {
-		this.props.close();
-	};
+
+	inputChange = (e) => this.setState(changeInput(e));
+
+	modalClose = () => this.props.close();
+
 	save() {
 		let newAttr = this.props.data.attribute.new;
 		let oldAttr = this.props.data.attribute.old;
-		let data = {
-			db: 'both',
-			id: this.state.id,
-			name: this.state.name,
-			quantity: this.state.quantity.old,
-			token: this.props.token
-		};
+		let quantity = this.state.quantity.old;
+		let data = { db: 'both', id: this.state.id, name: this.state.name, quantity, token: this.props.token };
 		if (!this.state.discount.new && !this.state.discount.old) {
 			data.price = this.state.price.old;
 		}
@@ -103,9 +75,9 @@ export default class BasicEdition extends React.Component {
 			})
 			.catch((err) => this.setMessage('error', Config.message.error));
 	}
-	setSave() {
-		this.setState({ disabled: true, disabledSave: true, doNotUpdateProps: false, save: true });
-	}
+
+	setSave = () => this.setState({ disabled: true, disabledSave: true, doNotUpdateProps: false, save: true });
+
 	setDisabledSave() {
 		let disabled = false;
 		this.state.errorFields.forEach((el) => {
@@ -126,24 +98,15 @@ export default class BasicEdition extends React.Component {
 				store.dispatch(product.clearBasic());
 				this.modalClose();
 			} else {
-				this.setState({
-					disabled: false,
-					disabledSave: false,
-					message: undefined,
-					messageType: undefined,
-					setTimeout: false
-				});
+				let data = setTimeoutData();
+				console.log(data);
+				this.setState( setTimeoutData() );
 			}
 		}, Config.timer);
 	}
 
 	render() {
-		const centered = {
-			display: 'block',
-			margin: 'auto',
-			border: '1px solid #C8C8C8',
-			borderRadius: '10px'
-		};
+		const centered = { display: 'block', margin: 'auto', border: '1px solid #C8C8C8', borderRadius: '10px' };
 		const checkWarning = (field, warning) => {
 			return this.state.error[field] ? this.state[warning] : null;
 		};

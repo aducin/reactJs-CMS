@@ -38,22 +38,24 @@ export default class AccountContainer extends React.Component {
 		this.model = new AccountModel();
 		this.state = {...State};
 		this.xml = new Xml(this.model, this.props.mainModel);
+		this.model.displayModalMessage.subscribe((bool) => this.handleDisplayMessage(bool));
 		this.model.xml.subscribe(path => this.setState({ link: path }));
 	}
 
-	componentDidMount() {
-		this.model.displayModalMessage.subscribe((bool) => this.handleDisplayMessage(bool));
-	}
-	componentWillUpdate(nextProps, nextState) {
-		if (!nextState.ajaxSent && nextProps.token ) {
+	static getDerivedStateFromProps(nextProps, previousState) {
+		if (!previousState.ajaxSent && nextProps.token ) {
 			store.dispatch(account.setLoading());
 			store.dispatch(account.setAction('getData', {params: {}, token: nextProps.token}));
-			this.setState({ ajaxSent: true });
-		} else if (nextProps.account.error) {
-			this.props.mainModel.setMessage('warning', err.message);
+			return {ajaxSent: true};
+		}
+		return null;
+	}
+	componentDidUpdate() {
+		if (this.props.account.error) {
 			store.dispatch(account.clearError());
-		} else if (nextState.errorHandler) {
-			this.modalErrorHandler(nextState);
+			this.props.mainModel.setMessage('warning', err.message);
+		} else if (this.state.errorHandler) {
+			this.modalErrorHandler(this.state);
 		}
 	}
 	shouldComponentUpdate(nextProps, nextState) {
@@ -68,9 +70,9 @@ export default class AccountContainer extends React.Component {
 		}
 		this.setState({ modal: false, modalDisable: false, modalMessage: { text: null, type: null } });
 	}
-	createXml() {
-		this.xml.create(this.state.selected, this.props.token);
-	}
+
+	createXml =() => this.xml.create(this.state.selected, this.props.token);
+
 	dateChange(field, data) {
 		let obj = changeDate(field, data, this.state.modalObj);
 		obj.saveDisabled = disableHandler(this.state, this.state.modalObjError);
@@ -86,9 +88,9 @@ export default class AccountContainer extends React.Component {
 		}
 		this.setState({ display: bool });
 	}
-	modalChange(e) {
-		this.setState({ errorHandler: true, modalObj: handleFieldChange(e, this.state.modalObj) });
-	}
+
+	modalChange = (e) => this.setState({ errorHandler: true, modalObj: handleFieldChange(e, this.state.modalObj) });
+
 	modalErrorHandler(state) {
 		let error = errorHandler(state.modalObj);
 		let modalObj = {...state.modalObj, saveDisabled: disableHandler(state, error)};

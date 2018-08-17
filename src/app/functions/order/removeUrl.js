@@ -8,6 +8,11 @@ export const removeUrl = (state, DefaultHeader) => {
   curState.disable = false;
   curState.header = DefaultHeader;
   curState.id = undefined;
+  curState.params = {
+    id: undefined,
+    db: undefined,
+    action: undefined
+  };
   curState.shipmentNumber = false;
   return curState;
 };

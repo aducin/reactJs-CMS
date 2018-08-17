@@ -1,8 +1,8 @@
-export const setModified = (currentModified) => {
+export const setModified = (currentModified, currentModifiedSearch) => {
   let modified, modifiedSearch;
   if(!currentModified) {
     modified = true;
-    modifiedSearch = true;
+    modifiedSearch = currentModifiedSearch;
   } else {
     modified = currentModified;
     modifiedSearch = false;

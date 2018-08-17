@@ -32,6 +32,11 @@ export const State = {
   },
   inProgress: false,
   panel: null,
+  params: {
+    id: undefined,
+    db: undefined,
+    action: undefined
+  },
   shipmentNumber: false,
   urlCheck: false
 };

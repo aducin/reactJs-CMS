@@ -14,9 +14,9 @@ import OrderModel from '../model/orderModel.js';
 import Email from '../classes/email';
 import CustomerModel from '../model/customerModel.js';
 import { checkDisabled } from '../functions/order/checkDisabled';
-import { checkIfUrlChanged } from '../functions/order/checkIfUrlChanged';
 import { removeUrl } from '../functions/order/removeUrl';
 import { setContainer } from '../functions/jsx/order.jsx';
+import { setParams } from '../functions/order/setParams';
 import { setUrl } from '../functions/order/setUrl';
 import { Header as DefaultHeader, State } from '../helper/orderState';
 
@@ -31,36 +31,35 @@ export default class OrderContainer extends React.Component {
 		this.email = new Email(this.props.mainModel);
 	}
 
-	componentDidUpdate() {
-		if (this.props.order.error) {
-			this.props.mainModel.setMessage('warning', Config.error);
-			store.dispatch(order.clearError());
+	static getDerivedStateFromProps(nextProps, previousState) {
+		let action = setParams(nextProps, previousState);
+		if (action.update) {
+			if (action.params.id && action.params.db) {
+				return { disable: true, params: action.params, urlCheck: true };
+			} else {
+				return removeUrl(previousState, DefaultHeader);
+			}
 		}
-	}
-	componentWillUpdate(nextProps, nextState) {
-		let params = nextProps.params;
-		if (nextState.urlCheck) {
-			this.checkUrl();
-			this.setState({urlCheck: false});
-		} else if (this.state.checkDisabled) {
-			this.checkDisabled();
-			this.setState({checkDisabled: false});
-		} else if (nextState.clear) {
-			store.dispatch(order.clearData());
-			this.setState({clear: false});
-		} else if (nextProps.order.customerId && params.db && params.id) {
+		if (nextProps.order.cleared && previousState.clear) {
+			return { clear: false };
+		} else if (nextProps.order.customerId && nextProps.params.db && nextProps.params.id) {
+			let params = nextProps.params;
 			let data = { db: params.db, id: nextProps.order.customerId, orderId: params.id, token: nextProps.token };
 			store.dispatch(order.deleteCustomerId());
 			store.dispatch(order.setAction('getCustomer', data));
-		} else {
-			let removedDb = params.db === undefined && this.props.params.db !== undefined;
-			let removedId = params.id === undefined && this.props.params.id !== undefined;
-			if (removedDb && removedId) {
-				this.removeDb();
-			}
-			if (checkIfUrlChanged(params, this.props.params, nextProps.order, this.state.inProgress)) {
-				this.setUrlCheck();
-			}
+		}
+		return null;
+	}
+	componentDidUpdate() {
+		if (this.state.urlCheck) {
+			this.checkUrl();
+		} else if (this.state.checkDisabled) {
+			this.checkDisabled();
+		} else if (this.state.clear) {
+			store.dispatch(order.clearData());
+		} else if (this.props.order.error) {
+			this.props.mainModel.setMessage('warning', Config.error);
+			store.dispatch(order.clearError());
 		}
 	}
 	shouldComponentUpdate(nextProps, nextState) {
@@ -88,9 +87,8 @@ export default class OrderContainer extends React.Component {
 				store.dispatch(order.setAction('setVoucher', { db, id, token: this.props.token }));
 			}
 		}
+		this.setState({urlCheck: false});
 	}
-
-	removeDb = () => this.setState(removeUrl(this.state, DefaultHeader));
 
 	searchOrder = (data) => window.location.href = setUrl(data);
 
@@ -109,8 +107,6 @@ export default class OrderContainer extends React.Component {
 		this.setState({ error: data });
 	}
 	setShipmentNumber = (e) => this.setState({ curShipment: e.target.value });
-
-	setUrlCheck = () => this.setState({ disable: true, urlCheck: true });
 
 	shipmentNumberHandler = () => this.setState({ shipmentNumber: !this.state.shipmentNumber });
 

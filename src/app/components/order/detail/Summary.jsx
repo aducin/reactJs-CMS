@@ -8,7 +8,6 @@ const summary = (props) => {
   let message = Config.message;
   if (props.name === 'discount') {
     let data = props.data;
-    console.log(data);
     let bottomDetails = (
       <div class="container marginTop10px">
         <div class="col-xs-12 col-lg-3 pull-left"></div>

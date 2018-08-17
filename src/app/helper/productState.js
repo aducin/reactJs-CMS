@@ -89,10 +89,11 @@ export const State = {
   printingSearch: false,
   restoreList: false,
   saveData: {},
-  componentSearched: false,
+  //componentSearched: false,
   searching: false,
   simpleSearched: false,
   success: false,
   toDisplay: undefined,
+  token: null,
   warning: false
 };

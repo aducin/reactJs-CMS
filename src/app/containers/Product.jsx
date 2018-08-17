@@ -23,6 +23,7 @@ import { setContent } from '../functions/jsx/container.jsx';
 import { checkUrl } from '../functions/product/checkUrl';
 import { clearStorage } from '../functions/product/clearStorage';
 import { getStorage } from '../functions/product/getStorage';
+import { setDisabled } from '../functions/product/setDisabled';
 import { setModified, setModifiedData } from '../functions/product/setModified';
 import { setStorage, setStorageSimple } from '../functions/product/setStorage';
 import { stateAfterUrlCheck } from '../functions/stateAfterUrlCheck';
@@ -49,50 +50,47 @@ export default class ProductContainer extends React.Component {
 		this.subscription = this.model.newestOrdersInterval.subscribe(() => this.checkNewestOrders());
 	}
 
-	componentDidMount() {
-		this.checkComponent();
-	}
-	componentDidUpdate() {
-		if (this.state.action) {
+	componentDidUpdate(props, state, snapshot) {
+		if (this.props.token && !this.model.token) {
+			this.model.setToken(this.props.token);
+			this.lists.getLists();
+			if (!this.props.params.id) {
+				this.clear();
+			}
+		} else if (this.state.action) {
 			this[this.state.action]();
 		}
 	}
-	componentWillUnmount() { this.subscription.unsubscribe() }
-	componentWillUpdate(nextProps, nextState) {
-		this.setDisabled(nextProps, nextState);
-		if (!this.props.token && nextProps.token) {
-			this.model.setToken(nextProps.token);
-		}
-		if (!this.state.componentSearched && nextState.componentSearched && !nextProps.params.id) {
-			this.clear();
+	/*
+	getSnapshotBeforeUpdate(prevProps, prevState) {
+		return { params: prevProps.params, token: prevProps.token };
+	}
+	*/
+	static getDerivedStateFromProps(nextProps, previousState) {
+		if (nextProps.token && !previousState.token) {
+			return { token: nextProps.token };
 		} else if (nextProps.product.error) {
-			this.props.mainModel.setMessage('warning', Config.error);
+			nextProps.mainModel.setMessage('warning', Config.error);
 			store.dispatch(product.clearError());
-			this.setState({ disable: false });
+			return { disable: false };
 		} else {
-			this.checkUrl(nextProps, nextState);
-			if (nextState.action) {
-				this.setState({ action: null });
+			let act = checkUrl(nextProps, previousState);
+			if (act.modify) {
+				if (act.dispatch) {
+					store.dispatch(product[act.dispatch]());
+				}
+				return stateAfterUrlCheck(previousState, act);
 			}
 		}
+		return setDisabled(nextProps, previousState);
+	}
+	componentWillUnmount() {
+		this.subscription.unsubscribe();
 	}
 	shouldComponentUpdate(nextProps, nextState) {
 		return (nextProps.approved && nextProps.token);
 	}
 
-	checkComponent() {
-		this.lists.getLists();
-		this.setState({ componentSearched: true });
-	}
-	checkUrl(nextProps, nextState) {
-		let act = checkUrl(nextProps, nextState);
-		if (act.modify) {
-			if (act.dispatch) {
-				store.dispatch(product[act.dispatch]());
-			}
-			this.setState( stateAfterUrlCheck(this.state, act) );
-		}
-	}
 	checkNewestOrders() {
 		store.dispatch(product.setOrdersSearch());
 		store.dispatch(product.setAction('setLastOrders', setUrl('pathOrder', 'last', this.props.token)));
@@ -109,8 +107,8 @@ export default class ProductContainer extends React.Component {
 			}
 			this.checkNewestOrders();
 		}
-		let mods = setModified(this.state.modified);
-		this.setState({ header: DefaultHeader, modified: mods[0], modifiedSearch: mods[1], nameSearch: false});
+		let mods = setModified(this.state.modified, this.state.modifiedSearch);
+		this.setState({action: null, header: DefaultHeader, modified: mods[0], modifiedSearch: mods[1], nameSearch: false});
 	}
 
 	clearEdition = () => this.setState({ action: 'clearUrl', restoreList: true });
@@ -121,12 +119,15 @@ export default class ProductContainer extends React.Component {
 
 	modsAfter = () => this.setState({ disabledEdition: false, modifiedSearch: false });
 
-	restoreList = () => this.searchName( getStorage() );
+	restoreList() {
+		this.searchName( getStorage() )
+		this.setState({ action: null });
+	}
 
 	searchEdition() {
 		store.dispatch(product.prepareResult());
 		store.dispatch(product.setAction('getProductById', {basic: false, id: this.state.editionSearched}));
-		this.setState({ disable: true });
+		this.setState({ action: null, disable: true });
 	}
 	searchName(data) {
 		store.dispatch(product.prepareResult());
@@ -137,10 +138,7 @@ export default class ProductContainer extends React.Component {
 	searchHistory() {
 		store.dispatch(product.prepareResult());
 		store.dispatch(product.setAction('getHistory', {basic: false, id: this.state.historySearched}));
-	}
-	setDisabled(props, state) {
-		let disabled = !state.constant || (props.params.action !== undefined && props.params.id !== undefined);
-		if (disabled !== state.disable) this.setState({ disable: disabled });
+		this.setState({ action: null, disable: true });
 	}
 
 	setError = (error) => this.props.mainModel.setMessage('warning', error);
@@ -170,22 +168,19 @@ export default class ProductContainer extends React.Component {
 		const state = this.state;
 		const token = this.props.token;
 		if (this.props.approved) {
-			header = (
-				<Header
-					active="products"
-					buttonHandler={this.props.logoutHandler.bind(this)}
-					disable={state.disable}
-					linkDisable={state.modifiedSearch || state.printingSearch}
-				/>
-			);
+			let links = state.modifiedSearch || state.printingSearch;
+			let handler = this.props.logoutHandler;
+			header = <Header active="products" buttonHandler={handler.bind(this)} disable={state.disable} linkDisable={links} />;
 			let messageStyle = this.props.success ? Config.alertSuccess : Config.alertError;
 			message = <Message message={this.props.toDisplay} messageStyle={messageStyle} />;
 		}
-		if (token && !this.props.params.action && !this.props.params.id && !this.state.nameSearch) {
+		if (!this.props.params.action && !this.props.params.id && !this.state.nameSearch) {
 			let list = product.modifiedList;
 			modified = <Modified after={() => this.modsAfter() } list={list} search={state.modifiedSearch} />;
-			lastOrders = <LastOrders data={product.lastOrders} search={product.ordersSearch} />;
-			print = <Printings data={product.printings} handle={this.setPrint.bind(this)} />;
+			if (this.model.token) {
+				lastOrders = <LastOrders data={product.lastOrders} search={product.ordersSearch} />;
+				print = <Printings data={product.printings} handle={this.setPrint.bind(this)} />;
+			}
 		} else if (this.state.editionSearched && !this.state.historySearched) {
 			let productData = { dataFull: product.fullDataFirst, empty: product.empty, modified: product.modifiedList };
 			edition = (
