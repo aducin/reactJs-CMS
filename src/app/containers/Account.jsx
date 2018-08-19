@@ -101,8 +101,7 @@ export default class AccountContainer extends React.Component {
 		this.setState({ modalDisable: true });
 	}
 	openModal(action) {
-		let modalObj = setModalData(action, this.props.account.list, this.state.selectedRow);
-		this.setState({ modal: action, modalObj });
+		this.setState({ modal: action, modalObj: setModalData(action, this.props.account.list, this.state.selectedRow) });
 	}
 	selectChange(e) {
 		let selected = selectHandle(e, this.state.selected);
@@ -111,8 +110,7 @@ export default class AccountContainer extends React.Component {
 		this.setState({ selected: selected });
 	}
 	selectRow(id) {
-		let curSelected = rowHandle(id, this.props.account.list, this.props.mainModel, this.state.selectedRow);
-		this.setState({ selectedRow: curSelected });
+		this.setState({ selectedRow: rowHandle(id, this.props.account.list, this.props.mainModel, this.state.selectedRow) });
 	}
 	setAccount() {
 		let data = accountPrepare(this.state, this.state.token);

@@ -918,11 +918,17 @@ label {
 .paddingTop8 {
   padding-top: 8px;
 }
+.paddingTop10 {
+  padding-top: $pixels10;
+}
 .paddingTop15 {
   padding-top: $pixels15;
 }
 .paddingTop20px {
   padding-top: $pixels20;
+}
+.paddingTop35px {
+  padding-top: 35px;
 }
 .selected {
   @include font-weight(bold);

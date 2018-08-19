@@ -21,7 +21,7 @@ const accountHeader = ( props ) => {
           <div class="col-xs-12 col-md-8 pull-left">
             <h4>{ message.account.filter }</h4>
             <Select
-              curClass="col-xs-12 marginTop10px"
+              curClass="marginTop10px paddingTop10"
               setDisabled={props.disable}
               list={ props.types }
               name="type"
@@ -30,7 +30,7 @@ const accountHeader = ( props ) => {
               value={ props.selected.type }
             />
             <Select
-              curClass="col-xs-12 marginTop10px"
+              curClass="marginTop10px paddingTop35px"
               setDisabled={props.disable}
               list={ props.states }
               name="state"
@@ -40,7 +40,7 @@ const accountHeader = ( props ) => {
             />
             <div class="col-xs-12 marginTop10px"></div>
             <Label name={ message.account.dateFrom } />
-            <div class="col-xs-12 col-lg-6">
+            <div class="col-xs-12 col-md-6">
               <DatePicker
                 dateFormat="YYYY.MM.DD"
                 selected={props.selected.dateFrom}
@@ -52,7 +52,7 @@ const accountHeader = ( props ) => {
             </div>
             <div class="col-xs-12 marginTop10px"></div>
             <Label name={ message.account.dateTo } />
-            <div class="col-xs-12 col-lg-6">
+            <div class="col-xs-12 col-md-6">
               <DatePicker
                 dateFormat="YYYY.MM.DD"
                 selected={props.selected.dateTo}

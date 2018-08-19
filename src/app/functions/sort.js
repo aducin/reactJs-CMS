@@ -4,8 +4,8 @@ export const sortList = (list, field) => {
       return -1;
     } else {
       if (typeof(a[field]) === 'string') {
-        var nameA = a[field].toLowerCase().localeCompare(b[field].toLowerCase(), "pl-PL");
-        var nameB = b[field].toLowerCase().localeCompare(a[field].toLowerCase(), "pl-PL");
+        let nameA = a[field].toLowerCase().localeCompare(b[field].toLowerCase(), "pl-PL");
+        let nameB = b[field].toLowerCase().localeCompare(a[field].toLowerCase(), "pl-PL");
         if (nameA < nameB)
           return -1
         if (nameA > nameB)
