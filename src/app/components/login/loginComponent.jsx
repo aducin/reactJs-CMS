@@ -1,34 +1,29 @@
 import React from 'react';
-
-import './login.css';
+import { reactLocalStorage } from 'reactjs-localstorage';
 
 import Config from '../../Config';
-import { reactLocalStorage } from 'reactjs-localstorage';
+import './login.css';
+
+import Checking from './Checking.jsx';
 import Cookies from 'universal-cookie';
+import Login from '../../helper/login';
 import LoginModel from '../../model/loginModel';
 import Footer from '../dumb/Footer.jsx';
+import Message from './Message.jsx';
+import { setLoginState } from '../../functions/login/setLoginState';
+import { setMessageStyle } from '../../functions/login/setMessageStyle';
 
 const cookies = new Cookies();
 
 export default class LoginComponent extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			checkData: false,
-			checking: false,
-			curToken: null,
-			defaultLocation: "#/products",
-			disabled: true,
-			failure: false,
-			login: '',
-			message: null,
-			password: '',
-			redirect: false,
-			remember: false,
-			token: null
-		}
+		this.state = Login;
 	}
 
+	componentDidMount() {
+		this.getToken();
+	}
 	componentDidUpdate() {
 		if (this.state.checking && this.state.curToken) {
 			this.checkToken(this.state.curToken);
@@ -36,22 +31,15 @@ export default class LoginComponent extends React.Component {
 			this.checkData();
 		} else if (this.state.redirect) {
 			this.redirectToDefault();
-		}
-	}
-	componentWillUpdate(nextProps, nextState) {
-		if (nextState.checkData) {
-			this.setState({ checkData: false });
-		} else if (nextState.failure) {
+		} else if (this.state.failure) {
 			this.setTimeout();
-		} else if (!nextState.checking) {
-			this.getToken();
 		}
 	}
 
 	checkData() {
     	let login = this.state.login !== undefined && this.state.login.length > 3;
     	let password = this.state.password !== undefined && this.state.password.length > 3;
-    	this.setState({ disabled: !(login && password) });
+    	this.setState({ checkData: false, disabled: !(login && password) });
 	};
 	checkToken(token) {
 		LoginModel.checkToken(token)
@@ -71,50 +59,36 @@ export default class LoginComponent extends React.Component {
 			this.setState({ checking: true, curToken: token });
 		}
 	}
-	handleCheckox(e) {
-		this.setState({ remember: e.target.checked });
-	};
-	handleError(message) {
-		this.setState({ failure: true, success: false, message: message });
-	};
+
+	handleCheckox = (e) => this.setState({ remember: e.target.checked });
+
+	handleError = (message) => this.setState({ failure: true, success: false, message: message });
+
 	login() {
-		var userLogin = this.state.login;
-		var password = this.state.password;
-		if (userLogin.length > 3 && password.length > 3) {
-			let params = { email: userLogin, password: password, remember: this.state.remember };
+		if (this.state.login.length > 3 && this.state.password.length > 3) {
+			let params = { email: this.state.login, password: this.state.password, remember: this.state.remember };
 			LoginModel.login(params, this.state.config)
     		.then((response) => {
     			if (response.data.success) {
-						this.setState({
-							disabled: true,
-							failure: false,
-							success: true,
-							message: response.data.reason,
-							redirect: true,
-							token: response.data.token
-						});
+						this.setState( setLoginState(response.data.reason, response.data.token));
     			} else {
     				throw new Error(response.data.reason);
     			}
     		})
-			.catch((err) =>{
-				this.handleError(err.message);
-			});
+			.catch(err => this.handleError(err.message));
 		}
 	};
 	redirectToDefault() {
-		var token = this.state.token;
 		if (this.state.remember) {
-			var now = new Date();
+			let now = new Date();
 			now.setDate(now.getDate()+7);
-			cookies.set('ad9bis', token, { path: Config.url.serverPath, expires: now });
+			cookies.set('ad9bis', this.state.token, { path: Config.url.serverPath, expires: now });
 		}
-		reactLocalStorage.set('token', token);
+		reactLocalStorage.set('token', this.state.token);
 		window.location.href = this.state.defaultLocation;
 	};
-	setData(e) {
-		this.setState({ checkData: true, [e.target.name]: e.target.value });
-	};
+	setData = (e) => this.setState({ checkData: true, [e.target.name]: e.target.value });
+
 	setTimeout() {
 		setTimeout(function() {
 			this.setState({ failure: false, message: null, success: false });
@@ -122,28 +96,11 @@ export default class LoginComponent extends React.Component {
 	}
 
 	render() {
-		var message;
-		if (this.state.success) {
-			var messageStyle = "alert alert-success";
-		} else if (this.state.failure) {
-			var messageStyle = "alert alert-danger";
-		}
-		if (this.state.message) {
-			message = <div class={messageStyle}>
-					<p>{this.state.message}</p>
-				</div>
-		}
 		if (this.state.checking) {
-			return (
-				<div>
-					<div class="col-sm-3 pull-left">
-					</div>
-					<div class="col-sm-6 pull-left">
-						<h2>{Config.message.authorisation}</h2>
-					</div>
-				</div>
-			);
+			return <Checking />;
 		} else {
+			let curMessage = this.state.message;
+			let message = curMessage ? <Message style={setMessageStyle(this.state)} message={curMessage} /> : null;
 			return (
 				<div class="backgroundBlue">
 					<div class="loginContainer">

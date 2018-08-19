@@ -55,7 +55,7 @@ export default class AccountContainer extends React.Component {
 			store.dispatch(account.clearError());
 			this.props.mainModel.setMessage('warning', err.message);
 		} else if (this.state.errorHandler) {
-			this.modalErrorHandler(this.state);
+			this.modalErrorHandler();
 		}
 	}
 	shouldComponentUpdate(nextProps, nextState) {
@@ -91,9 +91,9 @@ export default class AccountContainer extends React.Component {
 
 	modalChange = (e) => this.setState({ errorHandler: true, modalObj: handleFieldChange(e, this.state.modalObj) });
 
-	modalErrorHandler(state) {
-		let error = errorHandler(state.modalObj);
-		let modalObj = {...state.modalObj, saveDisabled: disableHandler(state, error)};
+	modalErrorHandler() {
+		let error = errorHandler(this.state.modalObj);
+		let modalObj = {...this.state.modalObj, saveDisabled: disableHandler(this.state, error)};
 		this.setState({ errorHandler: null, modalObj: modalObj, modalObjError: error });
 	}
 	modalSave() {
@@ -121,9 +121,7 @@ export default class AccountContainer extends React.Component {
 			.then((response) => {
 				let type = response.data.success ? 'success' : 'error';
 				this.displayMessage(response.data.reason, type);
-			}).catch((err) =>{
-				this.displayMessage(Config.message.error, 'error');
-			});
+			}).catch((err) => this.displayMessage(Config.message.error, 'error'));
 	}
 	setDate(name, value) {
 		let selected = {...this.state.selected};
@@ -166,15 +164,11 @@ export default class AccountContainer extends React.Component {
 			if (this.props.loading) {
 				busy = <Busy title={Config.message.loading} />;
 			}
+			let empty = !Boolean(this.props.account.list);
 			accountsDetails = (
 				<AccountDetail
-					ascending={state.ascending}
-					data={this.props.account}
-					empty={!Boolean(this.props.account.list)}
-					selectedRow={state.selectedRow}
-					selectRow={this.selectRow.bind(this)}
-					sortTable={this.sortTable.bind(this)}
-					sortBy={state.sortBy}
+					ascending={state.ascending} data={this.props.account} empty={empty} selectedRow={state.selectedRow}
+					selectRow={this.selectRow.bind(this)} sortTable={this.sortTable.bind(this)} sortBy={state.sortBy}
 				/>
 			);
 			if (this.state.modal) {

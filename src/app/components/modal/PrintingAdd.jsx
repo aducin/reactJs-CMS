@@ -6,13 +6,7 @@ import Config from '../../Config';
 import Input from '../dumb/Input.jsx';
 import Label from '../dumb/Label.jsx';
 
-const floatRight = {
-  float: 'right'
-};
-
-const marginTop = {
-  marginTop: '-3px'
-  };
+const marginTop = { marginTop: '-3px' };
 
 const printingAdd = ( props ) => {
   let bodyHeight = { height: '200px'};

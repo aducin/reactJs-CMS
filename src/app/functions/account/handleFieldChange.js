@@ -7,4 +7,4 @@ export const handleFieldChange = (e, modal) => {
   let obj = {...modal};
   obj[name] = value;
   return obj;
-}
+};

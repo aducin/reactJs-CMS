@@ -5,14 +5,16 @@ import { Modal } from 'react-bootstrap';
 
 import Config from '../../Config';
 import { createReducedObj } from '../../functions/createReducedObj';
+import Footer from '../account/modal/Footer.jsx';
 import Input from '../dumb/Input.jsx';
+import InputRow from '../account/modal/InputRow.jsx';
 import Label from '../dumb/Label.jsx';
 import Select from '../dumb/Select.jsx';
 
 const accountModal = ( props ) => {
   const bodyHeight = { height: '680px'};
-  const marginLeft = { marginLeft: '-15px'};
   const message = Config.message;
+  const disable = props.disable;
   let title = props.modalMessage.text ? props.modalMessage.text : props.title;
   let titleClass;
   if (props.modalMessage.type) {
@@ -22,6 +24,28 @@ const accountModal = ( props ) => {
     obj[key] = props.error[key] ? 'colorWarning' : '';
     return obj;
   }, {});
+  let action = props.handleChange;
+  let data = props.data;
+  let accessories = (
+    <InputRow type="accessories" quantity="true" action={action} data={data} disable={disable} labelError={labelError} />
+  );
+  let amount = <InputRow type="amount" action={action} data={data} disable={disable} labelError={labelError} />;
+  let book = <InputRow type="book" quantity="true" action={action} data={data} disable={disable} labelError={labelError} />;
+  let cars = <InputRow type="car" quantity="true" action={action} data={data} disable={disable} labelError={labelError} />;
+  let coaches = (
+    <InputRow type="coach" quantity="true" action={action} data={data} disable={disable} labelError={labelError} />
+  );
+  let elements = (
+    <InputRow type="element" quantity="true" action={action} data={data} disable={disable} labelError={labelError} />
+  );
+  let footer = <Footer close={props.close} disabled={props.data.saveDisabled} save={props.saveModal} />;
+  let locs = <InputRow type="locs" quantity="true" action={action} data={data} disable={disable} labelError={labelError} />;
+  let receipt = <InputRow type="receipt" action={action} data={data} disable={disable} labelError={labelError} />;
+  let recipient = <InputRow type="recipient" action={action} data={data} disable={disable} labelError={labelError} />;
+  let remarks = (
+    <InputRow type="remarks" action={action} data={data} disable={disable} heightRow="4" inputHeight="8" labelError={labelError} />
+  );
+  let shipment = <InputRow type="address" action={action} data={data} disable={disable} labelError={labelError} />;
   return(
     <Modal show={ props.show !== false } onHide={ () => props.close() }>
       <Modal.Header closeButton>
@@ -29,47 +53,17 @@ const accountModal = ( props ) => {
       </Modal.Header>
       <Modal.Body style={bodyHeight}>
         <Select
-          curClass="col-xs-12"
-          setDisabled={ props.disable }
-          list={ props.types }
-          name="type"
-          selectChange={ props.handleChange.bind(this) }
-          title={ message.account.type }
-          value={ props.data.type }
+          curClass="col-xs-12" list={ props.types } name="type" selectChange={ action.bind(this) }
+          setDisabled={ props.disable } title={ message.account.type } value={ props.data.type }
         />
         <Select
-          curClass="col-xs-12 marginTop10px"
-          setDisabled={ props.disable }
-          list={ props.states }
-          name="closed"
-          selectChange={ props.handleChange.bind(this) }
-          title={ message.account.state }
-          value={ props.data.closed }
+          curClass="col-xs-12 marginTop10px" list={ props.states } name="closed" selectChange={ action.bind(this) }
+          setDisabled={ props.disable } title={ message.account.state } value={ props.data.closed }
         />
+        {recipient}
+        {shipment}
         <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} heightRow="4" name={ message.account.order } />
-          <Input
-            heightRow="8"
-            placeholder={ message.labels.order }
-            changeHandler={ props.handleChange.bind(this) }
-            name="recipient"
-            disable={ props.disable }
-            value={ props.data.recipient }
-          />
-        </div>
-        <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} heightRow="4" name={ message.account.shipment } />
-          <Input
-            heightRow="8"
-            placeholder={ message.labels.shipment }
-            changeHandler={ props.handleChange.bind(this) }
-            name="address"
-            disable={ props.disable }
-            value={ props.data.address }
-          />
-        </div>
-        <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} heightRow="8" name={ message.account.cashDate } />
+          <Label heightRow="8" name={ message.account.cashDate } />
           <div class="col-xs-12 col-md-4">
             <DatePicker
               dateFormat="DD.MM.YYYY"
@@ -84,7 +78,7 @@ const accountModal = ( props ) => {
           </div>
         </div>
         <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} heightRow="8" name={ message.account.receiptDate } />
+          <Label heightRow="8" name={ message.account.receiptDate } />
           <div class="col-xs-12 col-md-4">
             <DatePicker
               dateFormat="DD.MM.YYYY"
@@ -98,115 +92,18 @@ const accountModal = ( props ) => {
             />
           </div>
         </div>
-        <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} labelClass={labelError.amount} heightRow="8" name={ message.account.amount } />
-          <Input
-            heightRow="4"
-            placeholder={ message.labels.amount }
-            changeHandler={ props.handleChange.bind(this) }
-            name="amount"
-            disable={ props.disable }
-            value={ props.data.amount }
-          />
-        </div>
-        <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} labelClass={labelError.receipt} heightRow="8" name={ message.account.receipt } />
-          <Input
-            heightRow="4"
-            placeholder={ message.labels.receipt }
-            changeHandler={ props.handleChange.bind(this) }
-            name="receipt"
-            disable={ props.disable }
-            value={ props.data.receipt }
-          />
-        </div>
-        <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} labelClass={labelError.locs} heightRow="8" name={ message.account.locs } />
-          <Input
-            heightRow="4"
-            placeholder={ message.labels.quantity.placeholder }
-            changeHandler={ props.handleChange.bind(this) }
-            name="locs"
-            disable={ props.disable }
-            value={ props.data.locs }
-          />
-        </div>
-        <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} labelClass={labelError.coach} heightRow="8" name={ message.account.coaches } />
-          <Input
-            heightRow="4"
-            placeholder={ message.labels.quantity.placeholder }
-            changeHandler={ props.handleChange.bind(this) }
-            name="coach"
-            disable={ props.disable }
-            value={ props.data.coach }
-          />
-        </div>
-        <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} labelClass={labelError.element} heightRow="8" name={ message.account.elements } />
-          <Input
-            heightRow="4"
-            placeholder={ message.labels.quantity.placeholder }
-            changeHandler={ props.handleChange.bind(this) }
-            name="element"
-            disable={ props.disable }
-            value={ props.data.element }
-          />
-        </div>
-        <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} labelClass={labelError.accessories} heightRow="8" name={ message.account.accessories } />
-          <Input
-            heightRow="4"
-            placeholder={ message.labels.quantity.placeholder }
-            changeHandler={ props.handleChange.bind(this) }
-            name="accessories"
-            disable={ props.disable }
-            value={ props.data.accessories }
-          />
-        </div>
-        <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} labelClass={labelError.book} heightRow="8" name={ message.account.literature } />
-          <Input
-            heightRow="4"
-            placeholder={ message.labels.quantity.placeholder }
-            changeHandler={ props.handleChange.bind(this) }
-            name="book"
-            disable={ props.disable }
-            value={ props.data.book }
-          />
-        </div>
-        <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} labelClass={labelError.car} heightRow="8" name={ message.account.cars } />
-          <Input
-            heightRow="4"
-            placeholder={ message.labels.quantity.placeholder }
-            changeHandler={ props.handleChange.bind(this) }
-            name="car"
-            disable={ props.disable }
-            value={ props.data.car }
-          />
-        </div>
-        <div class="col-xs-12 marginTop10px">
-          <Label cssStyle={marginLeft} heightRow="4" name={ message.account.remarks } />
-          <Input
-            heightRow="8"
-            placeholder={ message.labels.remarks }
-            changeHandler={ props.handleChange.bind(this) }
-            name="remarks"
-            disable={ props.disable }
-            value={ props.data.remarks }
-          />
-        </div>
+        {amount}
+        {receipt}
+        {locs}
+        {coaches}
+        {elements}
+        {accessories}
+        {book}
+        {cars}
+        {remarks}
       </Modal.Body>
       <Modal.Footer>
-        <div class="col-xs-12">
-          <div class="col-xs-12 col-md-2 pull-right">
-              <input class="btn btn-warning" type="button" onClick={ () => props.close() } value={ message.close } />
-          </div>
-          <div class="col-xs-12 col-md-2 pull-right">
-            <input class="btn btn-primary" type="button" disabled={props.data.saveDisabled} onClick={ () => props.saveModal() } value={ message.actions.save } />
-          </div>
-        </div>
+        {footer}
       </Modal.Footer>
     </Modal>
   );

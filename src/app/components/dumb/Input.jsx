@@ -1,14 +1,5 @@
 import React from 'react';
-/*
-const valueChange = (e) => {
-	let curObj = {
-		inputValue: e.target.value,
-		name: e.target.name
-	};
-	console.log(curObj);
-	this.props.inputChange(curObj);
-}
-*/
+
 const input = ( props ) => {
 	let curType = "text";
   if (props.curType) {
@@ -27,9 +18,18 @@ const input = ( props ) => {
   let disable = props.disable ? props.disable : false;
 	return (
 		<div class={standard}>
-			<input class={curClass} type={curType} defaultValue={props.value} disabled={disable} name={props.name} onChange={ (e) => props.changeHandler( e ) } onKeyUp={ (e) => props.changeHandler( e ) } placeholder={props.placeholder}/>
+			<input
+        class={curClass}
+        type={curType}
+        defaultValue={props.value}
+        disabled={disable}
+        name={props.name}
+        onChange={ (e) => props.changeHandler( e ) }
+        onKeyUp={ (e) => props.changeHandler( e ) }
+        placeholder={props.placeholder}
+      />
 		</div>
 	);
-}
+};
 
 export default input;

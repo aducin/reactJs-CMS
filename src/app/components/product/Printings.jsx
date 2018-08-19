@@ -34,13 +34,6 @@ export default class Printings extends React.Component {
       this.setTimeout();
     }
   }
-  componentWillUpdate(nextProps, nextState) {
-    if (nextState.saveFile) {
-      this.setState({ saveFile: false });
-    } else if (nextState.setTimeout) {
-      this.setState({ setTimeout: false });
-    }
-  }
 
   checkPrintings() {
     this.model.getPrintings()
@@ -90,7 +83,8 @@ export default class Printings extends React.Component {
         let type = response.data.success  ? 'success' : 'warning';
         this.setMessage(type, response.data.reason);
       })
-      .catch((err) =>this.setMessage('warning', err.reason));
+      .catch((err) =>this.setMessage('warning', err.reason))
+      .finally(() => this.setState({ saveFile: false }));
   }
   setDescription = event => {
     let saveDisable = event.target.value.length < 4;
@@ -105,6 +99,7 @@ export default class Printings extends React.Component {
     setTimeout(() => {
       this.closeModal();
       this.checkPrintings();
+      this.setState({ setTimeout: false });
     }, Config.timer);
   }
 

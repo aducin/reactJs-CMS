@@ -51,9 +51,13 @@ export default class ProductContainer extends React.Component {
 	}
 
 	componentDidUpdate(props, state, snapshot) {
-		if (this.props.token && !this.model.token) {
-			this.model.setToken(this.props.token);
-			this.lists.getLists();
+		if (this.props.token && (!this.model.token || this.state.getList === 1)) {
+			if (!this.model.token) {
+				this.model.setToken(this.props.token);
+			}
+			if (this.state.getList === 1) {
+				this.lists.getLists();
+			}
 			if (!this.props.params.id) {
 				this.clear();
 			}
@@ -68,7 +72,11 @@ export default class ProductContainer extends React.Component {
 	*/
 	static getDerivedStateFromProps(nextProps, previousState) {
 		if (nextProps.token && !previousState.token) {
-			return { token: nextProps.token };
+			return {token: nextProps.token};
+		} else if (nextProps.token && previousState.getList === 0 && !previousState.constant) {
+			return { getList: 1} ;
+		} else if (previousState.getList === 1) {
+			return { getList: 2 };
 		} else if (nextProps.product.error) {
 			nextProps.mainModel.setMessage('warning', Config.error);
 			store.dispatch(product.clearError());
@@ -84,12 +92,10 @@ export default class ProductContainer extends React.Component {
 		}
 		return setDisabled(nextProps, previousState);
 	}
-	componentWillUnmount() {
-		this.subscription.unsubscribe();
-	}
-	shouldComponentUpdate(nextProps, nextState) {
-		return (nextProps.approved && nextProps.token);
-	}
+
+	componentWillUnmount = () => this.subscription.unsubscribe();
+
+	shouldComponentUpdate =(nextProps, nextState) => (nextProps.approved && nextProps.token);
 
 	checkNewestOrders() {
 		store.dispatch(product.setOrdersSearch());
@@ -194,7 +200,7 @@ export default class ProductContainer extends React.Component {
 		} else if (state.nameSearch && !state.editionSearched && !state.historySearched && !state.simpleSearched) {
 			nameList = <ProductList clearList={this.clear.bind(this)} modal={this.setSimpleId.bind(this)} product={product} />;
 		}
-		if (this.state.simpleSearched) {
+		if (state.simpleSearched) {
 			let received = product.dataReceived;
 			basic = <BasicEdition close={()=>this.close()} data={product.basicData} received={received} token={token} />;
 		}

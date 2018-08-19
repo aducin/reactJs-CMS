@@ -23,13 +23,9 @@ const LastOrders = ( props ) => {
   };
   let data = props.data || {};
   let text = Config.message;
-  const styles = {
-    padding15px: {paddingTop: '15px'}
-  };
+  const styles = { padding15px: {paddingTop: '15px'}};
   if (props.search) {
-    return (
-      <Busy title={text.modifiedSearch} />
-    );
+    return <Busy title={text.modifiedSearch} />;
   } else {
     let setTable = (current) => {
       let title = text.orders.newOrder[current];
@@ -64,11 +60,9 @@ const LastOrders = ( props ) => {
         </div>
       );
     } else {
-      return (
-        <Title title={text.noLastOrder} />
-      )
+      return <Title title={text.noLastOrder} />;
     }
   }
-}
+};
 
 export default LastOrders;

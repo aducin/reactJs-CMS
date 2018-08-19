@@ -36,23 +36,22 @@ export default class App extends React.Component {
 	}
 
 	componentDidMount() {
-		this.model.success.subscribe((value) => this.setMessage(false, true, value));
-		this.model.warning.subscribe((value) => this.setMessage(true, false, value));
+		this.model.success.subscribe( value => this.setMessage(false, true, value));
+		this.model.warning.subscribe( value => this.setMessage(true, false, value));
 		this.getToken(true);
 	}
 	componentDidUpdate() {
 		if (this.state.logout) {
 			this.setLogout();
+		} else if (this.state.removeDisplay) {
+			this.removeDisplay();
 		}
 	}
-	componentWillUpdate(nextProps, nextState) {
-		if (nextState.approved) {
-			if (nextState.curPage === 'login') {
-				this.setState({ curPage: Config.defaultPage });
-			} else if (nextState.removeDisplay) {
-				this.removeDisplay();
-			}
+	static getDerivedStateFromProps(nextProps, previousState) {
+		if (previousState.approved && previousState.curPage === 'login') {
+			return {curPage: Config.defaultPage};
 		}
+		return null;
 	}
 	shouldComponentUpdate(nextProps, nextState) {
 		if (nextState.approved || (nextProps.location.pathname === this.state.defaultPath && this.props.location.pathname !== this.state.defaultPath)) {
@@ -66,25 +65,17 @@ export default class App extends React.Component {
 	}
 
 	checkToken(token) {
-		let data = {
-			action: 'tokenCheck',
-			token: token
-		};
+		//let data = { action: 'tokenCheck', token: token };
 		this.model.checkToken(token)
     	.then((response) => {
     		if (response.data.success) {
-    			this.setState({
-    				approved: true,
-    				token: token
-    			});	
+    			this.setState({ approved: true, token: token });
     		} else {
 					this.clearToken();
     			throw new Error(response.data.reason);
     		}
     	})
-    	.catch((err) =>{
-    		this.navigateToLogin();
-    	});
+    	.catch((err) => this.navigateToLogin());
 	}
 
 	clearToken() {
@@ -114,12 +105,7 @@ export default class App extends React.Component {
 		this.clearToken();
 		reactLocalStorage.clear('category');
 		reactLocalStorage.clear('manufactorer');
-		this.setState({
-			curPage: 'login',
-			logout: true,
-			success: true,
-			toDisplay: Config.message.logout
-		});
+		this.setState({ curPage: 'login', logout: true, success: true, toDisplay: Config.message.logout });
 	};
 	navigateToLogin() {
 		this.setState({ curPage: 'login' });
@@ -130,45 +116,27 @@ export default class App extends React.Component {
 	};
 	removeDisplay() {
 		setTimeout(function() {
-			this.setState({
-				error: false,
-				toDisplay: undefined
-			});
+			this.setState({ error: false, toDisplay: undefined });
 		}.bind(this), Config.timer);
 	};
 	setLogout() {
 		setTimeout(function() {
 			window.location.href = Config.url.path + Config.url.pathSuffix;
-			this.setState({
-				approved: false,
-				logout: false,
-				success: false,
-				toDisplay: undefined
-			});
+			this.setState({ approved: false, logout: false, success: false, toDisplay: undefined });
 		}.bind(this), Config.timer);
 	};
 	setMessage = (error, success, message) => {
 		window.scrollTo(0, 0);
-		this.setState({
-			error: error,
-			removeDisplay: true,
-			success: success,
-			toDisplay: message
-		});
-	};
-	setSuccess = (message) => {
-		this.setMessage(false, true, message);
-	};
-	setWarning = (message) => {
-		this.setMessage(true, false, message);
+		this.setState({ error: error, removeDisplay: true, success: success, toDisplay: message });
 	};
 
+	setSuccess = (message) => this.setMessage(false, true, message);
+
+	setWarning = (message) => this.setMessage(true, false, message);
+
 	render () {
-		let footer, padding;
-		if (this.state.curPage && this.state.curPage !== 'login') {
-			footer = <Footer />
-			padding = 'paddingBottom2';
-		}
+		let footer = this.state.curPage && this.state.curPage !== 'login' ? <Footer /> : null;
+		let padding = this.state.curPage && this.state.curPage !== 'login' ? 'paddingBottom2' : null;
 		return (
 			<div class={padding}>
 				{React.cloneElement(this.props.children, {

@@ -78,6 +78,7 @@ export const State = {
   editionSearched: false,
   error: false,
   file: null,
+  getList: 0,
   header: Header,
   historySearched: false,
   imageDisplay: false,

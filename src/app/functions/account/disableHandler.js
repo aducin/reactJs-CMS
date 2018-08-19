@@ -12,4 +12,4 @@ export const disableHandler = (state, error) => {
     }
     return disabled;
   }
-}
+};
