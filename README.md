@@ -5,6 +5,6 @@ The project has been written in following technologies:
 
 ReactJS,
 Redux,
-JSX,
+ES6,
 Webpack,
 SCSS
