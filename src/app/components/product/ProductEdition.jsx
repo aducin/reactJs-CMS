@@ -77,7 +77,7 @@ export default class ProductEdition extends React.Component {
 	render() {
 		const message = Config.message;
 		const product = this.props.productData.dataFull;
-		let disabled = Boolean(this.props.disable);
+		let disabled = Boolean(this.props.data.disabledEdition);
 		if (product && product.id !== undefined && product.id !== 0) {
 			product.categoryList = updateCategoryList(product.categoryList);
 			let image = <Images images={product.images} display={this.state.imageDisplay} action={this.hideOrShow}/>;
@@ -123,7 +123,8 @@ export default class ProductEdition extends React.Component {
 					categories={ options } cssStyle={ Config.css.padding12 } name="checkboxOptions" title={message.actions.self}
 				/>
 			);
-			let buttons = <Buttons product={product} list={this.props.list} save={this.saveFull} back={this.props.goBack} />;
+			let nameSearch = this.props.data.nameSearch;
+			let buttons = <Buttons product={product} list={nameSearch} save={this.saveFull} back={this.props.goBack} />;
 			return setContent(product, name, descShort, description, linkRewrite, metaTitle, metaDesc, tags, quantity,
 				newPrice, oldPrice, manufactorer, active, condition, categories, image, additional, buttons);
 		} else {

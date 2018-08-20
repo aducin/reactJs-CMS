@@ -14,11 +14,11 @@ let nameInQueue = false;
 let nameValue;
 
 const ProductHeader = ( props ) => {
-	const handleIdChange = (value) => props.setHeader(IdChange(value, props.data));
-	const handleIdSearch = () => props.setHeader(IdSearch(props.data));
+	const handleIdChange = (value) => props.setHeader(IdChange(value, props.mainState.header));
+	const handleIdSearch = () => props.setHeader(IdSearch(props.mainState.header));
 	const handleNameChange = (value) => {
 		nameValue = value;
-		let data = {...props.data, origin: 'name'};
+		let data = {...props.mainState.header, origin: 'name'};
 		let proceed = false;
 		let timeout = false;
 		data.productName = value;
@@ -48,23 +48,23 @@ const ProductHeader = ( props ) => {
 		}
 	};
 	const handleSelectChange = (e) => {
-		let data = SelectChange(e, props.data);
+		let data = SelectChange(e, props.mainState.header);
 		props.setHeader(data);
 		proceedSelect(data);
 	};
 	const proceedSelect = (data = null) => {
 		if (!data) {
-			data = {...props.data, productName: nameValue};
+			data = {...props.mainState.header, productName: nameValue};
 		}
 		if (data.productName !== '' && data.productName.length > 3) {
 			let searchData = {search: data.productName, category: data.activeCategory, manufactorer: data.activeManufactorer};
 			props.searchName(searchData);
 		}
 	};
-	let data = props.data;
+	let data = props.mainState.header;
 	let productId = data.productId !== 0 ? data.productId : '';
 	let message = Config.message;
-	let warning = props.data.warning;
+	let warning = props.mainState.header.warning;
 	if (props.mainState.error) {
 		return <Title title={message.error} />;
 	} else {

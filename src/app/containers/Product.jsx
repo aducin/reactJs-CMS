@@ -176,12 +176,7 @@ export default class ProductContainer extends React.Component {
 			additional = <Additional product={product} mods={this.modsAfter} print={this.setPrint} search={search} />;
 		} else if (this.state.editionSearched && !this.state.historySearched) {
 			let productData = { dataFull: product.fullDataFirst, empty: product.empty, modified: product.modifiedList };
-			edition = (
-				<ProductEdition
-					disable={state.disabledEdition} goBack={this.clearEdition.bind(this)}
-					list={state.nameSearch} productData={productData}
-				/>
-			);
+			edition = <ProductEdition data={this.state} goBack={this.clearEdition.bind(this)} productData={productData} />;
 		} else if (state.historySearched && !state.editionSearched) {
 			history = <ProductHistory clear={this.clear.bind(this)} id={state.editionSearched} product={product} />;
 		} else if (state.nameSearch && !state.editionSearched && !state.historySearched && !state.simpleSearched) {
@@ -192,10 +187,8 @@ export default class ProductContainer extends React.Component {
 			basic = <BasicEdition close={()=>this.close()} data={product.basicData} received={received} token={token} />;
 		}
 		let productHeader = (
-			<ProductHeader
-				data={state.header} product={product} mainState={state}
-				searchName={ (data) => this.searchName(data) } setHeader={ (data) => this.setHeader(data) }
-			/>
+			<ProductHeader product={product} mainState={state}
+				searchName={ (data) => this.searchName(data) } setHeader={ (data) => this.setHeader(data) } />
 		);
 		return setContent(header, message, productHeader, basic, edition, history, nameList, additional);
 	}
