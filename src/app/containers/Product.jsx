@@ -117,22 +117,22 @@ export default class ProductContainer extends React.Component {
 
 	modsAfter = () => this.setState({ disabledEdition: false, modifiedSearch: false });
 
-	restoreList() {
+	restoreList = () => {
 		this.searchName( getStorage() );
 		this.setState({ action: null });
 	}
-	searchEdition() {
+	searchEdition = () => {
 		store.dispatch(product.prepareResult());
 		store.dispatch(product.setAction('getProductById', {basic: false, id: this.state.editionSearched}));
 		this.setState({ action: null, disable: true });
 	}
-	searchName(data) {
+	searchName = (data) => {
 		store.dispatch(product.prepareResult());
 		store.dispatch(product.setAction('getByParams', { params: data, another: this.state.nameSearchData.anotherSearch }));
 		setStorage(data);
 		this.setState({ nameSearch: true, nameSearchData: data });
 	}
-	searchHistory() {
+	searchHistory = () => {
 		store.dispatch(product.prepareResult());
 		store.dispatch(product.setAction('getHistory', {basic: false, id: this.state.historySearched}));
 		this.setState({ action: null, disable: true });
@@ -140,7 +140,7 @@ export default class ProductContainer extends React.Component {
 
 	setError = (error) => this.props.mainModel.setMessage('warning', error);
 
-	setHeader(data) {
+	setHeader = (data) => {
 		if (data.origin === 'idSearch') {
 			this.setSimpleId({ id: data.productId });
 		} else if (data.origin === 'avoidName') {
@@ -148,11 +148,11 @@ export default class ProductContainer extends React.Component {
 		}
 		this.setState({ header: data });
 	}
-	setPrint(data) {
+	setPrint = (data) => {
 		store.dispatch(product.setPrintings(data));
 		this.setState({ printingSearch: false });
 	}
-	setSimpleId(data) {
+	setSimpleId = (data) => {
 		setStorageSimple(data.id);
 		store.dispatch(product.prepareResult());
 		store.dispatch(product.setAction('getProductById', { basic: true, id: parseInt(data.id) }));
@@ -194,7 +194,7 @@ export default class ProductContainer extends React.Component {
 		let productHeader = (
 			<ProductHeader
 				data={state.header} product={product} mainState={state}
-				searchName={this.searchName.bind(this)} setHeader={this.setHeader.bind(this)}
+				searchName={ (data) => this.searchName(data) } setHeader={ (data) => this.setHeader(data) }
 			/>
 		);
 		return setContent(header, message, productHeader, basic, edition, history, nameList, additional);

@@ -20,7 +20,7 @@ const additional = ( props ) => {
     printings = (
       <Printings
         data={ product.printings }
-        handle={ props.print.bind(this) }
+        handle={ (data) => props.print(data) }
       />
     );
   }
