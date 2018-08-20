@@ -5,28 +5,26 @@ import { connect } from 'react-redux';
 import store from '../store';
 import * as product from '../actions/productActions.jsx';
 import Config from '../Config';
+import Additional from '../components/product/Additional.jsx';
+import BasicEdition from '../components/modal/BasicEdition.jsx';
 import Header from '../components/dumb/Header.jsx';
 import Message from '../components/dumb/Message.jsx';
-import BasicEdition from '../components/modal/BasicEdition.jsx';
 import ProductEdition from '../components/product/ProductEdition.jsx';
 import ProductHeader from '../components/product/ProductHeader.jsx';
 import ProductHistory from '../components/product/ProductHistory.jsx';
 import ProductList from '../components/product/ProductList.jsx';
-import Modified from '../components/product/Modified.jsx';
-import LastOrders from '../components/product/LastOrders.jsx';
-import Printings from '../components/product/Printings.jsx';
 import productModelInstance from '../model/productModel';
 import Lists from '../classes/lists';
 import { clearUrl } from '../functions/clearUrl';
 import { setUrl } from '../functions/setUrl';
-import { setContent } from '../functions/jsx/container.jsx';
+import { setContent } from '../functions/jsx/product.jsx';
 import { checkUrl } from '../functions/product/checkUrl';
 import { clearStorage } from '../functions/product/clearStorage';
 import { getStorage } from '../functions/product/getStorage';
 import { setDisabled } from '../functions/product/setDisabled';
 import { setModified, setModifiedData } from '../functions/product/setModified';
 import { setStorage, setStorageSimple } from '../functions/product/setStorage';
-import { stateAfterUrlCheck } from '../functions/stateAfterUrlCheck';
+import { stateAfterUrlCheck } from '../functions/product/stateAfterUrlCheck';
 import { Header as DefaultHeader, State } from '../helper/productState';
 
 @connect((store) => {
@@ -50,26 +48,20 @@ export default class ProductContainer extends React.Component {
 		this.subscription = this.model.newestOrdersInterval.subscribe(() => this.checkNewestOrders());
 	}
 
-	componentDidUpdate(props, state, snapshot) {
-		if (this.props.token && (!this.model.token || this.state.getList === 1)) {
-			if (!this.model.token) {
-				this.model.setToken(this.props.token);
-			}
-			if (this.state.getList === 1) {
-				this.lists.getLists();
-			}
+	componentDidUpdate() {
+		if (this.props.token && !this.model.token) {
+			this.model.setToken(this.props.token);
 			if (!this.props.params.id) {
 				this.clear();
 			}
-		} else if (this.state.action) {
+		}
+		if (this.props.token && this.state.getList === 1) {
+			this.lists.getLists();
+		}
+		if (this.state.action) {
 			this[this.state.action]();
 		}
 	}
-	/*
-	getSnapshotBeforeUpdate(prevProps, prevState) {
-		return { params: prevProps.params, token: prevProps.token };
-	}
-	*/
 	static getDerivedStateFromProps(nextProps, previousState) {
 		if (nextProps.token && !previousState.token) {
 			return {token: nextProps.token};
@@ -95,7 +87,7 @@ export default class ProductContainer extends React.Component {
 
 	componentWillUnmount = () => this.subscription.unsubscribe();
 
-	shouldComponentUpdate =(nextProps, nextState) => (nextProps.approved && nextProps.token);
+	shouldComponentUpdate = (nextProps, nextState) => (nextProps.approved && nextProps.token);
 
 	checkNewestOrders() {
 		store.dispatch(product.setOrdersSearch());
@@ -126,10 +118,9 @@ export default class ProductContainer extends React.Component {
 	modsAfter = () => this.setState({ disabledEdition: false, modifiedSearch: false });
 
 	restoreList() {
-		this.searchName( getStorage() )
+		this.searchName( getStorage() );
 		this.setState({ action: null });
 	}
-
 	searchEdition() {
 		store.dispatch(product.prepareResult());
 		store.dispatch(product.setAction('getProductById', {basic: false, id: this.state.editionSearched}));
@@ -169,7 +160,7 @@ export default class ProductContainer extends React.Component {
 	}
 	
 	render() {
-		let basic, edition, header, history, lastOrders, message, modified, nameList, print;
+		let additional, basic, edition, header, history, message, nameList;
 		const product = this.props.product;
 		const state = this.state;
 		const token = this.props.token;
@@ -181,12 +172,8 @@ export default class ProductContainer extends React.Component {
 			message = <Message message={this.props.toDisplay} messageStyle={messageStyle} />;
 		}
 		if (!this.props.params.action && !this.props.params.id && !this.state.nameSearch) {
-			let list = product.modifiedList;
-			modified = <Modified after={() => this.modsAfter() } list={list} search={state.modifiedSearch} />;
-			if (this.model.token) {
-				lastOrders = <LastOrders data={product.lastOrders} search={product.ordersSearch} />;
-				print = <Printings data={product.printings} handle={this.setPrint.bind(this)} />;
-			}
+			let search = state.modifiedSearch;
+			additional = <Additional product={product} mods={this.modsAfter} print={this.setPrint} search={search} />;
 		} else if (this.state.editionSearched && !this.state.historySearched) {
 			let productData = { dataFull: product.fullDataFirst, empty: product.empty, modified: product.modifiedList };
 			edition = (
@@ -194,7 +181,7 @@ export default class ProductContainer extends React.Component {
 					disable={state.disabledEdition} goBack={this.clearEdition.bind(this)}
 					list={state.nameSearch} productData={productData}
 				/>
-			)
+			);
 		} else if (state.historySearched && !state.editionSearched) {
 			history = <ProductHistory clear={this.clear.bind(this)} id={state.editionSearched} product={product} />;
 		} else if (state.nameSearch && !state.editionSearched && !state.historySearched && !state.simpleSearched) {
@@ -210,6 +197,6 @@ export default class ProductContainer extends React.Component {
 				searchName={this.searchName.bind(this)} setHeader={this.setHeader.bind(this)}
 			/>
 		);
-		return setContent(header, message, productHeader, basic, edition, history, nameList, modified, lastOrders, print);
+		return setContent(header, message, productHeader, basic, edition, history, nameList, additional);
 	}
 }

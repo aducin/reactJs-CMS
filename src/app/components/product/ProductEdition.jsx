@@ -38,18 +38,16 @@ export default class ProductEdition extends React.Component {
 		this.state = EditionState;
 	}
 
-	componentWillUpdate(nextProps, nextState) {
-		this.equalState(nextProps, nextState);
+	static getDerivedStateFromProps(nextProps, previousState) {
+		if (previousState.id !== nextProps.productData.dataFull.id) {
+			return prepareEqual(previousState, nextProps.productData.dataFull);
+		}
+		return null;
 	}
 
 	descriptionChange = (e) => {
 		this.setState({ description: e.target.value });
 	};
-	equalState(props, state) {
-		if (state.id !== props.productData.dataFull.id) {
-			this.setState(prepareEqual(this.state, props.productData.dataFull));
-		}
-	}
 	handleCheckboxChange = (list, origin) => {
 		this.setState(checkBoxChange(this.state, list, origin));
 	};

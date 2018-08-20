@@ -5,12 +5,10 @@ import Config from '../../Config';
 import Label from '../dumb/Label.jsx';
 import Select from '../dumb/Select.jsx';
 import Title from '../dumb/Title.jsx';
-
-import { setXml } from '../../functions/jsx/account.jsx';
+import Xml from './header/Xml.jsx';
 
 const accountHeader = ( props ) => {
   let message = Config.message;
-  let xml = setXml(props.link, props.xml, props.createXml);
   return(
     <div class="container bgrContent borderRadius10 marginTop40px paddingBottom40px">
       <div class="col-xs-12">
@@ -71,7 +69,7 @@ const accountHeader = ( props ) => {
             <div class="col-xs-12 col-sm-4 col-md-12 marginTop10px">
               <input class="form-control btn btn-primary maxWidth160" disabled={props.disable || !props.selectedRow} onClick={ () => props.accountModal('modify') } type="button" value={ message.account.modify } />
             </div>
-            {xml}
+            <Xml link={props.link} propsXml={props.xml} createXml={props.createXml} />
           </div>
         </div>
       </div>

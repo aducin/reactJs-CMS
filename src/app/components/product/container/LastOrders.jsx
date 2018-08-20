@@ -1,11 +1,11 @@
 import React from 'react';
 
-import mainModelInstance from '../../model/mainModel';
-import productModelInstance from '../../model/productModel';
-import Config from '../../Config';
-import Helper from '../../helper/Helper.jsx';
-import Busy from '../dumb/Busy.jsx';
-import Title from '../dumb/Title.jsx';
+import mainModelInstance from '../../../model/mainModel';
+import productModelInstance from '../../../model/productModel';
+import Config from '../../../Config';
+import Helper from '../../../helper/Helper.jsx';
+import Busy from '../../dumb/Busy.jsx';
+import Title from '../../dumb/Title.jsx';
 
 const LastOrders = ( props ) => {
   const modifyOrder = (base, id) => {

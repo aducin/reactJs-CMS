@@ -1,13 +1,13 @@
 import React from 'react';
 
-import mainModelInstance from '../../model/mainModel';
-import productModelInstance from '../../model/productModel';
-import { setModifiedData } from '../../functions/product/setModified';
+import mainModelInstance from '../../../model/mainModel';
+import productModelInstance from '../../../model/productModel';
+import { setModifiedData } from '../../../functions/product/setModified';
 
-import Config from '../../Config';
-import Helper from '../../helper/Helper.jsx';
-import Busy from '../dumb/Busy.jsx';
-import Title from '../dumb/Title.jsx';
+import Config from '../../../Config';
+import Helper from '../../../helper/Helper.jsx';
+import Busy from '../../dumb/Busy.jsx';
+import Title from '../../dumb/Title.jsx';
 
 const styles = {
 	padding15px: {paddingTop: '15px'}

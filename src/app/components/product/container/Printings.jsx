@@ -1,18 +1,18 @@
 import React from 'react';
 import 'font-awesome/css/font-awesome.min.css';
 
-import { PrintingState } from '../../helper/productState';
-import setTable from '../../functions/jsx/printing';
+import { PrintingState } from '../../../helper/productState';
+import setTable from '../../../functions/jsx/printing';
 
-import Config from '../../Config';
-import Empty from './printing/Empty.jsx';
-import { setUrl } from '../../functions/setUrl';
-import mainModelInstance from '../../model/mainModel';
-import productModelInstance from '../../model/productModel';
-import ProductModel from '../../model/productModel';
-import Busy from '../dumb/Busy.jsx';
-import Title from '../dumb/Title.jsx';
-import PrintingAdd from '../modal/PrintingAdd.jsx';
+import Config from '../../../Config';
+import Empty from '../printing/Empty.jsx';
+import { setUrl } from '../../../functions/setUrl';
+import mainModelInstance from '../../../model/mainModel';
+import productModelInstance from '../../../model/productModel';
+import ProductModel from '../../../model/productModel';
+import Busy from '../../dumb/Busy.jsx';
+import Title from '../../dumb/Title.jsx';
+import PrintingAdd from '../../modal/PrintingAdd.jsx';
 
 export default class Printings extends React.Component {
   constructor(props){
@@ -26,7 +26,6 @@ export default class Printings extends React.Component {
     this.checkPrintings();
     this.setState({ inSearch: true });
   }
-
   componentDidUpdate() {
     if (this.state.saveFile) {
       this.saveFile();

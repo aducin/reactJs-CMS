@@ -38,4 +38,4 @@ export const checkUrl = (props, state) => {
     restoreList,
     simpleSearched
   };
-}
+};

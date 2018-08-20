@@ -8,4 +8,4 @@ export const setParams = (selected) => {
     }
   }
   return params;
-}
+};

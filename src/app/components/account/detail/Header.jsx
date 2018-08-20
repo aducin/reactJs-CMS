@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Config from '../../../Config';
-import { setIcon } from '../../../functions/jsx/account.jsx';
+import { setIcon } from '../../../functions/account/detail/setIcon';
 
 const header = ( props ) => {
   let headArray = Config.accountColumns.map((el, index) => {
